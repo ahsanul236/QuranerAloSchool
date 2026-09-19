@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (actorError || !actor || !actor.active) return json({ error: 'UNAUTHORIZED' }, 401);
+    if (actorError || !actor || !actor.active) return json({ error: 'UNAUTHORIZED' }, 401);\n    if (previewTeacherId && actor.role !== 'owner') return json({ error: 'OWNER_ONLY' }, 403);\n    if (!previewTeacherId && !['teacher', 'helper', 'owner'].includes(actor.role)) return json({ error: 'ROLE_NOT_ALLOWED' }, 403);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || 'list').toLowerCase();
@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
 
     let query = admin
       .from('qa_payroll_records')
-      .select('payroll_id,employee_user_id,employee_type,employee_ref_id,employee_code_snapshot,employee_name_snapshot,payroll_month,basic,allowance,bonus,overtime,deduction,leave_deduction,advance,adjustment,net_payable,status,paid_at,payment_method,payment_reference,notes')
+      .select('payroll_id,employee_user_id,employee_type,employee_ref_id,employee_code_snapshot,employee_name_snapshot,created_by,payroll_month,basic,allowance,bonus,overtime,deduction,leave_deduction,advance,adjustment,net_payable,status,paid_at,payment_method,payment_reference,notes')
       .eq('employee_type', employeeType)
       .eq('employee_ref_id', employeeRefId)
       .order('payroll_month', { ascending: false })
