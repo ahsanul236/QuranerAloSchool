@@ -34,7 +34,9 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (actorError || !actor || !actor.active) return json({ error: 'UNAUTHORIZED' }, 401);\n    if (previewTeacherId && actor.role !== 'owner') return json({ error: 'OWNER_ONLY' }, 403);\n    if (!previewTeacherId && !['teacher', 'helper', 'owner'].includes(actor.role)) return json({ error: 'ROLE_NOT_ALLOWED' }, 403);
+    if (actorError || !actor || !actor.active) return json({ error: 'UNAUTHORIZED' }, 401);
+    if (previewTeacherId && actor.role !== 'owner') return json({ error: 'OWNER_ONLY' }, 403);
+    if (!previewTeacherId && !['teacher', 'helper', 'owner'].includes(actor.role)) return json({ error: 'ROLE_NOT_ALLOWED' }, 403);
 
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || 'list').toLowerCase();
