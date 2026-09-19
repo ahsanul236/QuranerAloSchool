@@ -182,7 +182,7 @@ async function init() {
       <td><strong>${esc(money(item.net_payable))}</strong></td>
       <td>${esc(item.paid_at ? new Date(item.paid_at).toLocaleDateString('en-GB') : '—')}</td>
       <td>${esc(item.payment_method || '—')}</td>
-      <td><a class="portal-action-link" href="receipt.html?type=payroll&id=${encodeURIComponent(item.payroll_id)}&portal=1${previewTeacherId ? '&preview_teacher=' + encodeURIComponent(previewTeacherId) : ''}" target="_blank" rel="noopener noreferrer">রিসিট দেখুন</a></td>
+      <td>${item.status === 'paid' ? `<a class="portal-action-link" href="receipt.html?type=payroll&id=${encodeURIComponent(item.payroll_id)}&portal=1${previewTeacherId ? '&preview_teacher=' + encodeURIComponent(previewTeacherId) : ''}" target="_blank" rel="noopener noreferrer">রিসিট দেখুন</a>` : '<span class="muted">পেমেন্ট হয়নি</span>'}</td>
     </tr>
   `).join('') || '<tr><td colspan="6">No payroll record.</td></tr>';
 
