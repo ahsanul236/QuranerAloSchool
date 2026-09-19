@@ -114,6 +114,12 @@ async function init() {
 
   const previewTeacherId = qs.get('preview_teacher') || '';
 
+  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
+  $('signOut').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.replace('./');
+  });
+
   $('teacherCodeBadge').textContent = teacher.teacher_code || '—';
   $('teacherName').textContent = teacher.full_name_bn || teacher.full_name || '—';
   $('teacherSubtitle').textContent = `Teacher ID: ${teacher.teacher_code || '—'} · ${teacher.active ? 'Active' : 'Inactive'}`;
@@ -185,12 +191,6 @@ async function init() {
       <td>${item.status === 'paid' ? `<a class="portal-action-link" href="receipt.html?type=payroll&id=${encodeURIComponent(item.payroll_id)}&portal=1${previewTeacherId ? '&preview_teacher=' + encodeURIComponent(previewTeacherId) : ''}" target="_blank" rel="noopener noreferrer">রিসিট দেখুন</a>` : '<span class="muted">পেমেন্ট হয়নি</span>'}</td>
     </tr>
   `).join('') || '<tr><td colspan="6">No payroll record.</td></tr>';
-
-  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
-  $('signOut').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    location.replace('./');
-  });
 
   try { await setSchoolWhatsApp(); } catch (error) { console.warn('school WhatsApp link unavailable', error); }
 
