@@ -87,6 +87,25 @@ async function loadTeacherDetails(teacherId) {
   return data;
 }
 
+
+async function loadAssignedStudents(previewTeacherId = ''){
+  const {data,error}=await supabase.functions.invoke('portal-teacher-student',{
+    body:{action:'teacher', ...(previewTeacherId ? {previewTeacherId} : {})}
+  });
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.error||'ASSIGNED_STUDENTS_LOAD_FAILED');
+  const students=data.students||[];
+  $('assignedStudentRows').innerHTML=students.map((student)=> {
+    const digits=String(student.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');
+    const waDigits=digits ? (digits.startsWith('0')?'88'+digits:digits) : '';
+    const wa=waDigits
+      ? '<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>'
+      : '<span class="muted">ফোন নেই</span>';
+    return '<tr><td><strong>'+esc(student.full_name||student.student_code||'Student')+'</strong><br><span class="muted">'+esc(student.student_code||'—')+'</span></td><td>'+esc(student.phone||'—')+'</td><td><span class="active-badge '+statusClass(student.status)+'">'+esc(student.status||'—')+'</span></td><td>'+wa+'</td></tr>';
+  }).join('') || '<tr><td colspan="4">এখনো কোনো Student assigned নেই।</td></tr>';
+  return students;
+}
+
 async function loadPayroll(previewTeacherId = '') {
   const { data, error } = await supabase.functions.invoke('portal-self-payroll', {
     body: previewTeacherId ? { action: 'list', previewTeacherId } : { action: 'list' }
@@ -138,22 +157,21 @@ async function init() {
   $('address').textContent = teacher.address || '—';
   $('specialization').textContent = teacher.specialization || '—';
 
-  const [{ data: enrollmentData, error: enrollmentError }, payroll] = await Promise.all([
+  const [{ data: enrollmentData, error: enrollmentError }, payroll, assignedStudents] = await Promise.all([
     supabase.from('qa_enrollments')
       .select('student_id,course_code,start_date,end_date,status')
       .eq('teacher_user_id', teacher.user_id)
       .order('start_date', { ascending: false })
       .limit(100),
-    loadPayroll(previewTeacherId)
+    loadPayroll(previewTeacherId),
+    loadAssignedStudents(previewTeacherId)
   ]);
 
   if (enrollmentError) throw enrollmentError;
 
   const enrollments = enrollmentData || [];
+  $('studentCount').textContent = String(assignedStudents.length);
   const studentIds = [...new Set(enrollments.map((item) => item.student_id).filter(Boolean))];
-  const uniqueActiveStudents = new Set(enrollments.filter((item) => item.status === 'active').map((item) => item.student_id).filter(Boolean));
-  $('studentCount').textContent = String(uniqueActiveStudents.size);
-
   let studentNames = {};
   if (studentIds.length) {
     const { data: students, error } = await supabase.from('qa_students')
