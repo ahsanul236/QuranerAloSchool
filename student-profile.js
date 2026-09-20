@@ -23,19 +23,32 @@ async function loadTeachers(){
 function renderTeacherAssignment(){
   const select=$('assignedTeacher');
   const saveBtn=$('saveTeacherBtn');
-  if(!select)return;
+  const view=$('teacherAssignmentView');
+  const editor=$('teacherAssignmentEditor');
+  if(!select||!view||!editor)return;
   const canManage=access?.can('students.manage');
   const currentId=student?.teacher_id||'';
+  const currentTeacher=teachers.find(t=>t.teacher_id===currentId);
+  const currentName=currentTeacher
+    ? (currentTeacher.full_name_bn||currentTeacher.full_name||currentTeacher.teacher_code)
+    : 'কোনো শিক্ষক নির্ধারিত নেই';
+  const currentMeta=currentTeacher
+    ? [currentTeacher.teacher_code,currentTeacher.specialization,currentTeacher.active===false?'Inactive':'Active'].filter(Boolean).join(' · ')
+    : 'Edit Profile খুলে শিক্ষক নির্বাচন করা যাবে।';
+  view.innerHTML='<strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small>';
   const rows=[{teacher_id:'',teacher_code:'',full_name:'কোনো শিক্ষক নেই',full_name_bn:'',active:true},...teachers.filter(t=>t.active!==false||t.teacher_id===currentId)];
   select.innerHTML=rows.map(t=>{
     const name=t.teacher_id?(t.full_name_bn||t.full_name||t.teacher_code):'কোনো শিক্ষক নেই';
     const extra=t.teacher_id&&t.active===false?' (Inactive)':'';
     return '<option value="'+esc(t.teacher_id||'')+'" '+((t.teacher_id||'')===currentId?'selected':'')+'>'+esc(name+extra)+'</option>';
   }).join('');
-  select.disabled=!canManage;
-  saveBtn?.classList.toggle('hidden',!canManage);
-  $('teacherAssignmentBadge').textContent=canManage?'Assignment editable':'View only';
-  $('teacherAssignmentNote').textContent=canManage?'একজন শিক্ষার্থীর জন্য একজন শিক্ষকই নির্ধারণ করা যাবে। পরিবর্তন করলে আগের শিক্ষক assignmentটি সরবে।':'এই শিক্ষার্থীর জন্য নির্ধারিত শিক্ষক এখানে দেখা যাবে।';
+  editor.classList.toggle('hidden',!(canManage&&editing));
+  select.disabled=!(canManage&&editing);
+  saveBtn?.classList.toggle('hidden',!(canManage&&editing));
+  $('teacherAssignmentBadge').textContent=canManage?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
+  $('teacherAssignmentNote').textContent=canManage
+    ? (editing?'Teacher পরিবর্তন করতে নিচের অপশন ব্যবহার করুন।':'Teacher assignment পরিবর্তন করতে আগে Edit Profile খুলুন।')
+    : 'এই শিক্ষার্থীর জন্য নির্ধারিত শিক্ষক এখানে দেখা যাবে।';
 }
 async function saveTeacherAssignment(){
   if(!access?.can('students.manage'))throw new Error('Teacher assignment পরিবর্তনের permission নেই।');
