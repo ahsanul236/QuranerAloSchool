@@ -107,6 +107,7 @@ function mode(){
   $('cancelBtn').classList.toggle('hidden',!editing);
   $('guardianNote').textContent=ge?'Guardian তথ্যও এখান থেকে edit করা যাবে।':'Guardian তথ্য দেখা যাবে; edit করতে guardians.manage permission প্রয়োজন।';
   renderGuardians();
+  renderTeacherAssignment();
 }
 
 async function load(){
