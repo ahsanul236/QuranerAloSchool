@@ -65,8 +65,31 @@ async function loadTeacherAssignments(){
   $('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
   const current=allAssignedStudents.filter(st=>st.teacher_id===id);
   $('assignedStudentsList').innerHTML=current.map(st=>{
-    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div></div>';
+    const remove=canManage()&&editing
+      ? '<button class="secondary-btn remove-student-assignment" type="button" data-student-id="'+esc(st.student_id)+'">Student বাদ দিন</button>'
+      : '';
+    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div>'+remove+'</div>';
   }).join('')||'<div class="portal-empty">এখনো কোনো Student assigned নেই।</div>';
+  document.querySelectorAll('.remove-student-assignment').forEach(button=>button.addEventListener('click',async()=>{
+    const studentIdToRemove=button.dataset.studentId;
+    const student=allAssignedStudents.find(st=>st.student_id===studentIdToRemove);
+    if(!student)return;
+    const ok=window.confirm((student.full_name||student.student_code)+'-এর এই Teacher assignment বাদ দিতে চান?');
+    if(!ok)return;
+    button.disabled=true;
+    try{
+      const {error}=await supabase.from('qa_students').update({teacher_id:null}).eq('student_id',studentIdToRemove);
+      if(error)throw error;
+      $('assignmentMessage').textContent='Student assignment removed.';
+      $('assignmentMessage').className='message-inline success';
+      await loadTeacherAssignments();
+    }catch(e){
+      console.error(e);
+      $('assignmentMessage').textContent=e.message||'Student assignment remove করা যায়নি।';
+      $('assignmentMessage').className='message-inline error';
+      button.disabled=false;
+    }
+  }));
 }
 async function saveTeacherAssignments(){
   if(type!=='teacher'||!canManage())throw new Error('Teacher student assignment permission নেই।');
