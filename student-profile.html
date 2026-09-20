@@ -1,148 +1,152 @@
-<!doctype html>
-<html lang="bn">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b2342">
-<meta name="description" content="QURANER ALO student profile">
-<title>Student Profile | QURANER ALO</title>
-<link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
-<link rel="stylesheet" href="styles.css?v=20260919-1">
-<link rel="stylesheet" href="dashboard.css?v=20260919-5">
-<style>
-.profile-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin:14px 0 20px;flex-wrap:wrap;padding:18px 20px;border:1px solid #dbe6f0;border-radius:18px;background:linear-gradient(135deg,#f8fbff 0%,#ffffff 62%,#fffaf0 100%);box-shadow:0 8px 24px rgba(11,35,66,.06)}
-.profile-head h1{font-size:30px;margin:0}
-.profile-actions{display:flex;gap:10px;flex-wrap:wrap}.danger-btn{border:1px solid #b42318;background:#fff;color:#b42318;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}.danger-btn:hover{background:#fff5f4}.danger-btn:disabled{opacity:.6;cursor:not-allowed}
-.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
-.profile-card{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 6px 18px rgba(11,35,66,.04);transition:transform .18s ease,box-shadow .18s ease}.profile-card:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(11,35,66,.07)}
-.profile-card.full{grid-column:1/-1}
-.profile-card-head{padding:14px 16px;background:linear-gradient(180deg,#f7fafe,#f0f6fc);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px}
-.profile-card-head h2{font-size:18px;margin:0;color:var(--navy)}
-.profile-card-body{padding:16px}
-.profile-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.profile-field{display:grid;gap:5px}
-.profile-field label{font-size:13px;color:var(--muted);font-weight:600}
-.profile-field input,.profile-field select,.profile-field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink);font:inherit;transition:border-color .18s ease,box-shadow .18s ease}.profile-field input:focus,.profile-field select:focus,.profile-field textarea:focus{outline:none;border-color:#8fb3d8;box-shadow:0 0 0 3px rgba(45,123,231,.10)}
-.profile-field input[readonly],.profile-field textarea[readonly]{background:#f8fafc}
-.profile-field.full{grid-column:1/-1}
-.guardian-card{border:1px solid var(--line);border-radius:13px;background:#fbfcfe;padding:14px}
-.guardian-card + .guardian-card{margin-top:12px}.primary-guardian-toggle{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:9px 11px;border:1px dashed #c9d9e8;border-radius:10px;background:#f8fbff;color:var(--navy2);font-size:13px;font-weight:700}.primary-guardian-toggle input{width:auto}
-.guardian-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.guardian-title strong{color:var(--navy2)}
-.profile-note{margin:0;color:var(--muted);font-size:13px;line-height:1.6}
-.readonly-badge{padding:5px 10px;border-radius:999px;background:#f3f5f8;color:var(--muted);font-size:12px;font-weight:700}
-.loading-profile{text-align:center;padding:40px;color:var(--muted)}
-.save-row{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-@media(max-width:720px){.profile-grid,.profile-fields{grid-template-columns:1fr}.profile-card.full,.profile-field.full{grid-column:auto}.profile-actions{width:100%}.profile-actions a,.profile-actions button{flex:1}}
-.identity-card{border-color:#d8e5f2}.identity-intro{margin-bottom:12px}@media(max-width:720px){.identity-card{grid-column:auto}}\n
-/* Profile action-row update — visual-only and preserves existing behavior */
-.profile-head{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:center;text-align:center}
-.profile-head .profile-identity{width:100%;min-width:0;max-width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
-.profile-head .profile-identity .eyebrow,
-.profile-head .profile-identity h1,
-.profile-head .profile-identity .muted{margin-left:0;margin-right:0;text-align:center}
-.profile-head .profile-identity h1{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
-.profile-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;align-items:stretch}
-.profile-actions a,.profile-actions button{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none}
-.whatsapp-btn{border:1px solid #25d366;background:#25d366;color:#fff;border-radius:10px;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(37,211,102,.18)}
-.whatsapp-btn:hover:not(.is-disabled){background:#20bd5b;border-color:#20bd5b;transform:translateY(-1px)}
-.whatsapp-btn.is-disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.15)}
-@media(max-width:720px){.profile-actions{grid-template-columns:1fr 1fr}}
-</style>
-</head>
-<body>
-<main class="dashboard-shell">
-<section class="card dashboard-card">
-<div class="topbar">
-<div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>Student Profile</span></div></div>
-<div class="top-actions"><a class="secondary-btn" href="students.html">Students</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div>
-</div>
-<div id="loading" class="notice-box">Student profile load হচ্ছে…</div>
-<div id="errorBox" class="notice-box hidden"></div>
-<div id="app" class="hidden">
-<div class="profile-head">
-<div class="profile-identity">
-<p class="eyebrow">STUDENT PROFILE</p>
-<h1 id="profileTitle">শিক্ষার্থী প্রোফাইল</h1>
-<p id="profileSubtitle" class="muted">Student ID: —</p>
-</div>
-<div class="profile-actions">
-<a class="secondary-btn" href="students.html">← তালিকায় ফিরুন</a>
-<button id="editBtn" class="primary-btn" type="button">Edit Profile</button><a id="whatsappBtn" class="whatsapp-btn" href="#" target="_blank" rel="noopener noreferrer" aria-label="Send message on WhatsApp"><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><path d="M20.52 3.48A11.86 11.86 0 0 0 12.08 0C5.53 0 .2 5.33.2 11.88c0 2.1.55 4.15 1.59 5.96L.1 24l6.3-1.65a11.9 11.9 0 0 0 5.68 1.44h.01c6.55 0 11.88-5.33 11.88-11.88 0-3.17-1.24-6.15-3.45-8.43ZM12.09 21.8h-.01a9.88 9.88 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.23-.37a9.86 9.86 0 0 1-1.51-5.29C2.21 6.43 6.64 2 12.09 2c2.63 0 5.1 1.03 6.96 2.89a9.82 9.82 0 0 1 2.9 6.99c0 5.45-4.43 9.92-9.86 9.92Zm5.43-7.41c-.3-.15-1.77-.88-2.05-.98-.27-.1-.47-.15-.67.15-.2.3-.77.98-.94 1.18-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.76-1.66-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.08-.79.37-.27.3-1.04 1.02-1.04 2.5s1.07 2.9 1.22 3.1c.15.2 2.1 3.21 5.08 4.5.71.31 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.07-.12-.27-.2-.57-.35Z"/></svg> Send message</a><button id="removeBtn" class="danger-btn hidden" type="button">Remove This Profile</button>
-</div>
-</div>
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import {getAccess} from './authz.js';
 
-<form id="profileForm">
-<div class="profile-grid">
-<div class="profile-card full">
-<div class="profile-card-head"><h2>শিক্ষার্থীর তথ্য</h2><span id="editBadge" class="readonly-badge">View mode</span></div>
-<div class="profile-card-body">
-<div class="profile-fields">
-<div class="profile-field"><label>Student ID</label><input id="studentCode" readonly></div>
-<div class="profile-field"><label>পূর্ণ নাম</label><input id="fullName" required></div>
-<div class="profile-field"><label>লিঙ্গ</label><select id="gender"><option value="unspecified">নির্ধারিত নয়</option><option value="male">পুরুষ</option><option value="female">নারী</option></select></div>
-<div class="profile-field"><label>জন্মতারিখ</label><input id="dateOfBirth" type="date"></div>
-<div class="profile-field"><label>ভর্তি তারিখ</label><input id="admissionDate" type="date"></div>
-<div class="profile-field"><label>ফোন নম্বর</label><input id="studentPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></div>
-<div class="profile-field"><label>জন্ম নিবন্ধন নম্বর</label><input id="birthRegistrationNo" inputmode="numeric"></div>
-<div class="profile-field"><label>অবস্থা</label><select id="status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="graduated">Graduated</option><option value="suspended">Suspended</option><option value="withdrawn">Withdrawn</option></select></div>
-<div class="profile-field full"><label>নোট</label><textarea id="notes" rows="3"></textarea></div>
-</div>
-</div>
-</div>
+const c=window.QURANER_ALO_CONFIG;
+const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+const studentId=new URLSearchParams(location.search).get('id');
+let access=null,student=null,guardians=[],teachers=[],editing=false;
 
-<div class="profile-card full" id="teacherAssignmentCard">
-<div class="profile-card-head"><h2>Assigned Teacher</h2><span id="teacherAssignmentBadge" class="readonly-badge">View mode</span></div>
-<div class="profile-card-body">
-<p id="teacherAssignmentNote" class="profile-note">এই শিক্ষার্থীর জন্য নির্ধারিত শিক্ষক এখানে দেখা যাবে। পরিবর্তন করতে Edit Profile খুলুন।</p>
-<div id="teacherAssignmentView" class="guardian-card" style="margin-top:12px">কোনো শিক্ষক নির্ধারিত নেই।</div>
-<div id="teacherAssignmentEditor" class="hidden" style="margin-top:12px">
-<div class="profile-fields">
-<div class="profile-field full">
-<label>টিচার নির্বাচন করুন</label>
-<select id="assignedTeacher"></select>
-</div>
-</div>
-<div class="save-row" style="margin-top:12px">
-<button id="saveTeacherBtn" class="primary-btn" type="button">Teacher সংরক্ষণ করুন</button>
-<span id="teacherSaveMessage" class="message-inline"></span>
-</div>
-</div>
-</div>
-</div>
+const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]));
+const login=()=>location.replace('./');
+const msg=(t,type='')=>{$('saveMessage').textContent=t;$('saveMessage').className=`message-inline ${type}`.trim();};
 
-<div class="profile-card full identity-card">
-<div class="profile-card-head"><h2>পিতা-মাতা ও জন্ম নিবন্ধন</h2><span class="readonly-badge">Identity Information</span></div>
-<div class="profile-card-body">
-<p class="profile-note identity-intro">পিতা-মাতার পরিচয়, NID এবং জন্ম নিবন্ধনের তথ্য এখানে সংরক্ষণ করুন।</p>
-<div class="profile-fields">
-<div class="profile-field"><label>পিতার নাম</label><input id="fatherName"></div>
-<div class="profile-field"><label>পিতার NID নম্বর</label><input id="fatherNid" inputmode="numeric"></div>
-<div class="profile-field"><label>মাতার নাম</label><input id="motherName"></div>
-<div class="profile-field"><label>মাতার NID নম্বর</label><input id="motherNid" inputmode="numeric"></div>
-</div>
-</div>
-</div>
+function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
+function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
+async function loadTeachers(){
+  if(!access?.can('teachers.view')&&!access?.can('teachers.manage')){renderTeacherAssignment();return;}
+  const {data,error}=await supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name,full_name_bn,phone,specialization,active').order('full_name',{ascending:true});
+  if(error)throw error;
+  teachers=data||[];
+  renderTeacherAssignment();
+}
+function renderTeacherAssignment(){
+  const select=$('assignedTeacher');
+  const saveBtn=$('saveTeacherBtn');
+  const view=$('teacherAssignmentView');
+  const editor=$('teacherAssignmentEditor');
+  if(!select||!view||!editor)return;
+  const canManage=access?.can('students.manage');
+  const currentId=student?.teacher_id||'';
+  const currentTeacher=teachers.find(t=>t.teacher_id===currentId);
+  const currentName=currentTeacher
+    ? (currentTeacher.full_name_bn||currentTeacher.full_name||currentTeacher.teacher_code)
+    : 'কোনো শিক্ষক নির্ধারিত নেই';
+  const currentMeta=currentTeacher
+    ? [currentTeacher.teacher_code,currentTeacher.specialization,currentTeacher.active===false?'Inactive':'Active'].filter(Boolean).join(' · ')
+    : 'Edit Profile খুলে শিক্ষক নির্বাচন করা যাবে।';
+  view.innerHTML='<strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small>';
+  const rows=[{teacher_id:'',teacher_code:'',full_name:'কোনো শিক্ষক নেই',full_name_bn:'',active:true},...teachers.filter(t=>t.active!==false||t.teacher_id===currentId)];
+  select.innerHTML=rows.map(t=>{
+    const name=t.teacher_id?(t.full_name_bn||t.full_name||t.teacher_code):'কোনো শিক্ষক নেই';
+    const extra=t.teacher_id&&t.active===false?' (Inactive)':'';
+    return '<option value="'+esc(t.teacher_id||'')+'" '+((t.teacher_id||'')===currentId?'selected':'')+'>'+esc(name+extra)+'</option>';
+  }).join('');
+  editor.classList.toggle('hidden',!(canManage&&editing));
+  select.disabled=!(canManage&&editing);
+  saveBtn?.classList.toggle('hidden',!(canManage&&editing));
+  $('teacherAssignmentBadge').textContent=canManage?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
+  $('teacherAssignmentNote').textContent=canManage
+    ? (editing?'Teacher পরিবর্তন করতে নিচের অপশন ব্যবহার করুন।':'Teacher assignment পরিবর্তন করতে আগে Edit Profile খুলুন।')
+    : 'এই শিক্ষার্থীর জন্য নির্ধারিত শিক্ষক এখানে দেখা যাবে।';
+}
+async function saveTeacherAssignment(){
+  if(!access?.can('students.manage'))throw new Error('Teacher assignment পরিবর্তনের permission নেই।');
+  const teacherId=$('assignedTeacher')?.value||null;
+  const {data,error}=await supabase.from('qa_students').update({teacher_id:teacherId}).eq('student_id',studentId).select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').single();
+  if(error)throw error;
+  student=data;
+  const teacher=teachers.find(t=>t.teacher_id===teacherId);
+  $('teacherSaveMessage').textContent=teacherId?(teacher?.full_name_bn||teacher?.full_name||'Teacher assigned.'):'Teacher assignment removed.';
+  $('teacherSaveMessage').className='message-inline success';
+  renderTeacherAssignment();
+}
 
-<div class="profile-card full">
-<div class="profile-card-head"><h2>Guardian Information</h2><span id="guardianPermissionBadge" class="readonly-badge">View mode</span></div>
-<div class="profile-card-body">
-<p id="guardianNote" class="profile-note">পিতা, মাতা অথবা Other person-কে Guardian হিসেবে নির্বাচন করা যাবে।</p>
-<div id="guardianList" style="margin-top:12px"></div>
-</div>
-</div>
-</div>
-<div class="save-row">
-<button id="cancelBtn" class="secondary-btn hidden" type="button">Cancel</button>
-<button id="saveBtn" class="primary-btn hidden" type="submit">Save Changes</button>
-<span id="saveMessage" class="message-inline"></span>
-</div>
-</form>
-</div>
-</section>
-</main>
-<script src="supabase-config.js"></script>
-<script type="module" src="student-profile.js?v=20260920-2"></script>
-<script src="management-nav.js?v=20260918-4"></script>
-</body>
-</html>
+function fillStudent(){
+  $('studentCode').value=student.student_code||'';
+  $('fullName').value=student.full_name||'';
+  $('gender').value=['male','female','unspecified'].includes(student.gender)?student.gender:'unspecified';
+  $('dateOfBirth').value=student.date_of_birth||'';
+  $('admissionDate').value=student.admission_date||'';
+  $('studentPhone').value=student.phone||'';
+  $('status').value=['active','inactive','graduated','suspended','withdrawn'].includes(student.status)?student.status:'active';
+  $('notes').value=student.notes||'';
+  $('fatherName').value=student.father_name||'';
+  $('fatherNid').value=student.father_nid||'';
+  $('motherName').value=student.mother_name||'';
+  $('motherNid').value=student.mother_nid||'';
+  $('birthRegistrationNo').value=student.birth_registration_no||'';
+  $('profileTitle').textContent=student.full_name||'শিক্ষার্থী প্রোফাইল';
+  $('profileSubtitle').textContent=`Student ID: ${student.student_code||'—'} · Status: ${String(student.status||'').replaceAll('_',' ')}`;
+  setWhatsAppLink(student.phone);
+}
+
+function guardianHtml(g){
+  const dis=!(editing&&access?.can('guardians.manage'));
+  const relation=g.relation==='Guardian'?'Other':(g.relation||'Other');
+  const selectedOther=relation==='Other';
+  return `<div class="guardian-card"><div class="guardian-title"><strong>${g.is_primary?'প্রধান Guardian':'Guardian'}</strong><span class="readonly-badge">${esc(relation)}</span></div>${editing&&access?.can('guardians.manage') ? `<label class="primary-guardian-toggle"><input type="radio" name="primaryGuardian" value="${esc(g.guardian_id)}" ${g.is_primary?'checked':''}> প্রধান Guardian হিসেবে সেট করুন</label>` : ''}<div class="profile-fields">
+  <div class="profile-field"><label>পূর্ণ নাম</label><input data-g-field="full_name" data-g-id="${esc(g.guardian_id)}" value="${esc(g.full_name)}" ${dis?'disabled':''}></div>
+  <div class="profile-field"><label>Guardian হিসেবে</label><select data-g-field="relation" data-g-id="${esc(g.guardian_id)}" ${dis?'disabled':''}><option value="">নির্বাচন করুন</option><option value="Father" ${relation==='Father'?'selected':''}>Father</option><option value="Mother" ${relation==='Mother'?'selected':''}>Mother</option><option value="Other" ${selectedOther?'selected':''}>Other</option></select></div>
+  <div class="profile-field"><label>ফোন</label><input data-g-field="phone" data-g-id="${esc(g.guardian_id)}" value="${esc(g.phone)}" ${dis?'disabled':''}></div>
+  <div class="profile-field"><label>Email</label><input data-g-field="email" data-g-id="${esc(g.guardian_id)}" type="email" value="${esc(g.email)}" ${dis?'disabled':''}></div>
+  <div class="profile-field full"><label>ঠিকানা</label><textarea data-g-field="address" data-g-id="${esc(g.guardian_id)}" rows="2" ${dis?'disabled':''}>${esc(g.address)}</textarea></div>
+  </div></div>`;
+}
+function renderGuardians(){
+  $('guardianList').innerHTML=guardians.length?guardians.map(guardianHtml).join(''):'<p class="profile-note">Guardian তথ্য পাওয়া যায়নি।</p>';
+}
+function mode(){
+  const se=editing&&access?.can('students.manage'), ge=editing&&access?.can('guardians.manage');
+  ['fullName','gender','dateOfBirth','admissionDate','studentPhone','status','notes','fatherName','fatherNid','motherName','motherNid','birthRegistrationNo'].forEach(id=>$(id).disabled=!se);
+  $('editBadge').textContent=se?'Edit mode':'View mode';
+  $('guardianPermissionBadge').textContent=ge?'Edit mode':'View mode';
+  $('editBtn').classList.toggle('hidden',editing||!access?.can('students.manage'));$('removeBtn').classList.toggle('hidden',editing||!access?.can('students.manage'));
+  $('saveBtn').classList.toggle('hidden',!editing);
+  $('cancelBtn').classList.toggle('hidden',!editing);
+  $('guardianNote').textContent=ge?'Guardian তথ্যও এখান থেকে edit করা যাবে।':'Guardian তথ্য দেখা যাবে; edit করতে guardians.manage permission প্রয়োজন।';
+  renderGuardians();
+}
+
+async function load(){
+  if(!studentId)throw new Error('Student ID সঠিক নয়।');
+  const {data:s,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').eq('student_id',studentId).maybeSingle();
+  if(error)throw error;if(!s)throw new Error('Student profile পাওয়া যায়নি।');student=s;
+  const {data:links,error:le}=await supabase.from('qa_student_guardians').select('guardian_id,is_primary').eq('student_id',studentId);
+  if(le)throw le;
+  guardians=[];
+  if(links?.length){
+    const {data:gs,error:ge}=await supabase.from('qa_guardians').select('guardian_id,full_name,relation,phone,email,address').in('guardian_id',links.map(x=>x.guardian_id));
+    if(ge)throw ge;
+    const map=Object.fromEntries((gs||[]).map(x=>[x.guardian_id,x]));
+    guardians=links.map(x=>({...map[x.guardian_id],is_primary:x.is_primary})).filter(x=>x.guardian_id).sort((a,b)=>Number(b.is_primary)-Number(a.is_primary));
+  }
+  fillStudent();mode();await loadTeachers();
+}
+
+async function save(){
+  if(!access?.can('students.manage'))throw new Error('Student edit permission নেই।');
+  const payload={full_name:$('fullName').value.trim(),gender:$('gender').value,date_of_birth:$('dateOfBirth').value||null,phone:$('studentPhone').value.trim(),admission_date:$('admissionDate').value||null,status:$('status').value,notes:$('notes').value.trim(),father_name:$('fatherName').value.trim(),father_nid:$('fatherNid').value.trim(),mother_name:$('motherName').value.trim(),mother_nid:$('motherNid').value.trim(),birth_registration_no:$('birthRegistrationNo').value.trim()};
+  if(!payload.full_name)throw new Error('Student-এর নাম দিতে হবে।');
+  const {data,error}=await supabase.from('qa_students').update(payload).eq('student_id',studentId).select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,created_at,updated_at').single();
+  if(error)throw error;student=data;
+  if(access.can('guardians.manage')){
+    const selectedPrimary=document.querySelector('input[name="primaryGuardian"]:checked')?.value||guardians.find(g=>g.is_primary)?.guardian_id||'';
+    for(const g of guardians){
+      const q=s=>document.querySelector(`[data-g-field="${s}"][data-g-id="${CSS.escape(g.guardian_id)}"]`);
+      const update={full_name:q('full_name')?.value.trim()||'',relation:q('relation')?.value||'',phone:q('phone')?.value.trim()||'',email:q('email')?.value.trim()||'',address:q('address')?.value.trim()||''};
+      if(!update.full_name||!update.relation)throw new Error('Guardian-এর নাম ও সম্পর্ক পূরণ করতে হবে।');
+      const {error:ge}=await supabase.from('qa_guardians').update(update).eq('guardian_id',g.guardian_id);if(ge)throw ge;
+      const {error:gle}=await supabase.from('qa_student_guardians').update({is_primary:g.guardian_id===selectedPrimary}).eq('student_id',studentId).eq('guardian_id',g.guardian_id);if(gle)throw gle;
+    }
+  }
+  editing=false;await load();
+}
+
+$('saveTeacherBtn')?.addEventListener('click',async()=>{const btn=$('saveTeacherBtn');btn.disabled=true;$('teacherSaveMessage').textContent='Saving…';$('teacherSaveMessage').className='message-inline';try{await saveTeacherAssignment();}catch(e){console.error(e);$('teacherSaveMessage').textContent=e.message||'Teacher assignment save করা যায়নি।';$('teacherSaveMessage').className='message-inline error';}finally{btn.disabled=false;}});
+$('editBtn').onclick=()=>{editing=true;msg('');mode();};
+$('cancelBtn').onclick=async()=>{editing=false;msg('');await load();};$('removeBtn').onclick=async()=>{if(!access?.can('students.manage')){msg('Student remove permission নেই।','error');return;}const name=student?.full_name||student?.student_code||'এই শিক্ষার্থী';const ok=window.confirm(`আপনি কি "${name}"-এর profile remove করতে চান?\\n\\nRemove করলে profile-টি স্থায়ীভাবে মুছে ফেলা হবে না; Student status "Withdrawn" করা হবে এবং fee, attendance, Quran progress ও অন্যান্য history সংরক্ষিত থাকবে।\\n\\nনিশ্চিত করতে OK চাপুন।`);if(!ok)return;$('removeBtn').disabled=true;msg('Removing profile…');try{const {error}=await supabase.from('qa_students').update({status:'withdrawn'}).eq('student_id',studentId);if(error)throw error;window.location.replace('students.html');}catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false;}};
+$('profileForm').onsubmit=async e=>{e.preventDefault();$('saveBtn').disabled=true;msg('Saving changes…');try{await save();msg('Student profile updated successfully.','success');}catch(err){console.error(err);msg(err?.message||'Profile update করা যায়নি।','error');}finally{$('saveBtn').disabled=false;}};
+$('signOut').onclick=async()=>{await supabase.auth.signOut();login();};
+
+(async()=>{try{access=await getAccess(supabase);if(!access){await supabase.auth.signOut();return login();}if(!access.can('students.view')&&!access.can('students.manage'))throw new Error('Student profile দেখার permission নেই।');$('loading').classList.add('hidden');$('app').classList.remove('hidden');await load();}catch(e){console.error(e);$('loading').classList.add('hidden');$('errorBox').textContent=e.message||'Profile load করা যায়নি।';$('errorBox').classList.remove('hidden');}})();
