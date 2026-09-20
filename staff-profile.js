@@ -38,8 +38,8 @@ function fill(){
 
 async function loadTeacherAssignments(){
   if(type!=='teacher')return;
+  if(!canManage())return;
   $('teacherStudentsCard')?.classList.remove('hidden');
-  if(!access?.can('students.view')&&!canManage())throw new Error('Student assignment দেখার permission নেই।');
   const {data:students,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,phone,status,teacher_id').order('full_name',{ascending:true});
   if(error)throw error;
   allAssignedStudents=students||[];
