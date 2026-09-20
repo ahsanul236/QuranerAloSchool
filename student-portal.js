@@ -118,6 +118,28 @@ async function loadStudentDetails(studentId) {
   return data;
 }
 
+
+async function loadAssignedTeacher(studentId, previewStudentId = ''){
+  const {data,error}=await supabase.functions.invoke('portal-teacher-student',{
+    body:{action:'student', ...(previewStudentId ? {previewStudentId} : {})}
+  });
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.error||'TEACHER_LOAD_FAILED');
+  const teacher=data.teacher;
+  const box=$('assignedTeacher');
+  if(!box)return;
+  if(!teacher){
+    box.innerHTML='<div class="portal-empty">আপনার জন্য এখনো কোনো শিক্ষক নির্ধারণ করা হয়নি।</div>';
+    return;
+  }
+  const phone=String(teacher.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');
+  const waDigits=phone ? (phone.startsWith('0')?'88'+phone:phone) : '';
+  const wa=waDigits
+    ? '<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp-এ মেসেজ করুন</a>'
+    : '<span class="muted">শিক্ষকের WhatsApp নম্বর সংরক্ষিত নেই।</span>';
+  box.innerHTML='<div class="portal-stat"><small>Assigned Teacher</small><strong>'+esc(teacher.full_name_bn||teacher.full_name||teacher.teacher_code||'Teacher')+'</strong>'+(teacher.specialization?'<span class="muted">'+esc(teacher.specialization)+'</span>':'')+'<span class="muted">'+esc(teacher.teacher_code||'')+'</span><div style="margin-top:10px">'+wa+'</div></div>';
+}
+
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -127,6 +149,13 @@ async function init() {
 
   const baseStudent = await resolveStudent(session);
   const student = await loadStudentDetails(baseStudent.student_id);
+
+  const previewStudentId = qs.get('preview_student') || '';
+  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
+  $('signOut').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    location.replace('./');
+  });
 
   if (student.status !== 'active') {
     await supabase.auth.signOut();
@@ -149,6 +178,8 @@ async function init() {
   $('fatherName').textContent = student.father_name || '—';
   $('motherName').textContent = student.mother_name || '—';
   $('birthRegistrationNo').textContent = student.birth_registration_no || '—';
+
+  await loadAssignedTeacher(student.student_id, previewStudentId);
 
   const [enrollmentResult, guardianLinkResult, feeChargeResult, feePaymentResult] = await Promise.all([
     supabase
@@ -307,12 +338,6 @@ async function init() {
   $('notes').innerHTML = notes.length
     ? notes.map((note) => `<div>${esc(note)}</div>`).join('')
     : 'No new notes.';
-
-  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
-  $('signOut').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-    location.replace('./');
-  });
 
   try { await setSchoolWhatsApp(); } catch (error) { console.warn('school WhatsApp link unavailable', error); }
 
