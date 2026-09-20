@@ -134,9 +134,11 @@ async function loadAssignedTeacher(studentId, previewStudentId = ''){
   }
   const phone=String(teacher.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');
   const waDigits=phone ? (phone.startsWith('0')?'88'+phone:phone) : '';
-  const wa=waDigits
+  const wa=teacher.active && waDigits
     ? '<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp-এ মেসেজ করুন</a>'
-    : '<span class="muted">শিক্ষকের WhatsApp নম্বর সংরক্ষিত নেই।</span>';
+    : (!teacher.active
+      ? '<span class="muted">শিক্ষক বর্তমানে Inactive।</span>'
+      : '<span class="muted">শিক্ষকের WhatsApp নম্বর সংরক্ষিত নেই।</span>');
   box.innerHTML='<div class="portal-stat"><small>Assigned Teacher</small><strong>'+esc(teacher.full_name_bn||teacher.full_name||teacher.teacher_code||'Teacher')+'</strong>'+(teacher.specialization?'<span class="muted">'+esc(teacher.specialization)+'</span>':'')+'<span class="muted">'+esc(teacher.teacher_code||'')+'</span><div style="margin-top:10px">'+wa+'</div></div>';
 }
 
