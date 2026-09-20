@@ -65,9 +65,7 @@ async function loadTeacherAssignments(){
   $('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
   const current=allAssignedStudents.filter(st=>st.teacher_id===id);
   $('assignedStudentsList').innerHTML=current.map(st=>{
-    const phone=normalizeWaNumber(st.phone);
-    const wa=phone?'<a class="whatsapp-btn" href="https://wa.me/'+phone+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="badge">ফোন নেই</span>';
-    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div><div>'+wa+'</div></div>';
+    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div></div>';
   }).join('')||'<div class="portal-empty">এখনো কোনো Student assigned নেই।</div>';
 }
 async function saveTeacherAssignments(){
