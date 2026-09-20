@@ -148,7 +148,7 @@ async function load(){
   if(type==='teacher') await loadTeacherAssignments();
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=()=>{editing=true;msg('');syncMode()};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();if(type==='teacher')await loadTeacherAssignments();};
 $('cancelBtn').onclick=async()=>{editing=false;msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
