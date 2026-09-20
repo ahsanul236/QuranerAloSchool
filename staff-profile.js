@@ -56,9 +56,12 @@ async function loadTeacherAssignments(){
     const selected=st.teacher_id===id?' selected':'';
     return '<option value="'+esc(st.student_id)+'"'+selected+'>'+esc(label)+'</option>';
   }).join('')||'<option disabled>কোনো Student পাওয়া যায়নি</option>';
-  $('studentPicker').disabled=!canManage();
-  $('saveStudentAssignmentsBtn').classList.toggle('hidden',!canManage());
-  $('teacherStudentsBadge').textContent=canManage()?'Assignment editable':'View only';
+  const editor=$('teacherAssignmentEditor');
+  const canEditAssignment=canManage()&&editing;
+  editor?.classList.toggle('hidden',!canEditAssignment);
+  $('studentPicker').disabled=!canEditAssignment;
+  $('saveStudentAssignmentsBtn').classList.toggle('hidden',!canEditAssignment);
+  $('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
   const current=allAssignedStudents.filter(st=>st.teacher_id===id);
   $('assignedStudentsList').innerHTML=current.map(st=>{
     const phone=normalizeWaNumber(st.phone);
@@ -100,6 +103,12 @@ function syncMode(){
   $('removeBtn').classList.toggle('hidden',editing||!canManage());
   $('saveBtn').classList.toggle('hidden',!editing);
   $('cancelBtn').classList.toggle('hidden',!editing);
+  const editor=$('teacherAssignmentEditor');
+  const canEditAssignment=type==='teacher'&&canManage()&&editing;
+  editor?.classList.toggle('hidden',!canEditAssignment);
+  if($('studentPicker'))$('studentPicker').disabled=!canEditAssignment;
+  if($('saveStudentAssignmentsBtn'))$('saveStudentAssignmentsBtn').classList.toggle('hidden',!canEditAssignment);
+  if(type==='teacher'&&$('teacherStudentsBadge'))$('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
 }
 async function load(){
   if(!id)throw Error('Profile ID সঠিক নয়।');
