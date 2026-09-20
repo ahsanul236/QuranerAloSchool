@@ -178,3 +178,180 @@
   .management-sidebar{top:var(--management-header-height)}
   .management-layout .dashboard-card>#app{padding-top:0}
 }
+/* Temporary management UI alignment layer — CSS-only, no feature/data behavior changes */
+/* Shared control rhythm */
+.management-layout input:not([type="checkbox"]):not([type="radio"]),
+.management-layout select,
+.management-layout textarea{
+  width:100%;
+  min-height:44px;
+  padding:10px 12px;
+  border:1px solid #cfd8e4;
+  border-radius:10px;
+  background:#fff;
+  color:var(--ink);
+  font:inherit;
+  line-height:1.35;
+  box-shadow:none;
+}
+.management-layout textarea{min-height:104px;resize:vertical}
+.management-layout input:not([type="checkbox"]):not([type="radio"]):focus,
+.management-layout select:focus,
+.management-layout textarea:focus{
+  outline:none;
+  border-color:#8fb3d8;
+  box-shadow:0 0 0 3px rgba(45,123,231,.10);
+}
+.management-layout .form-grid{
+  column-gap:18px;
+  row-gap:16px;
+}
+.management-layout .form-grid label,
+.management-layout .profile-field label,
+.management-layout .field label{
+  gap:7px;
+  line-height:1.4;
+}
+.management-layout .form-grid label,
+.management-layout .profile-field,
+.management-layout .field{align-content:start}
+.management-layout .form-grid textarea,
+.management-layout .profile-field textarea,
+.management-layout .field textarea{line-height:1.55}
+.management-layout .page-actions,
+.management-layout .save-row,
+.management-layout .assignment-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.management-layout .page-actions .primary-btn,
+.management-layout .page-actions .secondary-btn,
+.management-layout .save-row .primary-btn,
+.management-layout .save-row .secondary-btn,
+.management-layout .assignment-actions .primary-btn{
+  width:auto;
+  min-height:44px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:10px 16px;
+  line-height:1.2;
+}
+.management-layout .top-actions{
+  align-items:center;
+  gap:8px;
+}
+.management-layout .top-actions .secondary-btn,
+.management-layout .top-actions .quick-link{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.management-layout .quick-links{
+  align-items:center;
+  gap:8px;
+}
+.management-layout .quick-link{
+  min-height:42px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  line-height:1.2;
+}
+.management-layout .user-table th,
+.management-layout .user-table td,
+.management-layout .student-table th,
+.management-layout .student-table td,
+.management-layout .staff-table th,
+.management-layout .staff-table td{
+  padding:12px 14px;
+  vertical-align:middle;
+}
+.management-layout .user-table input:not([type="checkbox"]):not([type="radio"]),
+.management-layout .user-table select,
+.management-layout .student-table input:not([type="checkbox"]):not([type="radio"]),
+.management-layout .student-table select,
+.management-layout .staff-table input:not([type="checkbox"]):not([type="radio"]),
+.management-layout .staff-table select{
+  min-height:42px;
+  padding:9px 11px;
+  border-radius:9px;
+}
+.management-layout .permission-grid{
+  gap:10px;
+}
+.management-layout .permission-grid label{
+  min-height:42px;
+  padding:9px 11px;
+  display:flex;
+  align-items:center;
+}
+.management-layout .module-tab{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.management-layout .save-btn{
+  min-height:40px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  line-height:1.2;
+}
+.management-layout .active-badge,
+.management-layout .badge,
+.management-layout .readonly-badge{
+  line-height:1.2;
+  white-space:nowrap;
+}
+.management-layout .notice-box{min-height:46px;display:flex;align-items:center}
+.management-layout .message-inline{min-height:22px;line-height:1.45}
+.management-layout .panel-head{min-height:58px;padding:14px 18px}
+.management-layout .panel-head h2{line-height:1.3}
+.management-layout .profile-card-head{
+  min-height:52px;
+  align-items:center;
+  padding:13px 16px;
+}
+.management-layout .profile-body,
+.management-layout .profile-card-body{padding:16px}
+.management-layout .profile-fields,
+.management-layout .fields{
+  gap:14px 16px;
+}
+.management-layout .profile-actions{
+  align-items:stretch;
+}
+.management-layout .profile-actions a,
+.management-layout .profile-actions button{
+  min-height:44px;
+}
+@media(max-width:720px){
+  .management-layout .page-actions,
+  .management-layout .save-row,
+  .management-layout .assignment-actions{
+    align-items:stretch;
+  }
+  .management-layout .page-actions .primary-btn,
+  .management-layout .page-actions .secondary-btn,
+  .management-layout .save-row .primary-btn,
+  .management-layout .save-row .secondary-btn,
+  .management-layout .assignment-actions .primary-btn{
+    width:100%;
+  }
+  .management-layout .panel-head{padding:13px 15px}
+  .management-layout .user-table th,
+  .management-layout .user-table td,
+  .management-layout .student-table th,
+  .management-layout .student-table td,
+  .management-layout .staff-table th,
+  .management-layout .staff-table td{
+    padding:10px 10px;
+  }
+}
