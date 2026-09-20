@@ -1,6 +1,6 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false;
+const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[];
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
 const canView=()=>access?.can(type==='teacher'?'teachers.view':'staff.view');
 const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage');
@@ -35,6 +35,63 @@ function fill(){
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
   setWhatsAppLink(row.phone);
 }
+
+async function loadTeacherAssignments(){
+  if(type!=='teacher')return;
+  $('teacherStudentsCard')?.classList.remove('hidden');
+  if(!access?.can('students.view')&&!canManage())throw new Error('Student assignment দেখার permission নেই।');
+  const {data:students,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,phone,status,teacher_id').order('full_name',{ascending:true});
+  if(error)throw error;
+  allAssignedStudents=students||[];
+  const teacherIds=[...new Set(allAssignedStudents.map(x=>x.teacher_id).filter(Boolean))];
+  let teacherMap={};
+  if(teacherIds.length){
+    const {data:ts,error:te}=await supabase.from('qa_teachers').select('teacher_id,full_name,full_name_bn,active').in('teacher_id',teacherIds);
+    if(te)throw te;
+    teacherMap=Object.fromEntries((ts||[]).map(x=>[x.teacher_id,x]));
+  }
+  $('studentPicker').innerHTML=allAssignedStudents.map(st=>{
+    const assignedTo=st.teacher_id&&st.teacher_id!==id?teacherMap[st.teacher_id]:null;
+    const label=(st.full_name||st.student_code||st.student_id)+(st.student_code?' · '+st.student_code:'')+(assignedTo?' — বর্তমানে '+(assignedTo.full_name_bn||assignedTo.full_name||'অন্য Teacher'):'');
+    const selected=st.teacher_id===id?' selected':'';
+    return '<option value="'+esc(st.student_id)+'"'+selected+'>'+esc(label)+'</option>';
+  }).join('')||'<option disabled>কোনো Student পাওয়া যায়নি</option>';
+  $('studentPicker').disabled=!canManage();
+  $('saveStudentAssignmentsBtn').classList.toggle('hidden',!canManage());
+  $('teacherStudentsBadge').textContent=canManage()?'Assignment editable':'View only';
+  const current=allAssignedStudents.filter(st=>st.teacher_id===id);
+  $('assignedStudentsList').innerHTML=current.map(st=>{
+    const phone=normalizeWaNumber(st.phone);
+    const wa=phone?'<a class="whatsapp-btn" href="https://wa.me/'+phone+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="badge">ফোন নেই</span>';
+    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div><div>'+wa+'</div></div>';
+  }).join('')||'<div class="portal-empty">এখনো কোনো Student assigned নেই।</div>';
+}
+async function saveTeacherAssignments(){
+  if(type!=='teacher'||!canManage())throw new Error('Teacher student assignment permission নেই।');
+  const picker=$('studentPicker');
+  const selectedIds=[...picker.selectedOptions].map(o=>o.value).filter(Boolean);
+  const selectedSet=new Set(selectedIds);
+  const current=allAssignedStudents.filter(st=>st.teacher_id===id);
+  const conflicts=allAssignedStudents.filter(st=>selectedSet.has(st.student_id)&&st.teacher_id&&st.teacher_id!==id);
+  if(conflicts.length){
+    const names=conflicts.slice(0,5).map(st=>st.full_name||st.student_code).join(', ');
+    const suffix=conflicts.length>5?' এবং আরও '+(conflicts.length-5)+' জন':'';
+    const ok=window.confirm(names+suffix+' বর্তমানে অন্য Teacher-এর কাছে assigned।\n\nSelected করলে তাদের বর্তমান assignment পরিবর্তন হয়ে এই Teacher-এর কাছে চলে আসবে।\n\nচালিয়ে যেতে OK চাপুন।');
+    if(!ok)return;
+  }
+  const removeIds=current.filter(st=>!selectedSet.has(st.student_id)).map(st=>st.student_id);
+  if(removeIds.length){
+    const {error}=await supabase.from('qa_students').update({teacher_id:null}).in('student_id',removeIds);
+    if(error)throw error;
+  }
+  if(selectedIds.length){
+    const {error}=await supabase.from('qa_students').update({teacher_id:id}).in('student_id',selectedIds);
+    if(error)throw error;
+  }
+  $('assignmentMessage').textContent='Student assignment updated.';
+  $('assignmentMessage').className='message-inline success';
+  await loadTeacherAssignments();
+}
 function syncMode(){
   const canEdit=editing&&canManage();
   setInputs(canEdit);
@@ -57,8 +114,9 @@ async function load(){
   row=data;
   fill();
   syncMode();
+  if(type==='teacher') await loadTeacherAssignments();
 }
-$('editBtn').onclick=()=>{editing=true;msg('');syncMode()};
+$('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});\n$('editBtn').onclick=()=>{editing=true;msg('');syncMode()};
 $('cancelBtn').onclick=async()=>{editing=false;msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
