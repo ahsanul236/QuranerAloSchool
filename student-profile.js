@@ -5,7 +5,7 @@ const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const studentId=new URLSearchParams(location.search).get('id');
-let access=null,student=null,guardians=[],editing=false;
+let access=null,student=null,guardians=[],teachers=[],editing=false;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]));
 const login=()=>location.replace('./');
@@ -13,6 +13,42 @@ const msg=(t,type='')=>{$('saveMessage').textContent=t;$('saveMessage').classNam
 
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
+async function loadTeachers(){
+  if(!access?.can('teachers.view')&&!access?.can('teachers.manage')){renderTeacherAssignment();return;}
+  const {data,error}=await supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name,full_name_bn,phone,specialization,active').order('full_name',{ascending:true});
+  if(error)throw error;
+  teachers=data||[];
+  renderTeacherAssignment();
+}
+function renderTeacherAssignment(){
+  const select=$('assignedTeacher');
+  const saveBtn=$('saveTeacherBtn');
+  if(!select)return;
+  const canManage=access?.can('students.manage');
+  const currentId=student?.teacher_id||'';
+  const rows=[{teacher_id:'',teacher_code:'',full_name:'কোনো শিক্ষক নেই',full_name_bn:'',active:true},...teachers.filter(t=>t.active!==false||t.teacher_id===currentId)];
+  select.innerHTML=rows.map(t=>{
+    const name=t.teacher_id?(t.full_name_bn||t.full_name||t.teacher_code):'কোনো শিক্ষক নেই';
+    const extra=t.teacher_id&&t.active===false?' (Inactive)':'';
+    return '<option value="'+esc(t.teacher_id||'')+'" '+((t.teacher_id||'')===currentId?'selected':'')+'>'+esc(name+extra)+'</option>';
+  }).join('');
+  select.disabled=!canManage;
+  saveBtn?.classList.toggle('hidden',!canManage);
+  $('teacherAssignmentBadge').textContent=canManage?'Assignment editable':'View only';
+  $('teacherAssignmentNote').textContent=canManage?'একজন শিক্ষার্থীর জন্য একজন শিক্ষকই নির্ধারণ করা যাবে। পরিবর্তন করলে আগের শিক্ষক assignmentটি সরবে।':'এই শিক্ষার্থীর জন্য নির্ধারিত শিক্ষক এখানে দেখা যাবে।';
+}
+async function saveTeacherAssignment(){
+  if(!access?.can('students.manage'))throw new Error('Teacher assignment পরিবর্তনের permission নেই।');
+  const teacherId=$('assignedTeacher')?.value||null;
+  const {data,error}=await supabase.from('qa_students').update({teacher_id:teacherId}).eq('student_id',studentId).select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').single();
+  if(error)throw error;
+  student=data;
+  const teacher=teachers.find(t=>t.teacher_id===teacherId);
+  $('teacherSaveMessage').textContent=teacherId?(teacher?.full_name_bn||teacher?.full_name||'Teacher assigned.'):'Teacher assignment removed.';
+  $('teacherSaveMessage').className='message-inline success';
+  renderTeacherAssignment();
+}
+
 function fillStudent(){
   $('studentCode').value=student.student_code||'';
   $('fullName').value=student.full_name||'';
@@ -61,7 +97,7 @@ function mode(){
 
 async function load(){
   if(!studentId)throw new Error('Student ID সঠিক নয়।');
-  const {data:s,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,created_at,updated_at').eq('student_id',studentId).maybeSingle();
+  const {data:s,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').eq('student_id',studentId).maybeSingle();
   if(error)throw error;if(!s)throw new Error('Student profile পাওয়া যায়নি।');student=s;
   const {data:links,error:le}=await supabase.from('qa_student_guardians').select('guardian_id,is_primary').eq('student_id',studentId);
   if(le)throw le;
@@ -72,7 +108,7 @@ async function load(){
     const map=Object.fromEntries((gs||[]).map(x=>[x.guardian_id,x]));
     guardians=links.map(x=>({...map[x.guardian_id],is_primary:x.is_primary})).filter(x=>x.guardian_id).sort((a,b)=>Number(b.is_primary)-Number(a.is_primary));
   }
-  fillStudent();mode();
+  fillStudent();mode();await loadTeachers();
 }
 
 async function save(){
@@ -94,6 +130,7 @@ async function save(){
   editing=false;await load();
 }
 
+$('saveTeacherBtn')?.addEventListener('click',async()=>{const btn=$('saveTeacherBtn');btn.disabled=true;$('teacherSaveMessage').textContent='Saving…';$('teacherSaveMessage').className='message-inline';try{await saveTeacherAssignment();}catch(e){console.error(e);$('teacherSaveMessage').textContent=e.message||'Teacher assignment save করা যায়নি।';$('teacherSaveMessage').className='message-inline error';}finally{btn.disabled=false;}});
 $('editBtn').onclick=()=>{editing=true;msg('');mode();};
 $('cancelBtn').onclick=async()=>{editing=false;msg('');await load();};$('removeBtn').onclick=async()=>{if(!access?.can('students.manage')){msg('Student remove permission নেই।','error');return;}const name=student?.full_name||student?.student_code||'এই শিক্ষার্থী';const ok=window.confirm(`আপনি কি "${name}"-এর profile remove করতে চান?\\n\\nRemove করলে profile-টি স্থায়ীভাবে মুছে ফেলা হবে না; Student status "Withdrawn" করা হবে এবং fee, attendance, Quran progress ও অন্যান্য history সংরক্ষিত থাকবে।\\n\\nনিশ্চিত করতে OK চাপুন।`);if(!ok)return;$('removeBtn').disabled=true;msg('Removing profile…');try{const {error}=await supabase.from('qa_students').update({status:'withdrawn'}).eq('student_id',studentId);if(error)throw error;window.location.replace('students.html');}catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false;}};
 $('profileForm').onsubmit=async e=>{e.preventDefault();$('saveBtn').disabled=true;msg('Saving changes…');try{await save();msg('Student profile updated successfully.','success');}catch(err){console.error(err);msg(err?.message||'Profile update করা যায়নি।','error');}finally{$('saveBtn').disabled=false;}};
