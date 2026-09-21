@@ -402,6 +402,18 @@ function personCanViewOwn(actor: Actor, person: Person) {
 async function canViewProfileImage(actor: Actor, target: Person) {
   if (actor.role === 'owner' || actor.role === 'admin') return true;
 
+  if (!['student','teacher','helper'].includes(actor.role)) {
+    const viewPermission =
+      target.role === 'student' ? 'students.view' :
+      target.role === 'teacher' ? 'teachers.view' :
+      'staff.view';
+    const managePermission =
+      target.role === 'student' ? 'students.manage' :
+      target.role === 'teacher' ? 'teachers.manage' :
+      'staff.manage';
+    return can(actor, viewPermission) || can(actor, managePermission);
+  }
+
   if (actor.role === target.role) {
     const self = await resolveSelfPerson(actor);
     return self.id === target.id;
