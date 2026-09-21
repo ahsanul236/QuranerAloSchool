@@ -686,7 +686,7 @@ async function handleDelete(actor: Actor, documentToken: string) {
     console.error('Google Drive delete failed', { status: res.status, errorText: errorText.slice(0, 500) });
     throw new Error('GOOGLE_DRIVE_DELETE_FAILED');
   }
-  return { ok: true, fileId };
+  return { ok: true };
 }
 
 async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: string) {
