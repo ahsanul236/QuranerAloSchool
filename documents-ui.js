@@ -91,6 +91,10 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       let replaceExisting = false;
       if (existing.length && ['profile_picture','birth_registration','nid'].includes(category)) {
         replaceExisting = window.confirm(categoryLabel(category)+'-এর একটি file আগে থেকেই আছে।\n\nনতুন file দিয়ে বর্তমান file-এর content replace করতে চান?');
+        if (!replaceExisting) {
+          setMessage(messageNode, 'বর্তমান file অপরিবর্তিত রাখা হয়েছে। নতুন file upload করা হয়নি।');
+          return;
+        }
       }
       uploadBtn.disabled = true;
       setMessage(messageNode, 'Upload হচ্ছে…');
