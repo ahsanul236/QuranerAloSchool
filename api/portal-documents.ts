@@ -421,53 +421,80 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
 }
 
 async function uploadNewFile(parentId: string, file: File, appProperties: Record<string, string>, fileName: string) {
-  const boundary = `quraneralo_${crypto.randomUUID().replaceAll('-', '')}`;
   const metadata = {
     name: fileName,
     parents: [parentId],
+    mimeType: file.type,
     appProperties: { qa_app: 'quraner-alo', ...appProperties },
   };
 
-  const metaBytes = new TextEncoder().encode(
-    `--${boundary}\\r\\nContent-Type: application/json; charset=UTF-8\\r\\n\\r\\n${JSON.stringify(metadata)}`,
-  );
-  const mediaHeaderBytes = new TextEncoder().encode(
-    `\\r\\n--${boundary}\\r\\nContent-Type: ${file.type}\\r\\n\\r\\n`,
-  );
-  const fileBytes = new Uint8Array(await file.arrayBuffer());
-  const endBytes = new TextEncoder().encode(`\\r\\n--${boundary}--`);
-  const body = new Uint8Array(
-    metaBytes.length + mediaHeaderBytes.length + fileBytes.length + endBytes.length,
-  );
-  let offset = 0;
-  body.set(metaBytes, offset);
-  offset += metaBytes.length;
-  body.set(mediaHeaderBytes, offset);
-  offset += mediaHeaderBytes.length;
-  body.set(fileBytes, offset);
-  offset += fileBytes.length;
-  body.set(endBytes, offset);
-
+  const metadataJson = JSON.stringify(metadata);
+  const metadataBytes = new TextEncoder().encode(metadataJson);
   const token = await getAccessToken();
-  const res = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties',
+
+  const initRes = await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties',
     {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': `multipart/related; boundary="${boundary}"`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Length': String(metadataBytes.byteLength),
+        'X-Upload-Content-Type': file.type,
+        'X-Upload-Content-Length': String(file.size),
       },
-      body,
+      body: metadataJson,
     },
   );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.id) {
-    const status = res.status || 0;
-    const reason = String(data?.error?.errors?.[0]?.reason || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
-    const message = String(data?.error?.message || '').replace(/[^a-zA-Z0-9 .,!?_-]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 180);
-    console.error('Google Drive upload failed', { status, reason, message });
-    throw new Error(`GOOGLE_DRIVE_UPLOAD_FAILED_${status}_${reason || 'UNKNOWN'}_${message || 'No Google Drive error message'}`);
+
+  if (!initRes.ok) {
+    const initText = await initRes.text().catch(() => '');
+    let initData: any = {};
+    try { initData = JSON.parse(initText || '{}'); } catch {}
+    const status = initRes.status || 0;
+    const reason = String(initData?.error?.errors?.[0]?.reason || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+    const message = String(initData?.error?.message || initText || initRes.statusText || 'No Google Drive error message')
+      .replace(/[^a-zA-Z0-9 .,!?_-]/g, ' ')
+      .replace(/\\s+/g, ' ')
+      .trim()
+      .slice(0, 180);
+    console.error('Google Drive resumable init failed', { status, reason, message });
+    throw new Error(`GOOGLE_DRIVE_UPLOAD_INIT_FAILED_${status}_${reason || 'UNKNOWN'}_${message}`);
   }
+
+  const sessionUrl = initRes.headers.get('Location');
+  if (!sessionUrl) {
+    console.error('Google Drive resumable init missing Location header');
+    throw new Error('GOOGLE_DRIVE_UPLOAD_INIT_FAILED_200_NO_LOCATION');
+  }
+
+  const fileBytes = new Uint8Array(await file.arrayBuffer());
+  const uploadRes = await fetch(sessionUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': file.type,
+      'Content-Length': String(fileBytes.byteLength),
+    },
+    body: fileBytes,
+  });
+
+  const uploadText = await uploadRes.text().catch(() => '');
+  let data: any = {};
+  try { data = JSON.parse(uploadText || '{}'); } catch {}
+
+  if (!uploadRes.ok || !data.id) {
+    const status = uploadRes.status || 0;
+    const reason = String(data?.error?.errors?.[0]?.reason || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+    const message = String(data?.error?.message || uploadText || uploadRes.statusText || 'No Google Drive error message')
+      .replace(/[^a-zA-Z0-9 .,!?_-]/g, ' ')
+      .replace(/\\s+/g, ' ')
+      .trim()
+      .slice(0, 180);
+    console.error('Google Drive resumable upload failed', { status, reason, message });
+    throw new Error(`GOOGLE_DRIVE_UPLOAD_FAILED_${status}_${reason || 'UNKNOWN'}_${message}`);
+  }
+
   return data;
 }
 
