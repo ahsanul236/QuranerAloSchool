@@ -45,6 +45,18 @@ function extOf(name: string) {
   return parts.length > 1 ? parts.pop() || '' : '';
 }
 
+async function validateImageSignature(file: File) {
+  const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+  const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const isPng = bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  const mime = String(file.type || '').toLowerCase();
+  if ((mime === 'image/jpeg' && !isJpeg) || (mime === 'image/png' && !isPng)) {
+    throw new Error('INVALID_FILE_TYPE');
+  }
+}
+
 function normalizeFilename(name: string) {
   const cleaned = String(name || 'document')
     .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
@@ -483,8 +495,9 @@ async function handleUpload(actor: Actor, req: Request) {
   if (!categoryAllowedForRole(person.role, category)) throw new Error('CATEGORY_NOT_ALLOWED');
 
   const ext = extOf(fileValue.name);
-  if (!ALLOWED_EXTENSIONS.has(ext) || !ALLOWED_MIME.has(fileValue.type)) throw new Error('INVALID_FILE_TYPE');
+  if (!ALLOWED_EXTENSIONS.has(ext) || !ALLOWED_MIME.has(String(fileValue.type || '').toLowerCase())) throw new Error('INVALID_FILE_TYPE');
   if (fileValue.size <= 0 || fileValue.size > MAX_BYTES) throw new Error('FILE_TOO_LARGE');
+  await validateImageSignature(fileValue);
 
   const year = new Date().getFullYear();
   const { personFolder } = await ensurePersonFolder(person, year);
