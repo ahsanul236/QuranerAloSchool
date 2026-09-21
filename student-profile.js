@@ -106,6 +106,7 @@ function mode(){
   $('editBtn').classList.toggle('hidden',editing||!access?.can('students.manage'));$('removeBtn').classList.toggle('hidden',editing||!access?.can('students.manage'));
   $('saveBtn').classList.toggle('hidden',!editing);
   $('cancelBtn').classList.toggle('hidden',!editing);
+  $('studentDocumentsCard')?.classList.toggle('hidden',!editing);
   $('guardianNote').textContent=ge?'Guardian তথ্যও এখান থেকে edit করা যাবে।':'Guardian তথ্য দেখা যাবে; edit করতে guardians.manage permission প্রয়োজন।';
   renderGuardians();
   renderTeacherAssignment();
