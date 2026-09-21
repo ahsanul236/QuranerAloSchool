@@ -1,6 +1,6 @@
 import {
   listDocuments, uploadDocument, deleteDocument, openDocument,
-  fetchDocumentBlob, validateDocumentFile, fileSizeLabel, categoryLabel, getProfileImage
+  fetchDocumentBlob, validateDocumentFileContent, fileSizeLabel, categoryLabel, getProfileImage, documentErrorMessage
 } from './documents-client.js';
 
 function esc(v) {
@@ -53,7 +53,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
     listNode.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', async () => {
       button.disabled = true;
       try { await openDocument(button.dataset.view); }
-      catch (error) { setMessage(messageNode, error.message || 'Document view করা যায়নি।', 'error'); }
+      catch (error) { setMessage(messageNode, documentErrorMessage(error), 'error'); }
       finally { button.disabled = false; }
     }));
 
@@ -61,7 +61,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       if (!window.confirm('এই document স্থায়ীভাবে মুছে ফেলতে চান?')) return;
       button.disabled = true;
       try { await deleteDocument(button.dataset.delete); setMessage(messageNode, 'Document সফলভাবে মুছে ফেলা হয়েছে।', 'success'); await render(); }
-      catch (error) { setMessage(messageNode, error.message || 'Document delete করা যায়নি।', 'error'); button.disabled = false; }
+      catch (error) { setMessage(messageNode, documentErrorMessage(error), 'error'); button.disabled = false; }
     }));
 
     const profile = files.find((file) => file.category === 'profile_picture');
@@ -85,7 +85,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
     const category = categorySelect?.value || 'other_document';
     if (!file) { setMessage(messageNode, 'প্রথমে একটি ফাইল নির্বাচন করুন।', 'error'); return; }
     try {
-      validateDocumentFile(file);
+      await validateDocumentFileContent(file);
       const current = (await listDocuments({ role, personId })).files || [];
       const existing = current.filter((x) => x.category === category);
       let replaceExisting = false;
@@ -104,7 +104,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       await render();
     } catch (error) {
       console.error('document upload error', error);
-      setMessage(messageNode, error.message || 'Document upload করা যায়নি।', 'error');
+      setMessage(messageNode, documentErrorMessage(error), 'error');
     } finally { uploadBtn.disabled = false; }
   });
 
