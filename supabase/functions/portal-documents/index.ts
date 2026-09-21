@@ -491,7 +491,8 @@ async function handleUpload(actor: Actor, req: Request) {
   const existing = await listDriveDocuments(person, year);
   const sameCategory = existing.filter((item) => item.category === category);
 
-  if (sameCategory.length > 0 && replaceExisting && ['profile_picture', 'birth_registration', 'nid'].includes(category)) {
+  if (sameCategory.length > 0 && ['profile_picture', 'birth_registration', 'nid'].includes(category)) {
+    if (!replaceExisting) throw new Error('DOCUMENT_ALREADY_EXISTS');
     const current = sameCategory.sort((a, b) => String(b.modifiedTime || b.createdTime || '').localeCompare(String(a.modifiedTime || a.createdTime || '')))[0];
     const newName = category === 'profile_picture'
       ? `profile.${ext === 'jpeg' ? 'jpg' : ext}`
