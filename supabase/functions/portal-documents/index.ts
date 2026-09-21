@@ -70,6 +70,62 @@ function escapeDriveQueryLiteral(value: string) {
   return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
+function bytesToBase64Url(bytes: Uint8Array) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64UrlToBytes(value: string) {
+  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function documentTokenKey() {
+  const credentials = await getGoogleCredentials();
+  const material = new TextEncoder().encode('quraneralo-document-token:v1:' + credentials.client_secret);
+  const digest = await crypto.subtle.digest('SHA-256', material);
+  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function createDocumentToken(fileId: string) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const payload = new TextEncoder().encode(JSON.stringify({
+    v: 1,
+    fileId,
+    exp: Date.now() + (7 * 24 * 60 * 60 * 1000),
+  }));
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await documentTokenKey(), payload);
+  return 'v1.' + bytesToBase64Url(iv) + '.' + bytesToBase64Url(new Uint8Array(encrypted));
+}
+
+async function resolveDocumentToken(token: string) {
+  if (!String(token || '').startsWith('v1.')) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const parts = String(token).split('.');
+  if (parts.length !== 3) throw new Error('INVALID_DOCUMENT_TOKEN');
+  try {
+    const iv = base64UrlToBytes(parts[1]);
+    const encrypted = base64UrlToBytes(parts[2]);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, await documentTokenKey(), encrypted);
+    const payload = JSON.parse(new TextDecoder().decode(decrypted));
+    if (!payload?.fileId || Number(payload.exp || 0) < Date.now()) throw new Error('INVALID_DOCUMENT_TOKEN');
+    return String(payload.fileId);
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
+  }
+}
+
+async function publicDocumentMetadata(file: Record<string, any>) {
+  const meta = metadataFromFile(file);
+  const fileId = meta.fileId;
+  delete meta.fileId;
+  return { ...meta, documentToken: await createDocumentToken(fileId) };
+}
+
 async function parseActor(req: Request): Promise<Actor> {
   const auth = req.headers.get('authorization') || '';
   if (!auth.toLowerCase().startsWith('bearer ')) throw new Error('UNAUTHORIZED');
@@ -334,6 +390,11 @@ async function listDriveDocuments(person: Person, year?: number) {
   return (data.files || []).map(metadataFromFile);
 }
 
+async function listPublicDriveDocuments(person: Person, year?: number) {
+  const files = await listDriveDocuments(person, year);
+  return Promise.all(files.map(publicDocumentMetadata));
+}
+
 function personCanViewOwn(actor: Actor, person: Person) {
   return actor.role === person.role && ['student', 'teacher', 'helper'].includes(actor.role);
 }
@@ -393,6 +454,8 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
     return { target, category };
   }
 
+  if (action === 'delete') throw new Error('FORBIDDEN');
+
   const own = await personCanViewOwn(actor, target);
   if (own) return { target, category };
 
@@ -404,38 +467,62 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
 }
 
 async function uploadNewFile(parentId: string, file: File, appProperties: Record<string, string>, fileName: string) {
-  const boundary = `quraneralo_${crypto.randomUUID().replaceAll('-', '')}`;
   const metadata = {
     name: fileName,
     parents: [parentId],
+    mimeType: file.type,
     appProperties: { qa_app: 'quraner-alo', ...appProperties },
   };
 
-  const metaBytes = new TextEncoder().encode(
-    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,
-  );
-  const fileBytes = new Uint8Array(await file.arrayBuffer());
-  const endBytes = new TextEncoder().encode(`\r\n--${boundary}--`);
-  const body = new Uint8Array(metaBytes.length + fileBytes.length + endBytes.length);
-  body.set(metaBytes, 0);
-  body.set(fileBytes, metaBytes.length);
-  body.set(endBytes, metaBytes.length + fileBytes.length);
-
+  const metadataJson = JSON.stringify(metadata);
+  const metadataBytes = new TextEncoder().encode(metadataJson);
   const token = await getAccessToken();
-  const res = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties',
+
+  const initRes = await fetch(
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties',
     {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': `multipart/related; boundary="${boundary}"`,
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Length': String(metadataBytes.byteLength),
+        'X-Upload-Content-Type': file.type,
+        'X-Upload-Content-Length': String(file.size),
       },
-      body,
+      body: metadataJson,
     },
   );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.id) {
-    console.error('Google Drive upload failed', { status: res.status, error: data?.error?.message || data?.error });
+
+  if (!initRes.ok) {
+    const text = await initRes.text().catch(() => '');
+    let data: any = {};
+    try { data = JSON.parse(text || '{}'); } catch {}
+    console.error('Google Drive resumable upload init failed', { status: initRes.status, error: data?.error?.message || data?.error });
+    throw new Error('GOOGLE_DRIVE_UPLOAD_FAILED');
+  }
+
+  const sessionUrl = initRes.headers.get('Location');
+  if (!sessionUrl) {
+    console.error('Google Drive resumable upload init missing Location header');
+    throw new Error('GOOGLE_DRIVE_UPLOAD_FAILED');
+  }
+
+  const fileBytes = new Uint8Array(await file.arrayBuffer());
+  const uploadRes = await fetch(sessionUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': file.type,
+      'Content-Length': String(fileBytes.byteLength),
+    },
+    body: fileBytes,
+  });
+
+  const uploadText = await uploadRes.text().catch(() => '');
+  let data: any = {};
+  try { data = JSON.parse(uploadText || '{}'); } catch {}
+  if (!uploadRes.ok || !data.id) {
+    console.error('Google Drive resumable upload failed', { status: uploadRes.status, error: data?.error?.message || data?.error });
     throw new Error('GOOGLE_DRIVE_UPLOAD_FAILED');
   }
   return data;
@@ -511,7 +598,7 @@ async function handleUpload(actor: Actor, req: Request) {
       ? `profile.${ext === 'jpeg' ? 'jpg' : ext}`
       : normalizeFilename(fileValue.name);
     const updated = await replaceFileContent(current.fileId, fileValue, newName);
-    return { ok: true, mode: 'replaced', file: metadataFromFile(updated) };
+    return { ok: true, mode: 'replaced', file: await publicDocumentMetadata(updated) };
   }
 
   const fileName = category === 'profile_picture'
@@ -531,10 +618,11 @@ async function handleUpload(actor: Actor, req: Request) {
     fileName,
   );
 
-  return { ok: true, mode: 'created', file: metadataFromFile(uploaded) };
+  return { ok: true, mode: 'created', file: await publicDocumentMetadata(uploaded) };
 }
 
-async function handleView(actor: Actor, fileId: string) {
+async function handleView(actor: Actor, documentToken: string) {
+  const fileId = await resolveDocumentToken(documentToken);
   const meta = await getFileMetadata(fileId);
   const { category } = await authorizeFile(actor, meta, 'view');
   if (!ALLOWED_MIME.has(String(meta.mimeType || '').toLowerCase())) throw new Error('INVALID_FILE_TYPE');
@@ -547,12 +635,12 @@ async function handleView(actor: Actor, fileId: string) {
       'Content-Type': meta.mimeType,
       'Cache-Control': 'private, no-store',
       'X-File-Name': fileName,
-      'X-Drive-File-Id': meta.id,
     },
   });
 }
 
-async function handleDelete(actor: Actor, fileId: string) {
+async function handleDelete(actor: Actor, documentToken: string) {
+  const fileId = await resolveDocumentToken(documentToken);
   const meta = await getFileMetadata(fileId);
   await authorizeFile(actor, meta, 'delete');
   const token = await getAccessToken();
@@ -588,7 +676,7 @@ async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: st
     ok: true,
     found: true,
     person: { role: person.role, id: person.id, code: person.code, name: person.name },
-    file: metadataFromFile(file),
+    file: await publicDocumentMetadata(file),
   };
 }
 
@@ -647,11 +735,11 @@ Deno.serve(async (req) => {
       if (actor.role !== person.role && !(can(actor, permission) || can(actor, permission.replace('.view', '.manage')))) {
         throw new Error('FORBIDDEN');
       }
-      return json({ ok: true, person: { role: person.role, id: person.id, code: person.code, name: person.name }, files: await listDriveDocuments(person) });
+      return json({ ok: true, person: { role: person.role, id: person.id, code: person.code, name: person.name }, files: await listPublicDriveDocuments(person) });
     }
 
-    if (action === 'view') return await handleView(actor, String(body?.fileId || ''));
-    if (action === 'delete') return json(await handleDelete(actor, String(body?.fileId || '')));
+    if (action === 'view') return await handleView(actor, String(body?.documentToken || ''));
+    if (action === 'delete') return json(await handleDelete(actor, String(body?.documentToken || '')));
     if (action === 'profile_image') return json(await handleProfileImage(actor, String(body?.role || ''), String(body?.personId || '')));
     if (action === 'storage') return json(await handleStorage(actor));
 
@@ -659,7 +747,17 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('portal-documents error', error);
     const code = error instanceof Error ? error.message : 'SERVER_ERROR';
-    const status = ['UNAUTHORIZED', 'FORBIDDEN'].includes(code) ? 403 : 400;
+    const serverErrors = new Set([
+      'GOOGLE_AUTH_FAILED',
+      'GOOGLE_DRIVE_API_ERROR',
+      'GOOGLE_DRIVE_UPLOAD_FAILED',
+      'GOOGLE_DRIVE_REPLACE_FAILED',
+      'GOOGLE_DRIVE_DELETE_FAILED',
+      'GOOGLE_DRIVE_NOT_CONFIGURED',
+      'GOOGLE_DRIVE_CONFIG_INVALID',
+      'SUPABASE_FUNCTION_CONFIG_INVALID',
+    ]);
+    const status = ['UNAUTHORIZED', 'FORBIDDEN'].includes(code) ? 403 : serverErrors.has(code) ? 500 : 400;
     return json({ ok: false, error: code }, status);
   }
 });
