@@ -124,7 +124,7 @@ export async function setProfileImage({ role, personId, img }) {
   try {
     const result = await getProfileImage({ role, personId });
     if (!result?.found || !result.file?.documentToken) { img.classList.add('hidden'); return false; }
-    const file = await fetchDocumentBlob(result.file.fileId);
+    const file = await fetchDocumentBlob(result.file.documentToken);
     const url = URL.createObjectURL(file.blob);
     img.src = url;
     img.classList.remove('hidden');
