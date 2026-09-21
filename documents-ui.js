@@ -55,7 +55,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       return files;
     }
     listNode.innerHTML = files.map((file) => {
-      return '<div class="document-row"><div class="document-main"><span class="document-type">'+esc(categoryLabel(file.category))+'</span><strong>'+esc(file.name)+'</strong><small>'+esc(fileSizeLabel(file.size))+' · '+esc(dateLabel(file.modifiedTime || file.createdTime))+'</small></div><div class="document-actions"><button type="button" class="secondary-btn" data-view="'+esc(file.fileId)+'">View</button>'+(canDelete ? '<button type="button" class="danger-btn" data-delete="'+esc(file.fileId)+'">Delete</button>' : '')+'</div></div>';
+      return '<div class="document-row"><div class="document-main"><span class="document-type">'+esc(categoryLabel(file.category))+'</span><strong>'+esc(file.name)+'</strong><small>'+esc(fileSizeLabel(file.size))+' · '+esc(dateLabel(file.modifiedTime || file.createdTime))+'</small></div><div class="document-actions"><button type="button" class="secondary-btn" data-view="'+esc(file.documentToken)+'">View</button>'+(canDelete ? '<button type="button" class="danger-btn" data-delete="'+esc(file.documentToken)+'">Delete</button>' : '')+'</div></div>';
     }).join('') || '<div class="document-empty">এখনো কোনো document upload করা হয়নি।</div>';
 
     listNode.querySelectorAll('[data-view]').forEach((button) => button.addEventListener('click', async () => {
@@ -77,7 +77,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       profileBox?.classList.remove('hidden');
       profileMeta.textContent = fileSizeLabel(profile.size)+' · '+dateLabel(profile.modifiedTime || profile.createdTime);
       try {
-        const blobResult = await fetchDocumentBlob(profile.fileId);
+        const blobResult = await fetchDocumentBlob(profile.documentToken);
         const url = URL.createObjectURL(blobResult.blob);
         if (profileImg) profileImg.src = url;
       } catch (error) { console.warn('profile image preview unavailable', error); profileBox?.classList.add('hidden'); }
@@ -123,7 +123,7 @@ export async function setProfileImage({ role, personId, img }) {
   if (!img) return false;
   try {
     const result = await getProfileImage({ role, personId });
-    if (!result?.found || !result.file?.fileId) { img.classList.add('hidden'); return false; }
+    if (!result?.found || !result.file?.documentToken) { img.classList.add('hidden'); return false; }
     const file = await fetchDocumentBlob(result.file.fileId);
     const url = URL.createObjectURL(file.blob);
     img.src = url;
