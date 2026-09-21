@@ -1,4 +1,5 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
+import{mountDocumentsPanel}from'./documents-ui.js';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[];
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
@@ -35,6 +36,16 @@ function fill(){
   $('notes').value=row.notes||'';
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
   setWhatsAppLink(row.phone);
+  if($('staffDocuments')){
+    await mountDocumentsPanel({
+      container:$('staffDocuments'),
+      role:type,
+      personId:id,
+      editable:canManage(),
+      canDelete:canManage(),
+      title:type==='teacher'?'Teacher Documents':'Helper Documents'
+    });
+  }
 }
 
 async function loadTeacherAssignments(){
