@@ -74,22 +74,84 @@ function createDocumentToken() {
   return `d1_${crypto.randomUUID()}_${crypto.randomUUID()}`;
 }
 
+function base64urlEncode(bytes: Uint8Array) {
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function base64urlDecode(value: string) {
+  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+}
+
+async function documentTokenKey() {
+  const raw = process.env.GOOGLE_DRIVE_CREDENTIALS || '';
+  if (!raw) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function createEphemeralDocumentToken(fileId: string) {
+  const key = await documentTokenKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(String(fileId)),
+  ));
+  return `d2_${base64urlEncode(iv)}_${base64urlEncode(ciphertext)}`;
+}
+
+async function resolveEphemeralDocumentToken(token: string) {
+  const parts = String(token || '').split('_');
+  if (parts.length !== 3 || parts[0] !== 'd2') throw new Error('INVALID_DOCUMENT_TOKEN');
+  let iv: Uint8Array;
+  let ciphertext: Uint8Array;
+  try {
+    iv = base64urlDecode(parts[1]);
+    ciphertext = base64urlDecode(parts[2]);
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
+  }
+  if (iv.length !== 12 || ciphertext.length < 17) throw new Error('INVALID_DOCUMENT_TOKEN');
+  try {
+    const key = await documentTokenKey();
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    const fileId = new TextDecoder().decode(new Uint8Array(plain));
+    if (!fileId || fileId.length > 300) throw new Error('INVALID_DOCUMENT_TOKEN');
+    return fileId;
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
+  }
+}
+
 async function ensureDocumentToken(file: Record<string, any>) {
   const props = { ...(file.appProperties || {}) };
   if (props.qa_doc_token) return String(props.qa_doc_token);
   if (!file.id) throw new Error('FILE_NOT_FOUND');
   const token = createDocumentToken();
   props.qa_doc_token = token;
-  await driveJson(`files/${encodeURIComponent(file.id)}?fields=id,appProperties`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ appProperties: props }),
-  });
-  return token;
+  try {
+    await driveJson(`files/${encodeURIComponent(file.id)}?fields=id,appProperties`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ appProperties: props }),
+    });
+    return token;
+  } catch (error) {
+    console.warn('Legacy document token write-back unavailable; using an ephemeral token.', {
+      code: error instanceof Error ? error.message : 'UNKNOWN'
+    });
+    return createEphemeralDocumentToken(String(file.id));
+  }
 }
 
 async function resolveDocumentToken(token: string) {
   const value = String(token || '');
+  if (value.startsWith('d2_')) return resolveEphemeralDocumentToken(value);
   if (!value.startsWith('d1_')) throw new Error('INVALID_DOCUMENT_TOKEN');
   const q = [
     "trashed = false",
