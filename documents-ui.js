@@ -52,7 +52,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       listNode.innerHTML = '<div class="document-empty">'+esc(documentErrorMessage(error))+'</div>';
       profileBox?.classList.add('hidden');
       if (profileImg) profileImg.removeAttribute('src');
-      throw error;
+      return files;
     }
     listNode.innerHTML = files.map((file) => {
       return '<div class="document-row"><div class="document-main"><span class="document-type">'+esc(categoryLabel(file.category))+'</span><strong>'+esc(file.name)+'</strong><small>'+esc(fileSizeLabel(file.size))+' · '+esc(dateLabel(file.modifiedTime || file.createdTime))+'</small></div><div class="document-actions"><button type="button" class="secondary-btn" data-view="'+esc(file.fileId)+'">View</button>'+(canDelete ? '<button type="button" class="danger-btn" data-delete="'+esc(file.fileId)+'">Delete</button>' : '')+'</div></div>';
