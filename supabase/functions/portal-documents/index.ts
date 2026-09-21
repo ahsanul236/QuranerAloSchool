@@ -443,14 +443,18 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
 
   const target: Person = { role, id: personId, code: String(props.qa_person_code || ''), name: '' };
 
-  if (actor.role === 'owner' || actor.role === 'admin') {
-    if (action === 'delete') {
-      const permission =
-        role === 'student' ? 'students.manage' :
-        role === 'teacher' ? 'teachers.manage' :
-        'staff.manage';
-      if (!can(actor, permission)) throw new Error('FORBIDDEN');
-    }
+  const viewPermission =
+    role === 'student' ? 'students.view' :
+    role === 'teacher' ? 'teachers.view' :
+    'staff.view';
+  const managePermission =
+    role === 'student' ? 'students.manage' :
+    role === 'teacher' ? 'teachers.manage' :
+    'staff.manage';
+
+  if (actor.role === 'owner' || actor.role === 'admin' || !['student','teacher','helper'].includes(actor.role)) {
+    if (!can(actor, viewPermission) && !can(actor, managePermission)) throw new Error('FORBIDDEN');
+    if (action === 'delete' && !can(actor, managePermission) && actor.role !== 'owner') throw new Error('FORBIDDEN');
     return { target, category };
   }
 
