@@ -19,8 +19,8 @@ const json = (body: unknown, status = 200, extraHeaders: Record<string, string> 
   { status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extraHeaders } }
 );
 
-const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
+const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY') || '';
+const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || Deno.env.get('SUPABASE_PUBLISHABLE_KEY') || '';
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const adminDb = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 const authDb = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
