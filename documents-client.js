@@ -156,8 +156,9 @@ export async function fetchDocumentBlob(documentToken) {
 }
 
 export async function openDocument(documentToken) {
-  const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
+  const popup = window.open('about:blank', '_blank');
   if (!popup) throw new Error('ব্রাউজার নতুন window খুলতে বাধা দিয়েছে।');
+  try { popup.opener = null; } catch {}
   try {
     const result = await fetchDocumentBlob(documentToken);
     const url = URL.createObjectURL(result.blob);
