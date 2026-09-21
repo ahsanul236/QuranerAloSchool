@@ -124,8 +124,8 @@ export async function uploadDocument({ role, personId, category, file, replaceEx
   return data;
 }
 
-export async function deleteDocument(fileId) {
-  return requestJson({ action: 'delete', fileId });
+export async function deleteDocument(documentToken) {
+  return requestJson({ action: 'delete', documentToken });
 }
 
 export async function getStorage() {
@@ -137,11 +137,11 @@ export async function getProfileImage({ role, personId }) {
   return data;
 }
 
-export async function fetchDocumentBlob(fileId) {
+export async function fetchDocumentBlob(documentToken) {
   const res = await fetch(endpoint(), {
     method: 'POST',
     headers: await sessionHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify({ action: 'view', fileId })
+    body: JSON.stringify({ action: 'view', documentToken })
   });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
@@ -154,11 +154,11 @@ export async function fetchDocumentBlob(fileId) {
   };
 }
 
-export async function openDocument(fileId) {
+export async function openDocument(documentToken) {
   const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
   if (!popup) throw new Error('ব্রাউজার নতুন window খুলতে বাধা দিয়েছে।');
   try {
-    const result = await fetchDocumentBlob(fileId);
+    const result = await fetchDocumentBlob(documentToken);
     const url = URL.createObjectURL(result.blob);
     popup.location.href = url;
     setTimeout(() => URL.revokeObjectURL(url), 60000);
