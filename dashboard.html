@@ -4,7 +4,21 @@
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2><a class="quick-link" href="exports.html">Lists & Export →</a></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
 </div>
 
+  
+<div class="panel">
+    <div class="panel-head"><h2>Google Drive Storage</h2><span class="eyebrow" id="googleDriveStorageStatus">Checking…</span></div>
+    <div id="googleDriveStorageCard" class="google-storage-card hidden" style="border:0;box-shadow:none;border-radius:0">
+      <div class="google-storage-head"><div><h3>Document Storage</h3><span class="muted">Website documents-এর Google Drive storage status</span></div></div>
+      <div class="google-storage-grid">
+        <div class="google-storage-item"><small>Total</small><strong id="googleDriveStorageTotal">—</strong></div>
+        <div class="google-storage-item"><small>Used</small><strong id="googleDriveStorageUsed">—</strong></div>
+        <div class="google-storage-item"><small>Free</small><strong id="googleDriveStorageFree">—</strong></div>
+        <div class="google-storage-item"><small>Usage</small><strong id="googleDriveStoragePercent">—</strong></div>
+      </div>
+      <div class="google-storage-progress"><div id="googleDriveStorageBar" class="google-storage-bar"></div></div>
+    </div>
   </div>
+</div>
 
 <div id="settingsView" class="settings-view hidden">
   <div class="page-head"><div><p class="eyebrow">সেটিংস ও প্রশাসন</p><h1>সেটিংস ও প্রশাসন</h1><p class="muted">পোর্টাল, ব্যবহারকারী, অনুমতি ও প্রশাসনিক সেটিংস এখান থেকে পরিচালনা করুন।</p></div></div>
@@ -18,19 +32,6 @@
   </div>
   <div id="portalPreview" class="panel hidden"><div class="panel-head"><h2>Portal Preview</h2><span class="eyebrow">SUPER ADMIN</span></div><div style="padding:16px"><p class="permission-note">Student বা Teacher-এর বাস্তব account data দিয়ে তাদের portal view দেখুন। এটি শুধু read-only preview; আপনার Super Admin session-ই থাকবে।</p><div class="form-grid"><label>Student portal preview<select id="studentPreviewSelect"><option value="">Student নির্বাচন করুন</option></select></label><label>Teacher portal preview<select id="teacherPreviewSelect"><option value="">Teacher নির্বাচন করুন</option></select></label><div class="page-actions"><button id="openStudentPreview" class="primary-btn" style="width:auto" type="button">Student View খুলুন</button><button id="openTeacherPreview" class="secondary-btn" style="width:auto" type="button">Teacher View খুলুন</button><span id="previewMessage" class="message-inline"></span></div></div></div></div>
   <div id="userManagement" class="panel hidden"><div class="panel-head"><h2>User & Role Management</h2><span class="eyebrow">USERS.MANAGE</span></div><div id="subAdminPanel" class="hidden" style="padding:16px;border-bottom:1px solid var(--line)"><form id="subAdminForm" class="form-grid"><label>Email<input id="subAdminEmail" type="email" required placeholder="subadmin@example.com"></label><label>Full Name<input id="subAdminName" type="text" required placeholder="Sub Admin name"></label><label>Password<input id="subAdminPassword" type="password" minlength="10" required placeholder="কমপক্ষে ১০ অক্ষর"></label><label>Confirm Password<input id="subAdminPassword2" type="password" minlength="10" required placeholder="আবার password"></label><div class="span-2 permission-editor"><div class="permission-head"><h3>Select permissions for Sub Admin</h3><button id="selectAllPermissions" class="link-btn" type="button">Select all</button></div><p class="permission-note">নতুন Sub Admin তৈরির সময় permissions নির্ধারণ করুন।</p><div id="subAdminPermissions" class="permission-grid"></div></div><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Sub Admin Account তৈরি করুন</button><span id="subAdminMessage" class="message-inline"></span></div></form></div><div class="table-wrap"><table class="user-table"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody id="userRows"></tbody></table></div><div id="existingPermissionPanel" class="hidden permission-editor existing-permissions"><div class="panel-head"><h3 id="existingPermissionTitle">Sub Admin permissions</h3><button id="closePermissionEditor" class="link-btn" type="button">Close</button></div><p class="permission-note">এখানে পরিবর্তন করলে নির্বাচিত Sub Admin-এর access update হবে।</p><div id="existingPermissions" class="permission-grid"></div><div class="page-actions"><button id="saveExistingPermissions" class="primary-btn" style="width:auto" type="button">Save permissions</button><span id="existingPermissionMessage" class="message-inline"></span></div></div></div>
-  <div class="panel">
-    <div class="panel-head"><h2>Google Drive Storage</h2><span class="eyebrow" id="googleDriveStorageStatus">Checking…</span></div>
-    <div id="googleDriveStorageCard" class="google-storage-card hidden" style="border:0;box-shadow:none;border-radius:0">
-      <div class="google-storage-head"><div><h3>Document Storage</h3><span class="muted">Website documents-এর Google Drive storage status</span></div></div>
-      <div class="google-storage-grid">
-        <div class="google-storage-item"><small>Total</small><strong id="googleDriveStorageTotal">—</strong></div>
-        <div class="google-storage-item"><small>Used</small><strong id="googleDriveStorageUsed">—</strong></div>
-        <div class="google-storage-item"><small>Free</small><strong id="googleDriveStorageFree">—</strong></div>
-        <div class="google-storage-item"><small>Usage</small><strong id="googleDriveStoragePercent">—</strong></div>
-      </div>
-      <div class="google-storage-progress"><div id="googleDriveStorageBar" class="google-storage-bar"></div></div>
-    </div>
-  </div>
   <div class="panel">
     <div class="panel-head"><h2>School Profile</h2><span class="eyebrow">SCHOOL SETTINGS</span></div>
     <div style="padding:18px">
