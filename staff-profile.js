@@ -36,16 +36,6 @@ function fill(){
   $('notes').value=row.notes||'';
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
   setWhatsAppLink(row.phone);
-  if($('staffDocuments')){
-    await mountDocumentsPanel({
-      container:$('staffDocuments'),
-      role:type,
-      personId:id,
-      editable:canManage(),
-      canDelete:canManage(),
-      title:type==='teacher'?'Teacher Documents':'Helper Documents'
-    });
-  }
 }
 
 async function loadTeacherAssignments(){
@@ -156,6 +146,16 @@ async function load(){
   row=data;
   fill();
   syncMode();
+  if($('staffDocuments')){
+    await mountDocumentsPanel({
+      container:$('staffDocuments'),
+      role:type,
+      personId:id,
+      editable:canManage(),
+      canDelete:canManage(),
+      title:type==='teacher'?'Teacher Documents':'Helper Documents'
+    });
+  }
   if(type==='teacher') await loadTeacherAssignments();
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
