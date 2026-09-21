@@ -176,6 +176,62 @@ async function decodeOpaqueDocumentToken(token: string) {
   }
 }
 
+async function createRobustDocumentToken(fileId: string, person: Person, parentFolderId = '') {
+  if (!fileId) throw new Error('FILE_NOT_FOUND');
+  const key = await documentTokenKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const payload = JSON.stringify({
+    fileId: String(fileId),
+    role: person.role,
+    personId: person.id,
+    personCode: person.code,
+    parentFolderId: String(parentFolderId || ''),
+  });
+  const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    new TextEncoder().encode(payload),
+  ));
+  const packed = new Uint8Array(iv.length + ciphertext.length);
+  packed.set(iv, 0);
+  packed.set(ciphertext, iv.length);
+  return `d4_${base64urlEncode(packed)}`;
+}
+
+async function decodeRobustDocumentToken(token: string) {
+  const parts = String(token || '').split('_');
+  if (parts.length !== 2 || parts[0] !== 'd4') throw new Error('INVALID_DOCUMENT_TOKEN');
+  let packed: Uint8Array;
+  try { packed = base64urlDecode(parts[1]); } catch { throw new Error('INVALID_DOCUMENT_TOKEN'); }
+  if (packed.length < 12 + 17) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const iv = packed.slice(0, 12);
+  const ciphertext = packed.slice(12);
+  try {
+    const key = await documentTokenKey();
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    const parsed = JSON.parse(new TextDecoder().decode(new Uint8Array(plain)));
+    if (
+      !parsed?.fileId ||
+      typeof parsed.fileId !== 'string' ||
+      !ROLE_SET.has(String(parsed.role || '')) ||
+      typeof parsed.personId !== 'string' ||
+      !parsed.personId
+    ) throw new Error('INVALID_DOCUMENT_TOKEN');
+    return {
+      fileId: parsed.fileId,
+      folderId: String(parsed.parentFolderId || ''),
+      target: {
+        role: parsed.role as Person['role'],
+        id: parsed.personId,
+        code: String(parsed.personCode || ''),
+        name: '',
+      } as Person,
+    };
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
+  }
+}
+
 async function decodeLegacyD2Token(token: string) {
   const parts = String(token || '').split('_');
   if (parts.length !== 3 || parts[0] !== 'd2') throw new Error('INVALID_DOCUMENT_TOKEN');
@@ -208,6 +264,7 @@ async function decodeLegacyD2Token(token: string) {
 
 async function resolveDocumentToken(token: string) {
   const value = String(token || '');
+  if (value.startsWith('d4_')) return decodeRobustDocumentToken(value);
   if (value.startsWith('d3_')) return decodeOpaqueDocumentToken(value);
   if (value.startsWith('d2_')) return decodeLegacyD2Token(value);
   if (!value.startsWith('d1_')) throw new Error('INVALID_DOCUMENT_TOKEN');
@@ -224,7 +281,7 @@ async function resolveDocumentToken(token: string) {
 
 async function publicDocumentMetadata(file: Record<string, any>, person: Person) {
   const meta = metadataFromFile(file, person);
-  const token = await createOpaqueDocumentToken(String(file.id || ''), person, String(meta.parentFolderId || ''));
+  const token = await createRobustDocumentToken(String(file.id || ''), person, String(meta.parentFolderId || ''));
   delete meta.fileId;
   delete meta.parentFolderId;
   return { ...meta, documentToken: token };
@@ -619,13 +676,10 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
   const hasValidPropsTarget = ROLE_SET.has(propRole) && Boolean(propPersonId);
 
   let target: Person | null = null;
-  if (hasValidPropsTarget) {
-    target = await resolveAnyPerson(propRole, propPersonId);
-    if (tokenTarget && (tokenTarget.role !== target.role || tokenTarget.id !== target.id)) {
-      throw new Error('FILE_NOT_FOUND');
-    }
-  } else if (tokenTarget) {
+  if (tokenTarget) {
     target = await resolveAnyPerson(tokenTarget.role, tokenTarget.id);
+  } else if (hasValidPropsTarget) {
+    target = await resolveAnyPerson(propRole, propPersonId);
   } else {
     throw new Error('FILE_NOT_FOUND');
   }
@@ -875,7 +929,7 @@ async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: st
   if (!file) {
     return { ok: true, found: false, person: { role: person.role, id: person.id, code: person.code, name: person.name } };
   }
-  const token = await createOpaqueDocumentToken(String(file.fileId || ''), person, String(file.parentFolderId || ''));
+  const token = await createRobustDocumentToken(String(file.fileId || ''), person, String(file.parentFolderId || ''));
   const { fileId, ...publicFile } = file;
   return {
     ok: true,
