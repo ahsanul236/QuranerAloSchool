@@ -17,7 +17,8 @@ function extensionOf(name) {
 export function validateDocumentFile(file) {
   if (!file) throw new Error('একটি ফাইল নির্বাচন করুন।');
   const ext = extensionOf(file.name);
-  if (!ALLOWED_EXTENSIONS.has(ext) || !ALLOWED_MIME_TYPES.has(file.type)) {
+  const mime = String(file.type || '').toLowerCase();
+  if (!ALLOWED_EXTENSIONS.has(ext) || !ALLOWED_MIME_TYPES.has(mime)) {
     throw new Error('শুধু JPG, JPEG অথবা PNG ফাইল আপলোড করা যাবে।');
   }
   if (file.size > MAX_DOCUMENT_BYTES) {
@@ -25,6 +26,20 @@ export function validateDocumentFile(file) {
   }
   if (file.size <= 0) {
     throw new Error('খালি ফাইল আপলোড করা যাবে না।');
+  }
+  return true;
+}
+
+export async function validateDocumentFileContent(file) {
+  validateDocumentFile(file);
+  const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
+  const isJpeg = bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+  const isPng = bytes.length >= 8 &&
+    bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47 &&
+    bytes[4] === 0x0d && bytes[5] === 0x0a && bytes[6] === 0x1a && bytes[7] === 0x0a;
+  const mime = String(file.type || '').toLowerCase();
+  if ((mime === 'image/jpeg' && !isJpeg) || (mime === 'image/png' && !isPng)) {
+    throw new Error('ফাইলের প্রকৃত ধরন JPG/JPEG/PNG-এর সাথে মিলছে না।');
   }
   return true;
 }
@@ -47,6 +62,29 @@ async function supabaseAuthSession() {
   return supabase.auth.getSession();
 }
 
+const ERROR_MESSAGES = {
+  UNAUTHORIZED: 'আপনার লগইন session বৈধ নয়। আবার login করুন।',
+  FORBIDDEN: 'আপনার এই document-এর জন্য প্রয়োজনীয় অনুমতি নেই।',
+  FILE_REQUIRED: 'প্রথমে একটি ফাইল নির্বাচন করুন।',
+  FILE_TOO_LARGE: 'ফাইলের আকার সর্বোচ্চ 500 KB হতে পারবে।',
+  INVALID_FILE_TYPE: 'শুধু JPG, JPEG অথবা PNG ফাইল গ্রহণ করা যাবে।',
+  CATEGORY_NOT_ALLOWED: 'এই document type এই profile-এর জন্য অনুমোদিত নয়।',
+  DOCUMENT_ALREADY_EXISTS: 'এই document type-এর একটি file আগে থেকেই আছে। নতুন file দিয়ে replace করার অনুমতি দিন।',
+  GOOGLE_DRIVE_NOT_CONFIGURED: 'Google Drive সংযোগ এখনও কনফিগার করা হয়নি।',
+  GOOGLE_DRIVE_CONFIG_INVALID: 'Google Drive configuration সঠিক নয়।',
+  GOOGLE_AUTH_FAILED: 'Google Drive authorization সম্পন্ন হয়নি বা মেয়াদ শেষ হয়েছে।',
+  GOOGLE_DRIVE_API_ERROR: 'Google Drive-এর সাথে যোগাযোগ করা যাচ্ছে না।',
+  GOOGLE_DRIVE_UPLOAD_FAILED: 'Google Drive-এ file upload করা যায়নি।',
+  GOOGLE_DRIVE_REPLACE_FAILED: 'Google Drive-এর existing file update করা যায়নি।',
+  GOOGLE_DRIVE_DELETE_FAILED: 'Google Drive থেকে file মুছে ফেলা যায়নি।',
+  INVALID_ACTION: 'Document request সঠিক নয়।'
+};
+
+export function documentErrorMessage(error) {
+  const code = error?.message || '';
+  return ERROR_MESSAGES[code] || code || 'Document request সম্পন্ন করা যায়নি।';
+}
+
 async function requestJson(body) {
   const res = await fetch(endpoint(), {
     method: 'POST',
@@ -65,7 +103,7 @@ export async function listDocuments({ role, personId }) {
 }
 
 export async function uploadDocument({ role, personId, category, file, replaceExisting = false }) {
-  validateDocumentFile(file);
+  await validateDocumentFileContent(file);
   const form = new FormData();
   form.append('action', 'upload');
   if (role) form.append('role', role);
@@ -127,18 +165,6 @@ export async function openDocument(fileId) {
     popup.close();
     throw error;
   }
-}
-
-export async function downloadDocument(fileId, filename = 'document') {
-  const result = await fetchDocumentBlob(fileId);
-  const url = URL.createObjectURL(result.blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename || result.filename || 'document';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
 }
 
 export function bytesToHuman(bytes) {
