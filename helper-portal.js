@@ -1,4 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -87,6 +88,16 @@ async function init() {
   $('motherName').textContent = p.mother_name || '—';
   $('nidNumber').textContent = p.nid_number || '—';
   $('address').textContent = p.address || '—';
+
+  await setProfileImage({role:'helper',personId:p.staff_id,img:$('helperPortalProfileImage')});
+  await mountDocumentsPanel({
+    container:$('helperPortalDocuments'),
+    role:'helper',
+    personId:p.staff_id,
+    editable:true,
+    canDelete:false,
+    title:'My Documents'
+  });
 
   $('latestPaidAmount').textContent = money(payroll.summary?.latestPaidAmount || 0);
   $('latestPaidMonth').textContent = payroll.summary?.latestPaidMonth
