@@ -429,14 +429,24 @@ async function uploadNewFile(parentId: string, file: File, appProperties: Record
   };
 
   const metaBytes = new TextEncoder().encode(
-    `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n`,
+    `--${boundary}\\r\\nContent-Type: application/json; charset=UTF-8\\r\\n\\r\\n${JSON.stringify(metadata)}`,
+  );
+  const mediaHeaderBytes = new TextEncoder().encode(
+    `\\r\\n--${boundary}\\r\\nContent-Type: ${file.type}\\r\\n\\r\\n`,
   );
   const fileBytes = new Uint8Array(await file.arrayBuffer());
-  const endBytes = new TextEncoder().encode(`\r\n--${boundary}--`);
-  const body = new Uint8Array(metaBytes.length + fileBytes.length + endBytes.length);
-  body.set(metaBytes, 0);
-  body.set(fileBytes, metaBytes.length);
-  body.set(endBytes, metaBytes.length + fileBytes.length);
+  const endBytes = new TextEncoder().encode(`\\r\\n--${boundary}--`);
+  const body = new Uint8Array(
+    metaBytes.length + mediaHeaderBytes.length + fileBytes.length + endBytes.length,
+  );
+  let offset = 0;
+  body.set(metaBytes, offset);
+  offset += metaBytes.length;
+  body.set(mediaHeaderBytes, offset);
+  offset += mediaHeaderBytes.length;
+  body.set(fileBytes, offset);
+  offset += fileBytes.length;
+  body.set(endBytes, offset);
 
   const token = await getAccessToken();
   const res = await fetch(
