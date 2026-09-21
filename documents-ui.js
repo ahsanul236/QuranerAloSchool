@@ -17,7 +17,8 @@ function categoriesForRole(role) {
 }
 
 function buildMarkup(role, editable, title) {
-  const options = categoriesForRole(role).map(([v,l]) => '<option value="'+v+'">'+l+'</option>').join('');
+  const options = '<option value="">Document type নির্বাচন করুন</option>' +
+    categoriesForRole(role).map(([v,l]) => '<option value="'+v+'">'+l+'</option>').join('');
   return '' +
     '<div class="document-manager-head"><div><h3>'+esc(title || 'Documents')+'</h3><p class="document-manager-note">শুধু JPG, JPEG, PNG · সর্বোচ্চ 500 KB · Other Document একাধিক upload করা যাবে</p></div><span class="document-manager-badge">Private</span></div>' +
     (editable ? '<div class="document-manager-upload"><label class="document-upload-field">Document type<select data-document-category>'+options+'</select></label><label class="document-upload-field">File<input data-document-file type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png"></label><div class="document-upload-actions"><button data-document-upload class="primary-btn" type="button">Upload</button><span data-document-message class="message-inline"></span></div></div>' : '') +
@@ -90,7 +91,8 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
 
   uploadBtn?.addEventListener('click', async () => {
     const file = fileInput?.files?.[0];
-    const category = categorySelect?.value || 'other_document';
+    const category = categorySelect?.value || '';
+    if (!category) { setMessage(messageNode, 'প্রথমে Document type নির্বাচন করুন।', 'error'); return; }
     if (!file) { setMessage(messageNode, 'প্রথমে একটি ফাইল নির্বাচন করুন।', 'error'); return; }
     try {
       await validateDocumentFileContent(file);
