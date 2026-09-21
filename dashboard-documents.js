@@ -1,1 +1,29 @@
-import { getStorage, bytesToHuman } from './documents-client.js';\n\nfunction $(id) { return document.getElementById(id); }\n\nasync function init() {\n  const box = $('googleDriveStorageCard');\n  if (!box) return;\n  try {\n    const data = await getStorage();\n    box.classList.remove('hidden');\n    $('googleDriveStorageStatus').textContent = 'Connected';\n    $('googleDriveStorageUsed').textContent = bytesToHuman(data.usedBytes);\n    $('googleDriveStorageFree').textContent = data.totalBytes ? bytesToHuman(data.freeBytes) : '—';\n    $('googleDriveStorageTotal').textContent = data.totalBytes ? bytesToHuman(data.totalBytes) : '—';\n    $('googleDriveStoragePercent').textContent = data.usedPercent == null ? '—' : data.usedPercent+'%';\n    $('googleDriveStorageBar').style.width = data.usedPercent == null ? '0%' : Math.min(100, Math.max(0, data.usedPercent))+'%';\n  } catch (error) {\n    console.warn('Google Drive storage unavailable', error);\n    box.classList.remove('hidden');\n    $('googleDriveStorageStatus').textContent = error?.message === 'GOOGLE_DRIVE_NOT_CONFIGURED' || error?.message === 'GOOGLE_DRIVE_CONFIG_INVALID' ? 'Not configured' : 'Unavailable';\n    $('googleDriveStorageUsed').textContent = '—';\n    $('googleDriveStorageFree').textContent = '—';\n    $('googleDriveStorageTotal').textContent = '—';\n    $('googleDriveStoragePercent').textContent = '—';\n    $('googleDriveStorageBar').style.width = '0%';\n  }\n}\n\nif (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();\n
+import { getStorage, bytesToHuman } from './documents-client.js';
+
+function $(id) { return document.getElementById(id); }
+
+async function init() {
+  const box = $('googleDriveStorageCard');
+  if (!box) return;
+  try {
+    const data = await getStorage();
+    box.classList.remove('hidden');
+    $('googleDriveStorageStatus').textContent = 'Connected';
+    $('googleDriveStorageUsed').textContent = bytesToHuman(data.usedBytes);
+    $('googleDriveStorageFree').textContent = data.totalBytes ? bytesToHuman(data.freeBytes) : '—';
+    $('googleDriveStorageTotal').textContent = data.totalBytes ? bytesToHuman(data.totalBytes) : '—';
+    $('googleDriveStoragePercent').textContent = data.usedPercent == null ? '—' : data.usedPercent+'%';
+    $('googleDriveStorageBar').style.width = data.usedPercent == null ? '0%' : Math.min(100, Math.max(0, data.usedPercent))+'%';
+  } catch (error) {
+    console.warn('Google Drive storage unavailable', error);
+    box.classList.remove('hidden');
+    $('googleDriveStorageStatus').textContent = error?.message === 'GOOGLE_DRIVE_NOT_CONFIGURED' || error?.message === 'GOOGLE_DRIVE_CONFIG_INVALID' ? 'Not configured' : 'Unavailable';
+    $('googleDriveStorageUsed').textContent = '—';
+    $('googleDriveStorageFree').textContent = '—';
+    $('googleDriveStorageTotal').textContent = '—';
+    $('googleDriveStoragePercent').textContent = '—';
+    $('googleDriveStorageBar').style.width = '0%';
+  }
+}
+
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
