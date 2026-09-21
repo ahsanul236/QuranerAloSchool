@@ -103,7 +103,7 @@ async function documentTokenKey() {
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-async function createOpaqueDocumentToken(fileId: string, person: Person) {
+async function createOpaqueDocumentToken(fileId: string, person: Person, parentFolderId = '') {
   if (!fileId) throw new Error('FILE_NOT_FOUND');
   const key = await documentTokenKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -112,6 +112,7 @@ async function createOpaqueDocumentToken(fileId: string, person: Person) {
     role: person.role,
     personId: person.id,
     personCode: person.code,
+    parentFolderId: String(parentFolderId || ''),
   });
   const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
@@ -146,6 +147,7 @@ async function decodeOpaqueDocumentToken(token: string) {
     ) throw new Error('INVALID_DOCUMENT_TOKEN');
     return {
       fileId: parsed.fileId,
+      folderId: String(parsed.parentFolderId || ''),
       target: {
         role: parsed.role as Person['role'],
         id: parsed.personId,
@@ -206,8 +208,9 @@ async function resolveDocumentToken(token: string) {
 
 async function publicDocumentMetadata(file: Record<string, any>, person: Person) {
   const meta = metadataFromFile(file, person);
-  const token = await createOpaqueDocumentToken(String(file.id || ''), person);
+  const token = await createOpaqueDocumentToken(String(file.id || ''), person, String(meta.parentFolderId || ''));
   delete meta.fileId;
+  delete meta.parentFolderId;
   return { ...meta, documentToken: token };
 }
 
@@ -451,6 +454,7 @@ function metadataFromFile(file: Record<string, any>, person?: Person) {
     String(file.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document';
   return {
     fileId: file.id,
+    parentFolderId: String(file.parents?.[0] || ''),
     name: file.name,
     mimeType: file.mimeType,
     size: Number(file.size || 0),
@@ -581,13 +585,15 @@ async function getFileMetadata(fileId: string) {
   return driveJson(`files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties,trashed,parents`);
 }
 
-async function fileIsInsidePersonFolder(file: Record<string, any>, target: Person) {
+async function fileIsInsidePersonFolder(file: Record<string, any>, target: Person, expectedFolderId = '') {
+  const parents = (file.parents || []).map((parentId: string) => String(parentId));
+  if (expectedFolderId) return parents.includes(String(expectedFolderId));
   const folders = await findAllPersonFolders(target);
   const allowed = new Set(folders.map((folder) => String(folder.id)));
-  return (file.parents || []).some((parentId: string) => allowed.has(String(parentId)));
+  return parents.some((parentId: string) => allowed.has(String(parentId)));
 }
 
-async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'view' | 'delete', tokenTarget?: Person | null) {
+async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'view' | 'delete', tokenTarget?: Person | null, tokenFolderId = '') {
   const props = file.appProperties || {};
   if (file.trashed) throw new Error('FILE_NOT_FOUND');
 
@@ -607,7 +613,7 @@ async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'v
     throw new Error('FILE_NOT_FOUND');
   }
 
-  if (!(await fileIsInsidePersonFolder(file, target))) throw new Error('FILE_NOT_FOUND');
+  if (!(await fileIsInsidePersonFolder(file, target, tokenFolderId))) throw new Error('FILE_NOT_FOUND');
 
   const category = String(props.qa_category || (String(file.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document'));
 
@@ -651,7 +657,7 @@ async function uploadNewFile(parentId: string, file: File, appProperties: Record
   const token = await getAccessToken();
 
   const initRes = await fetch(
-    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties',
+    'https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties,parents',
     {
       method: 'POST',
       headers: {
@@ -796,7 +802,7 @@ async function handleUpload(actor: Actor, req: Request) {
 async function handleView(actor: Actor, documentToken: string) {
   const decoded = await resolveDocumentToken(documentToken);
   const meta = await getFileMetadata(decoded.fileId);
-  const { category } = await authorizeFile(actor, meta, 'view', decoded.target);
+  const { category } = await authorizeFile(actor, meta, 'view', decoded.target, decoded.folderId);
   if (!ALLOWED_MIME.has(String(meta.mimeType || '').toLowerCase())) throw new Error('INVALID_FILE_TYPE');
   const res = await driveBinary(`files/${encodeURIComponent(decoded.fileId)}?alt=media`);
   const fileName = encodeURIComponent(String(meta.name || 'document'));
@@ -814,7 +820,7 @@ async function handleView(actor: Actor, documentToken: string) {
 async function handleDelete(actor: Actor, documentToken: string) {
   const decoded = await resolveDocumentToken(documentToken);
   const meta = await getFileMetadata(decoded.fileId);
-  await authorizeFile(actor, meta, 'delete', decoded.target);
+  await authorizeFile(actor, meta, 'delete', decoded.target, decoded.folderId);
   const token = await getAccessToken();
   const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(decoded.fileId)}`, {
     method: 'DELETE',
@@ -836,7 +842,7 @@ async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: st
   if (!file) {
     return { ok: true, found: false, person: { role: person.role, id: person.id, code: person.code, name: person.name } };
   }
-  const token = await createOpaqueDocumentToken(String(file.fileId || ''), person);
+  const token = await createOpaqueDocumentToken(String(file.fileId || ''), person, String(file.parentFolderId || ''));
   const { fileId, ...publicFile } = file;
   return {
     ok: true,
