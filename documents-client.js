@@ -78,6 +78,7 @@ const ERROR_MESSAGES = {
   GOOGLE_DRIVE_UPLOAD_FAILED: 'Google Drive-এ file upload করা যায়নি।',
   GOOGLE_DRIVE_REPLACE_FAILED: 'Google Drive-এর existing file update করা যায়নি।',
   GOOGLE_DRIVE_DELETE_FAILED: 'Google Drive থেকে file মুছে ফেলা যায়নি।',
+  INVALID_DOCUMENT_TOKEN: 'Document link আর বৈধ নেই। Document list নতুন করে খুলুন।',
   INVALID_ACTION: 'Document request সঠিক নয়।'
 };
 
