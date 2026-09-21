@@ -165,15 +165,18 @@ async function decodeLegacyD2Token(token: string) {
   }
   if (iv.length !== 12 || ciphertext.length < 17) throw new Error('INVALID_DOCUMENT_TOKEN');
   try {
-    const digest = await crypto.subtle.digest(
-      'SHA-256',
-      new TextEncoder().encode((process.env.GOOGLE_DRIVE_CREDENTIALS || '') + '::quraner-alo-document-token-v2'),
-    );
-    const key = await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['decrypt']);
-    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-    const value = new TextDecoder().decode(new Uint8Array(plain));
-    if (!value || value.length > 300) throw new Error('INVALID_DOCUMENT_TOKEN');
-    return { fileId: value, target: null as Person | null };
+    const raw = process.env.GOOGLE_DRIVE_CREDENTIALS || '';
+    const derivations = [raw + '::quraner-alo-document-token-v2', raw];
+    for (const material of derivations) {
+      try {
+        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(material));
+        const key = await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['decrypt']);
+        const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+        const value = new TextDecoder().decode(new Uint8Array(plain));
+        if (value && value.length <= 300) return { fileId: value, target: null as Person | null };
+      } catch {}
+    }
+    throw new Error('INVALID_DOCUMENT_TOKEN');
   } catch {
     throw new Error('INVALID_DOCUMENT_TOKEN');
   }
@@ -761,7 +764,7 @@ async function handleUpload(actor: Actor, req: Request) {
       ? `profile.${ext === 'jpeg' ? 'jpg' : ext}`
       : normalizeFilename(fileValue.name);
     const updated = await replaceFileContent(current.fileId, fileValue, newName);
-    return { ok: true, mode: 'replaced', file: await publicDocumentMetadata(updated) };
+    return { ok: true, mode: 'replaced', file: await publicDocumentMetadata(updated, person) };
   }
 
   const fileName = category === 'profile_picture'
@@ -776,13 +779,12 @@ async function handleUpload(actor: Actor, req: Request) {
       qa_role: person.role,
       qa_person_id: person.id,
       qa_person_code: person.code,
-      qa_category: category,
-      qa_doc_token: createDocumentToken(),
+      qa_category: category
     },
     fileName,
   );
 
-  return { ok: true, mode: 'created', file: await publicDocumentMetadata(uploaded) };
+  return { ok: true, mode: 'created', file: await publicDocumentMetadata(uploaded, person) };
 }
 
 async function handleView(actor: Actor, documentToken: string) {
