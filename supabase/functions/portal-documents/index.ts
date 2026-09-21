@@ -653,7 +653,7 @@ async function handleDelete(actor: Actor, documentToken: string) {
     console.error('Google Drive delete failed', { status: res.status, errorText: errorText.slice(0, 500) });
     throw new Error('GOOGLE_DRIVE_DELETE_FAILED');
   }
-  return { ok: true, fileId };
+  return { ok: true };
 }
 
 async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: string) {
@@ -685,7 +685,7 @@ async function handleStorage(actor: Actor) {
     throw new Error('FORBIDDEN');
   }
 
-  const data = await driveJson('about?fields=user(storageQuota),storageQuota');
+  const data = await driveJson('about?fields=user(displayName,emailAddress),storageQuota');
   const quota = data.storageQuota || {};
   const total = Number(quota.limit || 0);
   const used = Number(quota.usage || 0);
@@ -698,7 +698,7 @@ async function handleStorage(actor: Actor) {
     driveUsedBytes: inDrive,
     freeBytes: free,
     usedPercent: total > 0 ? Number(((used / total) * 100).toFixed(1)) : null,
-    email: data.user?.displayName || '',
+    email: data.user?.emailAddress || '',
   };
 }
 
