@@ -87,8 +87,14 @@ function base64urlDecode(value: string) {
   return Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
 }
 
+function runtimeEnv(name: string) {
+  const runtime = globalThis as any;
+  if (runtime?.Deno?.env?.get) return String(runtime.Deno.env.get(name) || '');
+  return String(runtime?.process?.env?.[name] || '');
+}
+
 async function documentTokenKey() {
-  const raw = process.env.GOOGLE_DRIVE_CREDENTIALS || '';
+  const raw = runtimeEnv('GOOGLE_DRIVE_CREDENTIALS');
   if (!raw) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
   const digest = await crypto.subtle.digest(
     'SHA-256',
@@ -165,7 +171,7 @@ async function decodeLegacyD2Token(token: string) {
   }
   if (iv.length !== 12 || ciphertext.length < 17) throw new Error('INVALID_DOCUMENT_TOKEN');
   try {
-    const raw = process.env.GOOGLE_DRIVE_CREDENTIALS || '';
+    const raw = runtimeEnv('GOOGLE_DRIVE_CREDENTIALS');
     const derivations = [raw + '::quraner-alo-document-token-v2', raw];
     for (const material of derivations) {
       try {
