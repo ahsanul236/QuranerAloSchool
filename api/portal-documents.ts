@@ -86,60 +86,43 @@ function escapeDriveQueryLiteral(value: string) {
   return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-function bytesToBase64Url(bytes: Uint8Array) {
-  let binary = '';
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+function createDocumentToken() {
+  return `d1_${crypto.randomUUID()}_${crypto.randomUUID()}`;
 }
 
-function base64UrlToBytes(value: string) {
-  const normalized = String(value || '').replace(/-/g, '+').replace(/_/g, '/');
-  const padded = normalized + '='.repeat((4 - (normalized.length % 4)) % 4);
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
-
-async function documentTokenKey() {
-  const credentials = await getGoogleCredentials();
-  const material = new TextEncoder().encode('quraneralo-document-token:v1:' + credentials.client_secret);
-  const digest = await crypto.subtle.digest('SHA-256', material);
-  return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
-}
-
-async function createDocumentToken(fileId: string) {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const payload = new TextEncoder().encode(JSON.stringify({
-    v: 1,
-    fileId,
-    exp: Date.now() + (7 * 24 * 60 * 60 * 1000),
-  }));
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, await documentTokenKey(), payload);
-  return 'v1.' + bytesToBase64Url(iv) + '.' + bytesToBase64Url(new Uint8Array(encrypted));
+async function ensureDocumentToken(file: Record<string, any>) {
+  const props = { ...(file.appProperties || {}) };
+  if (props.qa_doc_token) return String(props.qa_doc_token);
+  if (!file.id) throw new Error('FILE_NOT_FOUND');
+  const token = createDocumentToken();
+  props.qa_doc_token = token;
+  await driveJson(`files/${encodeURIComponent(file.id)}?fields=id,appProperties`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ appProperties: props }),
+  });
+  return token;
 }
 
 async function resolveDocumentToken(token: string) {
-  if (!String(token || '').startsWith('v1.')) throw new Error('INVALID_DOCUMENT_TOKEN');
-  const parts = String(token).split('.');
-  if (parts.length !== 3) throw new Error('INVALID_DOCUMENT_TOKEN');
-  try {
-    const iv = base64UrlToBytes(parts[1]);
-    const encrypted = base64UrlToBytes(parts[2]);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, await documentTokenKey(), encrypted);
-    const payload = JSON.parse(new TextDecoder().decode(decrypted));
-    if (!payload?.fileId || Number(payload.exp || 0) < Date.now()) throw new Error('INVALID_DOCUMENT_TOKEN');
-    return String(payload.fileId);
-  } catch {
-    throw new Error('INVALID_DOCUMENT_TOKEN');
-  }
+  const value = String(token || '');
+  if (!value.startsWith('d1_')) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const q = [
+    "trashed = false",
+    `appProperties has { key='qa_app' and value='quraner-alo' }`,
+    `appProperties has { key='qa_doc_token' and value='${escapeDriveQueryLiteral(value)}' }`,
+  ].join(' and ');
+  const data = await driveJson(`files?q=${encodeURIComponent(q)}&spaces=drive&pageSize=2&fields=files(id,appProperties,trashed)`);
+  const file = (data.files || [])[0];
+  if (!file?.id) throw new Error('INVALID_DOCUMENT_TOKEN');
+  return String(file.id);
 }
 
 async function publicDocumentMetadata(file: Record<string, any>) {
   const meta = metadataFromFile(file);
-  const fileId = meta.fileId;
+  const token = await ensureDocumentToken(file);
   delete meta.fileId;
-  return { ...meta, documentToken: await createDocumentToken(fileId) };
+  return { ...meta, documentToken: token };
 }
 
 async function parseActor(req: Request): Promise<Actor> {
@@ -663,6 +646,7 @@ async function handleUpload(actor: Actor, req: Request) {
       qa_person_id: person.id,
       qa_person_code: person.code,
       qa_category: category,
+      qa_doc_token: createDocumentToken(),
     },
     fileName,
   );
