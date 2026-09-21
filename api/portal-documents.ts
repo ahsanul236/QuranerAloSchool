@@ -106,24 +106,34 @@ function base64urlDecode(value: string) {
 async function documentTokenKey() {
   const raw = process.env.GOOGLE_DRIVE_CREDENTIALS || '';
   if (!raw) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(raw + '::quraner-alo-document-token-v2'),
+  );
   return crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
-async function createEphemeralDocumentToken(fileId: string) {
+async function createOpaqueDocumentToken(fileId: string, person: Person) {
+  if (!fileId) throw new Error('FILE_NOT_FOUND');
   const key = await documentTokenKey();
   const iv = crypto.getRandomValues(new Uint8Array(12));
+  const payload = JSON.stringify({
+    fileId: String(fileId),
+    role: person.role,
+    personId: person.id,
+    personCode: person.code,
+  });
   const ciphertext = new Uint8Array(await crypto.subtle.encrypt(
     { name: 'AES-GCM', iv },
     key,
-    new TextEncoder().encode(String(fileId)),
+    new TextEncoder().encode(payload),
   ));
-  return `d2_${base64urlEncode(iv)}_${base64urlEncode(ciphertext)}`;
+  return `d3_${base64urlEncode(iv)}_${base64urlEncode(ciphertext)}`;
 }
 
-async function resolveEphemeralDocumentToken(token: string) {
+async function decodeOpaqueDocumentToken(token: string) {
   const parts = String(token || '').split('_');
-  if (parts.length !== 3 || parts[0] !== 'd2') throw new Error('INVALID_DOCUMENT_TOKEN');
+  if (parts.length !== 3 || parts[0] !== 'd3') throw new Error('INVALID_DOCUMENT_TOKEN');
   let iv: Uint8Array;
   let ciphertext: Uint8Array;
   try {
@@ -136,38 +146,59 @@ async function resolveEphemeralDocumentToken(token: string) {
   try {
     const key = await documentTokenKey();
     const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
-    const fileId = new TextDecoder().decode(new Uint8Array(plain));
-    if (!fileId || fileId.length > 300) throw new Error('INVALID_DOCUMENT_TOKEN');
-    return fileId;
+    const parsed = JSON.parse(new TextDecoder().decode(new Uint8Array(plain)));
+    if (
+      !parsed?.fileId ||
+      typeof parsed.fileId !== 'string' ||
+      !ROLE_SET.has(String(parsed.role || '')) ||
+      typeof parsed.personId !== 'string' ||
+      !parsed.personId
+    ) throw new Error('INVALID_DOCUMENT_TOKEN');
+    return {
+      fileId: parsed.fileId,
+      target: {
+        role: parsed.role as Person['role'],
+        id: parsed.personId,
+        code: String(parsed.personCode || ''),
+        name: '',
+      } as Person,
+    };
   } catch {
     throw new Error('INVALID_DOCUMENT_TOKEN');
   }
 }
 
-async function ensureDocumentToken(file: Record<string, any>) {
-  const props = { ...(file.appProperties || {}) };
-  if (props.qa_doc_token) return String(props.qa_doc_token);
-  if (!file.id) throw new Error('FILE_NOT_FOUND');
-  const token = createDocumentToken();
-  props.qa_doc_token = token;
+async function decodeLegacyD2Token(token: string) {
+  const parts = String(token || '').split('_');
+  if (parts.length !== 3 || parts[0] !== 'd2') throw new Error('INVALID_DOCUMENT_TOKEN');
+  let iv: Uint8Array;
+  let ciphertext: Uint8Array;
   try {
-    await driveJson(`files/${encodeURIComponent(file.id)}?fields=id,appProperties`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ appProperties: props }),
-    });
-    return token;
-  } catch (error) {
-    console.warn('Legacy document token write-back unavailable; using an ephemeral token.', {
-      code: error instanceof Error ? error.message : 'UNKNOWN'
-    });
-    return createEphemeralDocumentToken(String(file.id));
+    iv = base64urlDecode(parts[1]);
+    ciphertext = base64urlDecode(parts[2]);
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
+  }
+  if (iv.length !== 12 || ciphertext.length < 17) throw new Error('INVALID_DOCUMENT_TOKEN');
+  try {
+    const digest = await crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode((process.env.GOOGLE_DRIVE_CREDENTIALS || '') + '::quraner-alo-document-token-v2'),
+    );
+    const key = await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+    const value = new TextDecoder().decode(new Uint8Array(plain));
+    if (!value || value.length > 300) throw new Error('INVALID_DOCUMENT_TOKEN');
+    return { fileId: value, target: null as Person | null };
+  } catch {
+    throw new Error('INVALID_DOCUMENT_TOKEN');
   }
 }
 
 async function resolveDocumentToken(token: string) {
   const value = String(token || '');
-  if (value.startsWith('d2_')) return resolveEphemeralDocumentToken(value);
+  if (value.startsWith('d3_')) return decodeOpaqueDocumentToken(value);
+  if (value.startsWith('d2_')) return decodeLegacyD2Token(value);
   if (!value.startsWith('d1_')) throw new Error('INVALID_DOCUMENT_TOKEN');
   const q = [
     "trashed = false",
@@ -177,12 +208,12 @@ async function resolveDocumentToken(token: string) {
   const data = await driveJson(`files?q=${encodeURIComponent(q)}&spaces=drive&pageSize=2&fields=files(id,appProperties,trashed)`);
   const file = (data.files || [])[0];
   if (!file?.id) throw new Error('INVALID_DOCUMENT_TOKEN');
-  return String(file.id);
+  return { fileId: String(file.id), target: null as Person | null };
 }
 
-async function publicDocumentMetadata(file: Record<string, any>) {
-  const meta = metadataFromFile(file);
-  const token = await ensureDocumentToken(file);
+async function publicDocumentMetadata(file: Record<string, any>, person: Person) {
+  const meta = metadataFromFile(file, person);
+  const token = await createOpaqueDocumentToken(String(file.id || ''), person);
   delete meta.fileId;
   return { ...meta, documentToken: token };
 }
@@ -422,8 +453,10 @@ function categoryAllowedForRole(role: Person['role'], category: string) {
   return category === 'nid';
 }
 
-function metadataFromFile(file: Record<string, any>) {
+function metadataFromFile(file: Record<string, any>, person?: Person) {
   const props = file.appProperties || {};
+  const fallbackCategory =
+    String(file.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document';
   return {
     fileId: file.id,
     name: file.name,
@@ -431,30 +464,80 @@ function metadataFromFile(file: Record<string, any>) {
     size: Number(file.size || 0),
     createdTime: file.createdTime || null,
     modifiedTime: file.modifiedTime || null,
-    category: props.qa_category || 'other_document',
-    role: props.qa_role || '',
-    personId: props.qa_person_id || '',
-    personCode: props.qa_person_code || '',
-    isProfile: props.qa_category === 'profile_picture',
+    category: props.qa_category || fallbackCategory,
+    role: props.qa_role || person?.role || '',
+    personId: props.qa_person_id || person?.id || '',
+    personCode: props.qa_person_code || person?.code || '',
+    isProfile: (props.qa_category || fallbackCategory) === 'profile_picture',
   };
 }
 
+async function listFolderFiles(folderId: string) {
+  const all: Record<string, any>[] = [];
+  let pageToken = '';
+  do {
+    const params = new URLSearchParams({
+      q: `'${escapeDriveQueryLiteral(folderId)}' in parents and trashed = false and mimeType != '${FOLDER_MIME}'`,
+      spaces: 'drive',
+      orderBy: 'createdTime desc',
+      pageSize: '1000',
+      fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,appProperties,parents,trashed)',
+    });
+    if (pageToken) params.set('pageToken', pageToken);
+    const data = await driveJson(`files?${params.toString()}`);
+    all.push(...(data.files || []));
+    pageToken = String(data.nextPageToken || '');
+  } while (pageToken);
+  return all.filter((file) => ALLOWED_MIME.has(String(file.mimeType || '').toLowerCase()));
+}
+
+async function findPersonFolderForYear(person: Person, year: number) {
+  const root = await findFolder('Quraner Alo Documents');
+  if (!root?.id) return null;
+  const yearFolder = await findFolder(String(year), root.id);
+  if (!yearFolder?.id) return null;
+  const roleFolderName = person.role === 'student' ? 'Students' : person.role === 'teacher' ? 'Teachers' : 'Helpers';
+  const roleFolder = await findFolder(roleFolderName, yearFolder.id);
+  if (!roleFolder?.id) return null;
+  return findFolder(person.code, roleFolder.id);
+}
+
+async function findAllPersonFolders(person: Person) {
+  const root = await findFolder('Quraner Alo Documents');
+  if (!root?.id) return [];
+  const params = new URLSearchParams({
+    q: `'${escapeDriveQueryLiteral(root.id)}' in parents and mimeType = '${FOLDER_MIME}' and trashed = false`,
+    spaces: 'drive',
+    orderBy: 'name desc',
+    pageSize: '1000',
+    fields: 'files(id,name,mimeType,trashed)',
+  });
+  const data = await driveJson(`files?${params.toString()}`);
+  const roleFolderName = person.role === 'student' ? 'Students' : person.role === 'teacher' ? 'Teachers' : 'Helpers';
+  const folders: Record<string, any>[] = [];
+  for (const yearFolder of data.files || []) {
+    const roleFolder = await findFolder(roleFolderName, yearFolder.id);
+    if (!roleFolder?.id) continue;
+    const personFolder = await findFolder(person.code, roleFolder.id);
+    if (personFolder?.id) folders.push(personFolder);
+  }
+  return folders;
+}
+
 async function listDriveDocuments(person: Person, year?: number) {
-  const q = [
-    "trashed = false",
-    `appProperties has { key='qa_app' and value='quraner-alo' }`,
-    `appProperties has { key='qa_role' and value='${escapeDriveQueryLiteral(person.role)}' }`,
-    `appProperties has { key='qa_person_id' and value='${escapeDriveQueryLiteral(person.id)}' }`,
-    ...(year ? [`appProperties has { key='qa_year' and value='${String(year)}' }`] : []),
-  ].join(' and ');
-  const fields = 'files(id,name,mimeType,size,createdTime,modifiedTime,appProperties)';
-  const data = await driveJson(`files?q=${encodeURIComponent(q)}&spaces=drive&orderBy=createdTime desc&pageSize=100&fields=${encodeURIComponent(fields)}`);
-  return (data.files || []).map(metadataFromFile);
+  const folders = year
+    ? [await findPersonFolderForYear(person, year)]
+    : await findAllPersonFolders(person);
+  const ids = folders.filter(Boolean).map((folder) => String(folder.id));
+  if (!ids.length) return [];
+  const records: Record<string, any>[] = [];
+  for (const folderId of ids) records.push(...await listFolderFiles(folderId));
+  return records.map((file) => metadataFromFile(file, person));
 }
 
 async function listPublicDriveDocuments(person: Person, year?: number) {
   const files = await listDriveDocuments(person, year);
-  return Promise.all(files.map(publicDocumentMetadata));
+  return Promise.all(files.map((file) => publicDocumentMetadata(file, person)));
 }
 
 function personCanViewOwn(actor: Actor, person: Person) {
@@ -506,27 +589,46 @@ async function getFileMetadata(fileId: string) {
   return driveJson(`files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties,trashed,parents`);
 }
 
-async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'view' | 'delete') {
+async function fileIsInsidePersonFolder(file: Record<string, any>, target: Person) {
+  const folders = await findAllPersonFolders(target);
+  const allowed = new Set(folders.map((folder) => String(folder.id)));
+  return (file.parents || []).some((parentId: string) => allowed.has(String(parentId)));
+}
+
+async function authorizeFile(actor: Actor, file: Record<string, any>, action: 'view' | 'delete', tokenTarget?: Person | null) {
   const props = file.appProperties || {};
-  if (props.qa_app !== 'quraner-alo' || file.trashed) throw new Error('FILE_NOT_FOUND');
+  if (file.trashed) throw new Error('FILE_NOT_FOUND');
 
-  const role = props.qa_role as Person['role'];
-  const personId = String(props.qa_person_id || '');
-  const category = String(props.qa_category || 'other_document');
-  if (!ROLE_SET.has(role) || !personId) throw new Error('FILE_NOT_FOUND');
+  const propRole = String(props.qa_role || '');
+  const propPersonId = String(props.qa_person_id || '');
+  const hasValidPropsTarget = ROLE_SET.has(propRole) && Boolean(propPersonId);
 
-  const target: Person = { role, id: personId, code: String(props.qa_person_code || ''), name: '' };
+  let target: Person | null = null;
+  if (hasValidPropsTarget) {
+    target = await resolveAnyPerson(propRole, propPersonId);
+    if (tokenTarget && (tokenTarget.role !== target.role || tokenTarget.id !== target.id)) {
+      throw new Error('FILE_NOT_FOUND');
+    }
+  } else if (tokenTarget) {
+    target = await resolveAnyPerson(tokenTarget.role, tokenTarget.id);
+  } else {
+    throw new Error('FILE_NOT_FOUND');
+  }
+
+  if (!(await fileIsInsidePersonFolder(file, target))) throw new Error('FILE_NOT_FOUND');
+
+  const category = String(props.qa_category || (String(file.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document'));
 
   const viewPermission =
-    role === 'student' ? 'students.view' :
-    role === 'teacher' ? 'teachers.view' :
+    target.role === 'student' ? 'students.view' :
+    target.role === 'teacher' ? 'teachers.view' :
     'staff.view';
   const managePermission =
-    role === 'student' ? 'students.manage' :
-    role === 'teacher' ? 'teachers.manage' :
+    target.role === 'student' ? 'students.manage' :
+    target.role === 'teacher' ? 'teachers.manage' :
     'staff.manage';
 
-  if (actor.role === 'owner' || actor.role === 'admin' || !['student','teacher','helper'].includes(actor.role)) {
+  if (actor.role === 'owner' || actor.role === 'admin' || !['student', 'teacher', 'helper'].includes(actor.role)) {
     if (!can(actor, viewPermission) && !can(actor, managePermission)) throw new Error('FORBIDDEN');
     if (action === 'delete' && !can(actor, managePermission) && actor.role !== 'owner') throw new Error('FORBIDDEN');
     return { target, category };
@@ -717,11 +819,11 @@ async function handleUpload(actor: Actor, req: Request) {
 }
 
 async function handleView(actor: Actor, documentToken: string) {
-  const fileId = await resolveDocumentToken(documentToken);
-  const meta = await getFileMetadata(fileId);
-  const { category } = await authorizeFile(actor, meta, 'view');
+  const decoded = await resolveDocumentToken(documentToken);
+  const meta = await getFileMetadata(decoded.fileId);
+  const { category } = await authorizeFile(actor, meta, 'view', decoded.target);
   if (!ALLOWED_MIME.has(String(meta.mimeType || '').toLowerCase())) throw new Error('INVALID_FILE_TYPE');
-  const res = await driveBinary(`files/${encodeURIComponent(fileId)}?alt=media`);
+  const res = await driveBinary(`files/${encodeURIComponent(decoded.fileId)}?alt=media`);
   const fileName = encodeURIComponent(String(meta.name || 'document'));
   return new Response(res.body, {
     status: 200,
@@ -735,11 +837,11 @@ async function handleView(actor: Actor, documentToken: string) {
 }
 
 async function handleDelete(actor: Actor, documentToken: string) {
-  const fileId = await resolveDocumentToken(documentToken);
-  const meta = await getFileMetadata(fileId);
-  await authorizeFile(actor, meta, 'delete');
+  const decoded = await resolveDocumentToken(documentToken);
+  const meta = await getFileMetadata(decoded.fileId);
+  await authorizeFile(actor, meta, 'delete', decoded.target);
   const token = await getAccessToken();
-  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}`, {
+  const res = await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(decoded.fileId)}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -754,24 +856,18 @@ async function handleDelete(actor: Actor, documentToken: string) {
 async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: string) {
   const person = await resolveAnyPerson(roleRaw, personIdRaw);
   if (!(await canViewProfileImage(actor, person))) throw new Error('FORBIDDEN');
-
-  const q = [
-    "trashed = false",
-    `appProperties has { key='qa_app' and value='quraner-alo' }`,
-    `appProperties has { key='qa_role' and value='${escapeDriveQueryLiteral(person.role)}' }`,
-    `appProperties has { key='qa_person_id' and value='${escapeDriveQueryLiteral(person.id)}' }`,
-    `appProperties has { key='qa_category' and value='profile_picture' }`,
-  ].join(' and ');
-
-  const data = await driveJson(`files?q=${encodeURIComponent(q)}&spaces=drive&orderBy=modifiedTime desc&pageSize=10&fields=files(id,name,mimeType,size,createdTime,modifiedTime,appProperties)`);
-  const file = (data.files || [])[0];
-  if (!file) return { ok: true, found: false, person: { role: person.role, id: person.id, code: person.code, name: person.name } };
-
+  const files = await listDriveDocuments(person);
+  const file = files.find((item) => item.category === 'profile_picture');
+  if (!file) {
+    return { ok: true, found: false, person: { role: person.role, id: person.id, code: person.code, name: person.name } };
+  }
+  const token = await createOpaqueDocumentToken(String(file.fileId || ''), person);
+  const { fileId, ...publicFile } = file;
   return {
     ok: true,
     found: true,
     person: { role: person.role, id: person.id, code: person.code, name: person.name },
-    file: await publicDocumentMetadata(file),
+    file: { ...publicFile, documentToken: token },
   };
 }
 
