@@ -452,8 +452,11 @@ async function uploadNewFile(parentId: string, file: File, appProperties: Record
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.id) {
-    console.error('Google Drive upload failed', { status: res.status, error: data?.error?.message || data?.error });
-    throw new Error('GOOGLE_DRIVE_UPLOAD_FAILED');
+    const status = res.status || 0;
+    const reason = String(data?.error?.errors?.[0]?.reason || '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+    const message = String(data?.error?.message || '').replace(/[^a-zA-Z0-9 .,!?_-]/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 180);
+    console.error('Google Drive upload failed', { status, reason, message });
+    throw new Error(`GOOGLE_DRIVE_UPLOAD_FAILED_${status}_${reason || 'UNKNOWN'}_${message || 'No Google Drive error message'}`);
   }
   return data;
 }
