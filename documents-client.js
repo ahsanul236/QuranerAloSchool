@@ -64,13 +64,14 @@ export async function listDocuments({ role, personId }) {
   return requestJson({ action: 'list', role, personId });
 }
 
-export async function uploadDocument({ role, personId, category, file }) {
+export async function uploadDocument({ role, personId, category, file, replaceExisting = false }) {
   validateDocumentFile(file);
   const form = new FormData();
   form.append('action', 'upload');
   if (role) form.append('role', role);
   if (personId) form.append('personId', personId);
   form.append('category', category);
+  form.append('replaceExisting', replaceExisting ? 'true' : 'false');
   form.append('file', file, file.name);
   const res = await fetch(endpoint(), {
     method: 'POST',
