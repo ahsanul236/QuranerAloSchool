@@ -126,6 +126,7 @@ function syncMode(){
   $('removeBtn').classList.toggle('hidden',editing||!canManage());
   $('saveBtn').classList.toggle('hidden',!editing);
   $('cancelBtn').classList.toggle('hidden',!editing);
+  $('staffDocumentsCard')?.classList.toggle('hidden',!editing);
   const editor=$('teacherAssignmentEditor');
   const canEditAssignment=type==='teacher'&&canManage()&&editing;
   editor?.classList.toggle('hidden',!canEditAssignment);
