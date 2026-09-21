@@ -809,7 +809,6 @@ export default async function handler(req: Request) {
       'SUPABASE_URL_NOT_CONFIGURED',
       'SUPABASE_CLIENTS_NOT_INITIALIZED',
       'SUPABASE_FUNCTION_CONFIG_INVALID',
-      'INVALID_DOCUMENT_TOKEN',
     ]);
     const status = ['UNAUTHORIZED', 'FORBIDDEN'].includes(code) ? 403 : serverErrors.has(code) ? 500 : 400;
     return json({ ok: false, error: code }, status);
