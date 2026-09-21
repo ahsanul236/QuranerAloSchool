@@ -21,11 +21,25 @@ const json = (body: unknown, status = 200, extraHeaders: Record<string, string> 
   { status, headers: { ...cors, 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extraHeaders } }
 );
 
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
-const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_uPx611I8B85nVyLg7PjcPg_jb7mxuxd';
-const supabaseUrl = process.env.SUPABASE_URL || 'https://xjysbpthosvjxzujmuhe.supabase.co';
-const adminDb = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
-const authDb = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
+let adminDb: ReturnType<typeof createClient> | null = null;
+let authDb: ReturnType<typeof createClient> | null = null;
+
+function initSupabaseClients() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_uPx611I8B85nVyLg7PjcPg_jb7mxuxd';
+  const supabaseUrl = process.env.SUPABASE_URL || 'https://xjysbpthosvjxzujmuhe.supabase.co';
+
+  if (!serviceKey) throw new Error('SUPABASE_SERVER_KEY_NOT_CONFIGURED');
+  if (!anonKey) throw new Error('SUPABASE_CLIENT_KEY_NOT_CONFIGURED');
+  if (!supabaseUrl) throw new Error('SUPABASE_URL_NOT_CONFIGURED');
+
+  adminDb = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  authDb = createClient(supabaseUrl, anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+}
 
 type Actor = {
   userId: string;
@@ -73,6 +87,7 @@ function escapeDriveQueryLiteral(value: string) {
 }
 
 async function parseActor(req: Request): Promise<Actor> {
+  if (!adminDb || !authDb) throw new Error('SUPABASE_CLIENTS_NOT_INITIALIZED');
   const auth = req.headers.get('authorization') || '';
   if (!auth.toLowerCase().startsWith('bearer ')) throw new Error('UNAUTHORIZED');
   const token = auth.slice(7);
@@ -621,7 +636,7 @@ export default async function handler(req: Request) {
   if (req.method !== 'POST') return json({ error: 'METHOD_NOT_ALLOWED' }, 405);
 
   try {
-    if (!serviceKey || !anonKey || !supabaseUrl) throw new Error('SUPABASE_FUNCTION_CONFIG_INVALID');
+    initSupabaseClients();
     const actor = await parseActor(req);
     const contentType = req.headers.get('content-type') || '';
     const body = contentType.includes('multipart/form-data')
@@ -661,7 +676,21 @@ export default async function handler(req: Request) {
   } catch (error) {
     console.error('portal-documents error', error);
     const code = error instanceof Error ? error.message : 'SERVER_ERROR';
-    const status = ['UNAUTHORIZED', 'FORBIDDEN'].includes(code) ? 403 : 400;
+    const serverErrors = new Set([
+      'GOOGLE_AUTH_FAILED',
+      'GOOGLE_DRIVE_API_ERROR',
+      'GOOGLE_DRIVE_UPLOAD_FAILED',
+      'GOOGLE_DRIVE_REPLACE_FAILED',
+      'GOOGLE_DRIVE_DELETE_FAILED',
+      'GOOGLE_DRIVE_NOT_CONFIGURED',
+      'GOOGLE_DRIVE_CONFIG_INVALID',
+      'SUPABASE_SERVER_KEY_NOT_CONFIGURED',
+      'SUPABASE_CLIENT_KEY_NOT_CONFIGURED',
+      'SUPABASE_URL_NOT_CONFIGURED',
+      'SUPABASE_CLIENTS_NOT_INITIALIZED',
+      'SUPABASE_FUNCTION_CONFIG_INVALID',
+    ]);
+    const status = ['UNAUTHORIZED', 'FORBIDDEN'].includes(code) ? 403 : serverErrors.has(code) ? 500 : 400;
     return json({ ok: false, error: code }, status);
   }
 }
