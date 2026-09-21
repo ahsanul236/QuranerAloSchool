@@ -1,4 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -139,7 +140,8 @@ async function loadAssignedTeacher(studentId, previewStudentId = ''){
     : (!teacher.active
       ? '<span class="muted">শিক্ষক বর্তমানে Inactive।</span>'
       : '<span class="muted">শিক্ষকের WhatsApp নম্বর সংরক্ষিত নেই।</span>');
-  box.innerHTML='<div class="portal-stat"><small>Assigned Teacher</small><strong>'+esc(teacher.full_name_bn||teacher.full_name||teacher.teacher_code||'Teacher')+'</strong>'+(teacher.specialization?'<span class="muted">'+esc(teacher.specialization)+'</span>':'')+'<span class="muted">'+esc(teacher.teacher_code||'')+'</span><div style="margin-top:10px">'+wa+'</div></div>';
+  box.innerHTML='<div class="portal-stat assigned-person-card"><div class="assigned-person-top"><img id="assignedTeacherProfileImage" class="portal-relationship-avatar hidden" alt="Teacher profile"><div><small>Assigned Teacher</small><strong>'+esc(teacher.full_name_bn||teacher.full_name||teacher.teacher_code||'Teacher')+'</strong>'+(teacher.specialization?'<span class="muted">'+esc(teacher.specialization)+'</span>':'')+'<span class="muted">'+esc(teacher.teacher_code||'')+'</span></div></div><div style="margin-top:10px">'+wa+'</div></div>';
+  return teacher;
 }
 
 async function init() {
@@ -181,7 +183,23 @@ async function init() {
   $('motherName').textContent = student.mother_name || '—';
   $('birthRegistrationNo').textContent = student.birth_registration_no || '—';
 
-  await loadAssignedTeacher(student.student_id, previewStudentId);
+  const assignedTeacher = await loadAssignedTeacher(student.student_id, previewStudentId);
+  await setProfileImage({ role:'student', personId:student.student_id, img:$('studentPortalProfileImage') });
+  await mountDocumentsPanel({
+    container:$('studentPortalDocuments'),
+    role:'student',
+    personId:student.student_id,
+    editable:!previewStudentId,
+    canDelete:false,
+    title:'My Documents'
+  });
+  if (assignedTeacher?.teacher_id) {
+    await setProfileImage({
+      role:'teacher',
+      personId:assignedTeacher.teacher_id,
+      img:$('assignedTeacherProfileImage')
+    });
+  }
 
   const [enrollmentResult, guardianLinkResult, feeChargeResult, feePaymentResult] = await Promise.all([
     supabase
