@@ -132,23 +132,12 @@ async function resolveSelfPerson(actor: Actor): Promise<Person> {
   throw new Error('ROLE_NOT_ALLOWED');
 }
 
-async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: string): Promise<Person> {
+async function resolveAnyPerson(roleRaw?: string, personIdRaw?: string): Promise<Person> {
   const requestedRole = String(roleRaw || '').toLowerCase();
   const requestedId = String(personIdRaw || '');
-
-  if (actor.role === requestedRole && requestedId) {
-    const self = await resolveSelfPerson(actor);
-    if (self.id === requestedId) return self;
-  }
-
-  if (actor.role === 'student' || actor.role === 'teacher' || actor.role === 'helper') {
-    return resolveSelfPerson(actor);
-  }
-
   if (!ROLE_SET.has(requestedRole) || !requestedId) throw new Error('TARGET_REQUIRED');
 
   if (requestedRole === 'student') {
-    if (!can(actor, 'students.view') && !can(actor, 'students.manage')) throw new Error('FORBIDDEN');
     const { data, error } = await adminDb
       .from('qa_students')
       .select('student_id,student_code,full_name,teacher_id')
@@ -160,7 +149,6 @@ async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: strin
   }
 
   if (requestedRole === 'teacher') {
-    if (!can(actor, 'teachers.view') && !can(actor, 'teachers.manage')) throw new Error('FORBIDDEN');
     const { data, error } = await adminDb
       .from('qa_teachers')
       .select('teacher_id,teacher_code,full_name,full_name_bn')
@@ -171,7 +159,6 @@ async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: strin
     return { role: 'teacher', id: data.teacher_id, code: data.teacher_code, name: data.full_name_bn || data.full_name };
   }
 
-  if (!can(actor, 'staff.view') && !can(actor, 'staff.manage')) throw new Error('FORBIDDEN');
   const { data, error } = await adminDb
     .from('qa_staff')
     .select('staff_id,staff_code,full_name')
@@ -180,6 +167,31 @@ async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: strin
   if (error) throw error;
   if (!data) throw new Error('HELPER_NOT_FOUND');
   return { role: 'helper', id: data.staff_id, code: data.staff_code, name: data.full_name };
+}
+
+async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: string): Promise<Person> {
+  const requestedRole = String(roleRaw || '').toLowerCase();
+  const requestedId = String(personIdRaw || '');
+
+  if (actor.role === 'student' || actor.role === 'teacher' || actor.role === 'helper') {
+    const self = await resolveSelfPerson(actor);
+    if (!requestedRole || !requestedId) return self;
+    if (requestedRole !== actor.role || requestedId !== self.id) throw new Error('FORBIDDEN');
+    return self;
+  }
+
+  if (!ROLE_SET.has(requestedRole) || !requestedId) throw new Error('TARGET_REQUIRED');
+  const person = await resolveAnyPerson(requestedRole, requestedId);
+  const permission =
+    person.role === 'student' ? 'students.view' :
+    person.role === 'teacher' ? 'teachers.view' :
+    'staff.view';
+  const managePermission =
+    person.role === 'student' ? 'students.manage' :
+    person.role === 'teacher' ? 'teachers.manage' :
+    'staff.manage';
+  if (!can(actor, permission) && !can(actor, managePermission)) throw new Error('FORBIDDEN');
+  return person;
 }
 
 async function getGoogleCredentials() {
@@ -297,12 +309,13 @@ function metadataFromFile(file: Record<string, any>) {
   };
 }
 
-async function listDriveDocuments(person: Person) {
+async function listDriveDocuments(person: Person, year?: number) {
   const q = [
     "trashed = false",
     `appProperties has { key='qa_app' and value='quraner-alo' }`,
     `appProperties has { key='qa_role' and value='${escapeDriveQueryLiteral(person.role)}' }`,
     `appProperties has { key='qa_person_id' and value='${escapeDriveQueryLiteral(person.id)}' }`,
+    ...(year ? [`appProperties has { key='qa_year' and value='${String(year)}' }`] : []),
   ].join(' and ');
   const fields = 'files(id,name,mimeType,size,createdTime,modifiedTime,appProperties)';
   const data = await driveJson(`files?q=${encodeURIComponent(q)}&spaces=drive&orderBy=createdTime desc&pageSize=100&fields=${encodeURIComponent(fields)}`);
@@ -475,7 +488,7 @@ async function handleUpload(actor: Actor, req: Request) {
 
   const year = new Date().getFullYear();
   const { personFolder } = await ensurePersonFolder(person, year);
-  const existing = await listDriveDocuments(person);
+  const existing = await listDriveDocuments(person, year);
   const sameCategory = existing.filter((item) => item.category === category);
 
   if (sameCategory.length > 0 && replaceExisting && ['profile_picture', 'birth_registration', 'nid'].includes(category)) {
@@ -542,7 +555,7 @@ async function handleDelete(actor: Actor, fileId: string) {
 }
 
 async function handleProfileImage(actor: Actor, roleRaw: string, personIdRaw: string) {
-  const person = await resolveTarget(actor, roleRaw, personIdRaw);
+  const person = await resolveAnyPerson(roleRaw, personIdRaw);
   if (!(await canViewProfileImage(actor, person))) throw new Error('FORBIDDEN');
 
   const q = [
