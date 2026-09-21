@@ -109,16 +109,23 @@ export async function fetchDocumentBlob(fileId) {
   }
   return {
     blob: await res.blob(),
-    filename: res.headers.get('X-File-Name') || 'document',
+    filename: decodeURIComponent(res.headers.get('X-File-Name') || 'document'),
     contentType: res.headers.get('Content-Type') || 'application/octet-stream'
   };
 }
 
 export async function openDocument(fileId) {
-  const result = await fetchDocumentBlob(fileId);
-  const url = URL.createObjectURL(result.blob);
-  window.open(url, '_blank', 'noopener,noreferrer');
-  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  const popup = window.open('about:blank', '_blank', 'noopener,noreferrer');
+  if (!popup) throw new Error('ব্রাউজার নতুন window খুলতে বাধা দিয়েছে।');
+  try {
+    const result = await fetchDocumentBlob(fileId);
+    const url = URL.createObjectURL(result.blob);
+    popup.location.href = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  } catch (error) {
+    popup.close();
+    throw error;
+  }
 }
 
 export async function downloadDocument(fileId, filename = 'document') {
@@ -131,6 +138,13 @@ export async function downloadDocument(fileId, filename = 'document') {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+export function bytesToHuman(bytes) {
+  const n = Number(bytes || 0);
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }
 
 export function fileSizeLabel(bytes) {
