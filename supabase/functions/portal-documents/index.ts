@@ -4,7 +4,7 @@ const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Expose-Headers': 'X-File-Name, X-Drive-File-Id',
+  'Access-Control-Expose-Headers': 'X-File-Name',
 };
 
 const MAX_BYTES = 500 * 1024;
