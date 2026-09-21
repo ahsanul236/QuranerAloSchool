@@ -22,8 +22,8 @@ const json = (body: unknown, status = 200, extraHeaders: Record<string, string> 
 );
 
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY || '';
-const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || '';
-const supabaseUrl = process.env.SUPABASE_URL || '';
+const anonKey = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_uPx611I8B85nVyLg7PjcPg_jb7mxuxd';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://xjysbpthosvjxzujmuhe.supabase.co';
 const adminDb = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
 const authDb = createClient(supabaseUrl, anonKey, { auth: { persistSession: false } });
 
