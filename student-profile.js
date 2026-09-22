@@ -98,6 +98,18 @@ function guardianHtml(g){
 function renderGuardians(){
   $('guardianList').innerHTML=guardians.length?guardians.map(guardianHtml).join(''):'<p class="profile-note">Guardian তথ্য পাওয়া যায়নি।</p>';
 }
+async function renderStudentDocuments(){
+  if(!$('studentDocuments'))return;
+  await mountDocumentsPanel({
+    container:$('studentDocuments'),
+    role:'student',
+    personId:studentId,
+    editable:Boolean(editing&&access?.can('students.manage')),
+    canDelete:Boolean(editing&&access?.can('students.manage')),
+    title:'Student Documents'
+  });
+}
+
 function mode(){
   const se=editing&&access?.can('students.manage'), ge=editing&&access?.can('guardians.manage');
   ['fullName','gender','dateOfBirth','admissionDate','studentPhone','status','notes','fatherName','fatherNid','motherName','motherNid','birthRegistrationNo'].forEach(id=>$(id).disabled=!se);
