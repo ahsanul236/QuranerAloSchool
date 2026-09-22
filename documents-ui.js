@@ -96,19 +96,30 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
     if (!file) { setMessage(messageNode, 'প্রথমে একটি ফাইল নির্বাচন করুন।', 'error'); return; }
     try {
       await validateDocumentFileContent(file);
-      const current = (await listDocuments({ role, personId })).files || [];
-      const existing = current.filter((x) => x.category === category);
-      let replaceExisting = false;
-      if (existing.length && ['profile_picture','birth_registration','nid'].includes(category)) {
-        replaceExisting = window.confirm(categoryLabel(category)+'-এর একটি file আগে থেকেই আছে।\n\nনতুন file দিয়ে বর্তমান file-এর content replace করতে চান?');
-        if (!replaceExisting) {
-          setMessage(messageNode, 'বর্তমান file অপরিবর্তিত রাখা হয়েছে। নতুন file upload করা হয়নি।');
-          return;
-        }
-      }
       uploadBtn.disabled = true;
       setMessage(messageNode, 'Upload হচ্ছে…');
-      await uploadDocument({ role, personId, category, file, replaceExisting });
+
+      let replaceExisting = false;
+      try {
+        await uploadDocument({ role, personId, category, file, replaceExisting: false });
+      } catch (error) {
+        if (error?.message !== 'DOCUMENT_ALREADY_EXISTS' ||
+            !['profile_picture','birth_registration','nid'].includes(category)) {
+          throw error;
+        }
+        const confirmed = window.confirm(
+          categoryLabel(category)+'-এর একটি file আগে থেকেই আছে।\n\n' +
+          'নতুন file দিয়ে বর্তমান file-এর content replace করতে চান?'
+        );
+        if (!confirmed) {
+          setMessage(messageNode, 'বর্তমান file অপরিবর্তিত রাখা হয়েছে। নতুন file upload করা হয়নি.');
+          return;
+        }
+        replaceExisting = true;
+        setMessage(messageNode, 'Existing file replace হচ্ছে…');
+        await uploadDocument({ role, personId, category, file, replaceExisting: true });
+      }
+
       fileInput.value = '';
       setMessage(messageNode, replaceExisting ? 'Document update হয়েছে।' : 'Document সফলভাবে upload হয়েছে।', 'success');
       await render();
