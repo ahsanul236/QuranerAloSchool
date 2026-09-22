@@ -623,6 +623,8 @@ async function listPublicDriveDocuments(person: Person, year?: number) {
     try {
       return await publicDocumentMetadata(file, person);
     } catch (error) {
+      const code = error instanceof Error ? error.message : 'UNKNOWN_ERROR';
+      if (code !== 'FILE_NOT_FOUND') throw error;
       console.error('Document metadata/token generation failed', {
         hasFileId: Boolean(file?.id),
         mimeType: String(file?.mimeType || ''),
@@ -630,7 +632,7 @@ async function listPublicDriveDocuments(person: Person, year?: number) {
           file?.appProperties?.qa_category ||
           (String(file?.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document')
         ),
-        error: error instanceof Error ? error.message : 'UNKNOWN_ERROR',
+        error: code,
       });
       return null;
     }
