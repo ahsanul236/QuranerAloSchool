@@ -139,13 +139,18 @@ async function createOpaqueDocumentToken(fileId: string, person: Person, parentF
 }
 
 async function decodeOpaqueDocumentToken(token: string) {
-  const parts = String(token || '').split('_');
-  if (parts.length !== 3 || parts[0] !== 'd3') throw new Error('INVALID_DOCUMENT_TOKEN');
+  const value = String(token || '');
+  if (!value.startsWith('d3_')) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const body = value.slice(3);
+  if (body.length < 18 || body.charAt(16) !== '_') throw new Error('INVALID_DOCUMENT_TOKEN');
+  const ivPart = body.slice(0, 16);
+  const ciphertextPart = body.slice(17);
+  if (!ciphertextPart) throw new Error('INVALID_DOCUMENT_TOKEN');
   let iv: Uint8Array;
   let ciphertext: Uint8Array;
   try {
-    iv = base64urlDecode(parts[1]);
-    ciphertext = base64urlDecode(parts[2]);
+    iv = base64urlDecode(ivPart);
+    ciphertext = base64urlDecode(ciphertextPart);
   } catch {
     throw new Error('INVALID_DOCUMENT_TOKEN');
   }
@@ -199,10 +204,12 @@ async function createRobustDocumentToken(fileId: string, person: Person, parentF
 }
 
 async function decodeRobustDocumentToken(token: string) {
-  const parts = String(token || '').split('_');
-  if (parts.length !== 2 || parts[0] !== 'd4') throw new Error('INVALID_DOCUMENT_TOKEN');
+  const value = String(token || '');
+  if (!value.startsWith('d4_')) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const encoded = value.slice(3);
+  if (!encoded) throw new Error('INVALID_DOCUMENT_TOKEN');
   let packed: Uint8Array;
-  try { packed = base64urlDecode(parts[1]); } catch { throw new Error('INVALID_DOCUMENT_TOKEN'); }
+  try { packed = base64urlDecode(encoded); } catch { throw new Error('INVALID_DOCUMENT_TOKEN'); }
   if (packed.length < 12 + 17) throw new Error('INVALID_DOCUMENT_TOKEN');
   const iv = packed.slice(0, 12);
   const ciphertext = packed.slice(12);
@@ -233,13 +240,18 @@ async function decodeRobustDocumentToken(token: string) {
 }
 
 async function decodeLegacyD2Token(token: string) {
-  const parts = String(token || '').split('_');
-  if (parts.length !== 3 || parts[0] !== 'd2') throw new Error('INVALID_DOCUMENT_TOKEN');
+  const value = String(token || '');
+  if (!value.startsWith('d2_')) throw new Error('INVALID_DOCUMENT_TOKEN');
+  const body = value.slice(3);
+  if (body.length < 18 || body.charAt(16) !== '_') throw new Error('INVALID_DOCUMENT_TOKEN');
+  const ivPart = body.slice(0, 16);
+  const ciphertextPart = body.slice(17);
+  if (!ciphertextPart) throw new Error('INVALID_DOCUMENT_TOKEN');
   let iv: Uint8Array;
   let ciphertext: Uint8Array;
   try {
-    iv = base64urlDecode(parts[1]);
-    ciphertext = base64urlDecode(parts[2]);
+    iv = base64urlDecode(ivPart);
+    ciphertext = base64urlDecode(ciphertextPart);
   } catch {
     throw new Error('INVALID_DOCUMENT_TOKEN');
   }
@@ -811,7 +823,7 @@ async function replaceFileContent(fileId: string, file: File, fileName?: string)
   }
 
   if (fileName) {
-    const renamed = await driveJson(`files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties`, {
+    const renamed = await driveJson(`files/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,createdTime,modifiedTime,appProperties,parents`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: fileName }),
