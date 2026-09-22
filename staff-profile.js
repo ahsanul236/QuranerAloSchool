@@ -134,6 +134,18 @@ function syncMode(){
   if($('saveStudentAssignmentsBtn'))$('saveStudentAssignmentsBtn').classList.toggle('hidden',!canEditAssignment);
   if(type==='teacher'&&$('teacherStudentsBadge'))$('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
 }
+async function renderStaffDocuments(){
+  if(!$('staffDocuments'))return;
+  await mountDocumentsPanel({
+    container:$('staffDocuments'),
+    role:type,
+    personId:id,
+    editable:Boolean(editing&&canManage()),
+    canDelete:Boolean(editing&&canManage()),
+    title:type==='teacher'?'Teacher Documents':'Helper Documents'
+  });
+}
+
 async function load(){
   if(!id)throw Error('Profile ID সঠিক নয়।');
   updateContext();
