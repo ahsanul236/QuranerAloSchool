@@ -292,8 +292,13 @@ async function resolveDocumentToken(token: string) {
 }
 
 async function publicDocumentMetadata(file: Record<string, any>, person: Person) {
-  const meta = metadataFromFile(file, person);
-  const token = await createRobustDocumentToken(String(file.id || ''), person, String(meta.parentFolderId || ''));
+  const alreadyMetadata = Boolean(file?.fileId);
+  const meta = alreadyMetadata
+    ? { ...file }
+    : metadataFromFile(file, person);
+  const fileId = String(meta.fileId || file.id || '');
+  const parentFolderId = String(meta.parentFolderId || file.parents?.[0] || '');
+  const token = await createRobustDocumentToken(fileId, person, parentFolderId);
   delete meta.fileId;
   delete meta.parentFolderId;
   return { ...meta, documentToken: token };
