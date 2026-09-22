@@ -1,5 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260921-6';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260922-2';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
