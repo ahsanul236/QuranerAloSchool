@@ -138,14 +138,7 @@ async function load(){
     guardians=links.map(x=>({...map[x.guardian_id],is_primary:x.is_primary})).filter(x=>x.guardian_id).sort((a,b)=>Number(b.is_primary)-Number(a.is_primary));
   }
   fillStudent();mode();await loadTeachers();
-  await mountDocumentsPanel({
-    container:$('studentDocuments'),
-    role:'student',
-    personId:studentId,
-    editable:access?.can('students.manage'),
-    canDelete:access?.can('students.manage'),
-    title:'Student Documents'
-  });
+  await renderStudentDocuments();
 }
 
 async function save(){
