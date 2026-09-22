@@ -602,7 +602,23 @@ async function listDriveDocuments(person: Person, year?: number) {
 
 async function listPublicDriveDocuments(person: Person, year?: number) {
   const files = await listDriveDocuments(person, year);
-  return Promise.all(files.map((file) => publicDocumentMetadata(file, person)));
+  const results = await Promise.all(files.map(async (file) => {
+    try {
+      return await publicDocumentMetadata(file, person);
+    } catch (error) {
+      console.error('Document metadata/token generation failed', {
+        hasFileId: Boolean(file?.id),
+        mimeType: String(file?.mimeType || ''),
+        category: String(
+          file?.appProperties?.qa_category ||
+          (String(file?.name || '').toLowerCase().startsWith('profile.') ? 'profile_picture' : 'other_document')
+        ),
+        error: error instanceof Error ? error.message : 'UNKNOWN_ERROR',
+      });
+      return null;
+    }
+  }));
+  return results.filter(Boolean);
 }
 
 function personCanViewOwn(actor: Actor, person: Person) {
