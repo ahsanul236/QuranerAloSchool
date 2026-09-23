@@ -5,8 +5,9 @@ const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
 const config = window.QURANER_ALO_CONFIG;
 
 function endpoint() {
+  if (location.hostname.endsWith('.vercel.app')) return '/api/portal-documents';
   if (!config?.supabaseUrl) throw new Error('Supabase configuration পাওয়া যায়নি।');
-  return `${config.supabaseUrl}/functions/v1/portal-documents-vault-test`;
+  return `${config.supabaseUrl}/functions/v1/portal-documents`;
 }
 
 function extensionOf(name) {
