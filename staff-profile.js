@@ -1,4 +1,5 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
+import{mountDocumentsPanel}from'./documents-ui.js?v=20260922-2';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[];
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
@@ -125,6 +126,7 @@ function syncMode(){
   $('removeBtn').classList.toggle('hidden',editing||!canManage());
   $('saveBtn').classList.toggle('hidden',!editing);
   $('cancelBtn').classList.toggle('hidden',!editing);
+  $('staffDocumentsCard')?.classList.remove('hidden');
   const editor=$('teacherAssignmentEditor');
   const canEditAssignment=type==='teacher'&&canManage()&&editing;
   editor?.classList.toggle('hidden',!canEditAssignment);
@@ -132,6 +134,18 @@ function syncMode(){
   if($('saveStudentAssignmentsBtn'))$('saveStudentAssignmentsBtn').classList.toggle('hidden',!canEditAssignment);
   if(type==='teacher'&&$('teacherStudentsBadge'))$('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
 }
+async function renderStaffDocuments(){
+  if(!$('staffDocuments'))return;
+  await mountDocumentsPanel({
+    container:$('staffDocuments'),
+    role:type,
+    personId:id,
+    editable:Boolean(editing&&canManage()),
+    canDelete:Boolean(editing&&canManage()),
+    title:type==='teacher'?'Teacher Documents':'Helper Documents'
+  });
+}
+
 async function load(){
   if(!id)throw Error('Profile ID সঠিক নয়।');
   updateContext();
@@ -145,10 +159,11 @@ async function load(){
   row=data;
   fill();
   syncMode();
+  await renderStaffDocuments();
   if(type==='teacher') await loadTeacherAssignments();
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();if(type==='teacher')await loadTeacherAssignments();};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();};
 $('cancelBtn').onclick=async()=>{editing=false;msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();

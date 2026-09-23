@@ -4,6 +4,22 @@
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2><a class="quick-link" href="exports.html">Lists & Export →</a></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
 </div>
 
+  
+<div class="panel">
+    <div class="panel-head"><h2>Google Drive Storage</h2><span class="eyebrow" id="googleDriveStorageStatus">Checking…</span></div>
+    <div id="googleDriveStorageCard" class="google-storage-card hidden" style="border:0;box-shadow:none;border-radius:0">
+      <div class="google-storage-head"><div><h3>Document Storage</h3><span class="muted">Website documents-এর Google Drive storage status</span></div></div>
+      <div class="google-storage-grid">
+        <div class="google-storage-item"><small>Total</small><strong id="googleDriveStorageTotal">—</strong></div>
+        <div class="google-storage-item"><small>Used</small><strong id="googleDriveStorageUsed">—</strong></div>
+        <div class="google-storage-item"><small>Free</small><strong id="googleDriveStorageFree">—</strong></div>
+        <div class="google-storage-item"><small>Usage</small><strong id="googleDriveStoragePercent">—</strong></div>
+      </div>
+      <div class="google-storage-progress"><div id="googleDriveStorageBar" class="google-storage-bar"></div></div>
+    </div>
+  </div>
+</div>
+
 <div id="settingsView" class="settings-view hidden">
   <div class="page-head"><div><p class="eyebrow">সেটিংস ও প্রশাসন</p><h1>সেটিংস ও প্রশাসন</h1><p class="muted">পোর্টাল, ব্যবহারকারী, অনুমতি ও প্রশাসনিক সেটিংস এখান থেকে পরিচালনা করুন।</p></div></div>
   <div class="panel">
@@ -24,4 +40,4 @@
     </div>
   </div>
 </div>
-<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260918-13"></script></body></html>
+<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260918-13"></script><script type="module" src="dashboard-documents.js?v=20260921-2"></script></body></html>

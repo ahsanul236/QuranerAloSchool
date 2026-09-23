@@ -36,7 +36,7 @@
 
 <div id="app" class="hidden">
   <section class="portal-hero">
-    <div class="portal-avatar"><img src="assets/quraner-alo-logo.jpg" alt=""></div>
+    <div class="portal-avatar"><img id="teacherPortalProfileImage" src="assets/quraner-alo-logo.jpg" alt=""></div>
     <div class="portal-identity">
       <p class="eyebrow">TEACHER PROFILE</p>
       <h1 id="teacherName">—</h1>
@@ -76,7 +76,7 @@
     <section class="portal-panel portal-wide">
       <h2>My Students</h2>
       <div class="portal-body">
-        <p class="portal-section-note">আপনার কাছে assigned থাকা সব Student এখানে দেখা যাবে। প্রত্যেকের পাশে সরাসরি WhatsApp-এ যোগাযোগের বাটন থাকবে।</p>
+        <p class="portal-section-note">আপনার কাছে assigned থাকা সব Student এখানে দেখা যাবে। প্রত্যেকের profile picture ও WhatsApp যোগাযোগ দেখা যাবে। Private documents দেখা যাবে না।</p>
         <div class="portal-table-wrap">
           <table class="portal-table">
             <thead><tr><th>Student</th><th>Phone</th><th>Status</th><th>Message</th></tr></thead>
@@ -85,8 +85,7 @@
         </div>
       </div>
     </section>
-
-    <section class="portal-panel portal-wide">
+<section class="portal-panel portal-wide">
       <h2>Payroll & Salary Receipt</h2>
       <div class="portal-body">
         <p class="portal-section-note">আপনার বেতন রেকর্ড দেখুন। প্রতিটি paid record থেকে অফিসিয়াল salary receipt খুলে প্রিন্ট, ডাউনলোড ও WhatsApp পাঠাতে পারবেন।</p>
@@ -112,11 +111,17 @@
     </section>
   </div>
 
+
+
+    <section class="portal-panel portal-wide">
+      <div id="teacherPortalDocuments" class="document-manager"></div>
+    </section>
+
   <p class="footer-note">এই portal-এ শুধু আপনার নিজের profile, assigned students এবং নিজের payroll/payment record দেখানো হয়।</p>
 </div>
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="teacher-portal.js?v=20260920-2"></script>
+<script type="module" src="teacher-portal.js?v=20260921-1"></script>
 </body>
 </html>

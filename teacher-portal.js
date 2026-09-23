@@ -1,4 +1,5 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260922-2';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -101,8 +102,13 @@ async function loadAssignedStudents(previewTeacherId = ''){
     const wa=waDigits
       ? '<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>'
       : '<span class="muted">ফোন নেই</span>';
-    return '<tr><td><strong>'+esc(student.full_name||student.student_code||'Student')+'</strong><br><span class="muted">'+esc(student.student_code||'—')+'</span></td><td>'+esc(student.phone||'—')+'</td><td><span class="active-badge '+statusClass(student.status)+'">'+esc(student.status||'—')+'</span></td><td>'+wa+'</td></tr>';
+    return '<tr><td><div class="assigned-person-inline"><img id="teacherAssignedStudentPhoto-'+esc(student.student_id)+'" class="portal-relationship-avatar small hidden" alt="Student profile"><div><strong>'+esc(student.full_name||student.student_code||'Student')+'</strong><br><span class="muted">'+esc(student.student_code||'—')+'</span></div></div></td><td>'+esc(student.phone||'—')+'</td><td><span class="active-badge '+statusClass(student.status)+'">'+esc(student.status||'—')+'</span></td><td>'+wa+'</td></tr>';
   }).join('') || '<tr><td colspan="4">এখনো কোনো Student assigned নেই।</td></tr>';
+  await Promise.all(students.map((student) => setProfileImage({
+    role:'student',
+    personId:student.student_id,
+    img:$('teacherAssignedStudentPhoto-'+student.student_id)
+  })));
   return students;
 }
 
@@ -132,6 +138,15 @@ async function init() {
   }
 
   const previewTeacherId = qs.get('preview_teacher') || '';
+  await setProfileImage({role:'teacher',personId:teacher.teacher_id,img:$('teacherPortalProfileImage')});
+  await mountDocumentsPanel({
+    container:$('teacherPortalDocuments'),
+    role:'teacher',
+    personId:teacher.teacher_id,
+    editable:!previewTeacherId,
+    canDelete:false,
+    title:'My Documents'
+  });
 
   $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('signOut').addEventListener('click', async () => {

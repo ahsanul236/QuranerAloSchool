@@ -38,7 +38,7 @@
   <div id="message" class="portal-message"></div>
 
   <section class="portal-hero">
-    <div class="portal-avatar"><img src="assets/quraner-alo-logo.jpg" alt=""></div>
+    <div class="portal-avatar"><img id="studentPortalProfileImage" src="assets/quraner-alo-logo.jpg" alt=""></div>
     <div class="portal-identity">
       <p class="eyebrow">STUDENT PROFILE</p>
       <h1 id="studentName">—</h1>
@@ -79,8 +79,7 @@
         <div id="assignedTeacher" class="portal-empty">আপনার জন্য এখনো কোনো শিক্ষক নির্ধারণ করা হয়নি।</div>
       </div>
     </section>
-
-    <section class="portal-panel">
+<section class="portal-panel">
       <h2>Guardian / Family</h2>
       <div class="portal-body"><div id="guardians" class="portal-grid"></div></div>
     </section>
@@ -125,11 +124,17 @@
       <div class="portal-body"><p id="notes" class="portal-note">No new notes.</p></div>
     </section>
   </div>
+
+
+    <section class="portal-panel portal-wide">
+      <div id="studentPortalDocuments" class="document-manager"></div>
+    </section>
+
   <p class="footer-note">আপনার profile ও নিজের payment information এখানে নিরাপদভাবে দেখানো হয়।</p>
 </div>
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="student-portal.js?v=20260920-2"></script>
+<script type="module" src="student-portal.js?v=20260921-1"></script>
 </body>
 </html>
