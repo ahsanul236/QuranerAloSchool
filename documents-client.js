@@ -1,4 +1,4 @@
-const MAX_DOCUMENT_BYTES = 500 * 1024;
+const MAX_DOCUMENT_BYTES = 250 * 1024;
 const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png']);
 const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
 
@@ -23,7 +23,7 @@ export function validateDocumentFile(file) {
     throw new Error('শুধু JPG, JPEG অথবা PNG ফাইল আপলোড করা যাবে।');
   }
   if (file.size > MAX_DOCUMENT_BYTES) {
-    throw new Error('ফাইলের আকার সর্বোচ্চ 500 KB হতে পারবে।');
+    throw new Error('ফাইলের আকার সর্বোচ্চ 250 KB হতে পারবে।');
   }
   if (file.size <= 0) {
     throw new Error('খালি ফাইল আপলোড করা যাবে না।');
@@ -67,7 +67,7 @@ const ERROR_MESSAGES = {
   UNAUTHORIZED: 'আপনার লগইন session বৈধ নয়। আবার login করুন।',
   FORBIDDEN: 'আপনার এই document-এর জন্য প্রয়োজনীয় অনুমতি নেই।',
   FILE_REQUIRED: 'প্রথমে একটি ফাইল নির্বাচন করুন।',
-  FILE_TOO_LARGE: 'ফাইলের আকার সর্বোচ্চ 500 KB হতে পারবে।',
+  FILE_TOO_LARGE: 'ফাইলের আকার সর্বোচ্চ 250 KB হতে পারবে।',
   INVALID_FILE_TYPE: 'শুধু JPG, JPEG অথবা PNG ফাইল গ্রহণ করা যাবে।',
   CATEGORY_NOT_ALLOWED: 'এই document type এই profile-এর জন্য অনুমোদিত নয়।',
   DOCUMENT_ALREADY_EXISTS: 'এই document type-এর একটি file আগে থেকেই আছে। নতুন file দিয়ে replace করার অনুমতি দিন।',
