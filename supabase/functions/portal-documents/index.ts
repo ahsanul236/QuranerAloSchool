@@ -7,7 +7,7 @@ const cors = {
   'Access-Control-Expose-Headers': 'X-File-Name',
 };
 
-const MAX_BYTES = 500 * 1024;
+const MAX_BYTES = 250 * 1024;
 const FOLDER_MIME = 'application/vnd.google-apps.folder';
 const ALLOWED_MIME = new Set(['image/jpeg', 'image/png']);
 const ALLOWED_EXTENSIONS = new Set(['jpg', 'jpeg', 'png']);
