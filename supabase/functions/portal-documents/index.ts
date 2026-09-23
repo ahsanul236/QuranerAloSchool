@@ -1,4 +1,5 @@
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import postgres from 'npm:postgres@3.4.3';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -93,9 +94,40 @@ function runtimeEnv(name: string) {
   return String(runtime?.process?.env?.[name] || '');
 }
 
-async function documentTokenKey() {
-  const raw = runtimeEnv('GOOGLE_DRIVE_CREDENTIALS');
+let cachedGoogleDriveCredentialsRaw = '';
+let vaultSql: ReturnType<typeof postgres> | null = null;
+
+async function googleDriveCredentialsRaw() {
+  const envRaw = runtimeEnv('GOOGLE_DRIVE_CREDENTIALS');
+  if (envRaw) return envRaw;
+  if (cachedGoogleDriveCredentialsRaw) return cachedGoogleDriveCredentialsRaw;
+
+  const dbUrl = runtimeEnv('SUPABASE_DB_URL');
+  if (!dbUrl) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
+
+  if (!vaultSql) {
+    vaultSql = postgres(dbUrl, {
+      prepare: false,
+      max: 1,
+      idle_timeout: 5,
+      connect_timeout: 5,
+    });
+  }
+
+  const rows = await vaultSql`
+    select decrypted_secret
+    from vault.decrypted_secrets
+    where name = ${'quraner_alo_google_drive_credentials'}
+    limit 1
+  `;
+  const raw = String(rows?.[0]?.decrypted_secret || '');
   if (!raw) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
+  cachedGoogleDriveCredentialsRaw = raw;
+  return raw;
+}
+
+async function documentTokenKey() {
+  const raw = await googleDriveCredentialsRaw();
   const digest = await crypto.subtle.digest(
     'SHA-256',
     new TextEncoder().encode(raw + '::quraner-alo-document-token-v2'),
@@ -241,7 +273,7 @@ async function decodeLegacyD2Token(token: string) {
   }
   if (iv.length !== 12 || ciphertext.length < 17) throw new Error('INVALID_DOCUMENT_TOKEN');
   try {
-    const raw = runtimeEnv('GOOGLE_DRIVE_CREDENTIALS');
+    const raw = await googleDriveCredentialsRaw();
     const derivations = [raw + '::quraner-alo-document-token-v2', raw];
     for (const material of derivations) {
       try {
@@ -425,8 +457,7 @@ async function resolveTarget(actor: Actor, roleRaw?: string, personIdRaw?: strin
 }
 
 async function getGoogleCredentials() {
-  const raw = Deno.env.get('GOOGLE_DRIVE_CREDENTIALS') || '';
-  if (!raw) throw new Error('GOOGLE_DRIVE_NOT_CONFIGURED');
+  const raw = await googleDriveCredentialsRaw();
   let credentials: { client_id?: string; client_secret?: string; refresh_token?: string };
   try {
     credentials = JSON.parse(raw);
