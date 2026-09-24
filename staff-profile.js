@@ -1,5 +1,5 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
-import{mountDocumentsPanel}from'./documents-ui.js?v=20260922-2';
+import{mountDocumentsPanel,setProfileImage}from'./documents-ui.js?v=20260922-2';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],editBaseline='',allowNavigation=false;
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
@@ -16,6 +16,7 @@ window.addEventListener('beforeunload',event=>{if(allowNavigation||!hasUnsavedPr
 const esc=v=>String(v??'').replace(/[&<>\"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[x]));
 const canView=()=>access?.can(type==='teacher'?'teachers.view':'staff.view');
 const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage');
+async function loadProfileImageWithFallback(role,personId,img){if(!img)return false;img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');const loaded=await setProfileImage({role,personId,img});if(!loaded){img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');}return loaded;}
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
 function setInputs(on){['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
@@ -47,6 +48,7 @@ function fill(){
   $('notes').value=row.notes||'';
   $('title').textContent=row.full_name||(teacher?'Teacher Profile':'Helper Profile');
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
+  void loadProfileImageWithFallback(type,id,$('staffProfileImage'));
   setWhatsAppLink(row.phone);
 }
 
@@ -81,8 +83,9 @@ async function loadTeacherAssignments(){
     const remove=canManage()&&editing
       ? '<button class="secondary-btn remove-student-assignment" type="button" data-student-id="'+esc(st.student_id)+'">Student বাদ দিন</button>'
       : '';
-    return '<div class="staff-assignment-row"><div><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div>'+remove+'</div>';
+    return '<div class="staff-assignment-row"><div class="staff-assignment-person"><img id="assignedStudentProfileImage-'+esc(st.student_id)+'" class="profile-photo-small" src="assets/quraner-alo-logo.jpg" alt="" aria-hidden="true"><div class="staff-assignment-person-copy"><strong>'+esc(st.full_name||st.student_code||'Student')+'</strong><small>'+esc(st.student_code||'—')+' · '+esc(st.status||'—')+'</small></div></div>'+remove+'</div>';
   }).join('')||'<div class="portal-empty">এখনো কোনো Student assigned নেই।</div>';
+  await Promise.all(current.map(st=>loadProfileImageWithFallback('student',st.student_id,$('assignedStudentProfileImage-'+st.student_id))));
   document.querySelectorAll('.remove-student-assignment').forEach(button=>button.addEventListener('click',async()=>{
     const studentIdToRemove=button.dataset.studentId;
     const student=allAssignedStudents.find(st=>st.student_id===studentIdToRemove);
