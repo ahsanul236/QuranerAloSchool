@@ -45,6 +45,7 @@ function fill(){
   $('joiningDate').value=row.joining_date||'';
   $('active').value=String(row.active!==false);
   $('notes').value=row.notes||'';
+  $('title').textContent=row.full_name||(teacher?'Teacher Profile':'Helper Profile');
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
   setWhatsAppLink(row.phone);
 }
