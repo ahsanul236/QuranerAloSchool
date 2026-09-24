@@ -13,7 +13,7 @@ const login=()=>location.replace('./');
 const msg=(t,type='')=>{$('saveMessage').textContent=t;$('saveMessage').className=`message-inline ${type}`.trim();};
 
 function profileEditState(){
-  const ids=['fullName','gender','dateOfBirth','admissionDate','studentPhone','status','notes','fatherName','fatherNid','motherName','motherNid','birthRegistrationNo'];
+  const ids=['fullName','fullNameBn','gender','dateOfBirth','admissionDate','studentPhone','status','notes','fatherName','fatherNid','motherName','motherNid','birthRegistrationNo'];
   const fields=Object.fromEntries(ids.map(id=>[id,$(id)?.value??'']));
   const guardianFields=[...document.querySelectorAll('[data-g-field][data-g-id]')]
     .map(el=>({id:el.dataset.gId||'',field:el.dataset.gField||'',value:el.value??''}))
@@ -87,7 +87,7 @@ function renderTeacherAssignment(){
 async function saveTeacherAssignment(){
   if(!access?.can('students.manage'))throw new Error('Teacher assignment পরিবর্তনের permission নেই।');
   const teacherId=$('assignedTeacher')?.value||null;
-  const {data,error}=await supabase.from('qa_students').update({teacher_id:teacherId}).eq('student_id',studentId).select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').single();
+  const {data,error}=await supabase.from('qa_students').update({teacher_id:teacherId}).eq('student_id',studentId).select('student_id,student_code,full_name,full_name_bn,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').single();
   if(error)throw error;
   student=data;
   const teacher=teachers.find(t=>t.teacher_id===teacherId);
@@ -99,6 +99,7 @@ async function saveTeacherAssignment(){
 function fillStudent(){
   $('studentCode').value=student.student_code||'';
   $('fullName').value=student.full_name||'';
+  $('fullNameBn').value=student.full_name_bn||'';
   $('gender').value=['male','female','unspecified'].includes(student.gender)?student.gender:'unspecified';
   $('dateOfBirth').value=student.date_of_birth||'';
   $('admissionDate').value=student.admission_date||'';
@@ -159,7 +160,7 @@ function mode(){
 
 async function load(){
   if(!studentId)throw new Error('Student ID সঠিক নয়।');
-  const {data:s,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').eq('student_id',studentId).maybeSingle();
+  const {data:s,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,full_name_bn,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,teacher_id,created_at,updated_at').eq('student_id',studentId).maybeSingle();
   if(error)throw error;if(!s)throw new Error('Student profile পাওয়া যায়নি।');student=s;
   const {data:links,error:le}=await supabase.from('qa_student_guardians').select('guardian_id,is_primary').eq('student_id',studentId);
   if(le)throw le;
@@ -176,9 +177,9 @@ async function load(){
 
 async function save(){
   if(!access?.can('students.manage'))throw new Error('Student edit permission নেই।');
-  const payload={full_name:$('fullName').value.trim(),gender:$('gender').value,date_of_birth:$('dateOfBirth').value||null,phone:$('studentPhone').value.trim(),admission_date:$('admissionDate').value||null,status:$('status').value,notes:$('notes').value.trim(),father_name:$('fatherName').value.trim(),father_nid:$('fatherNid').value.trim(),mother_name:$('motherName').value.trim(),mother_nid:$('motherNid').value.trim(),birth_registration_no:$('birthRegistrationNo').value.trim()};
-  if(!payload.full_name)throw new Error('Student-এর নাম দিতে হবে।');
-  const {data,error}=await supabase.from('qa_students').update(payload).eq('student_id',studentId).select('student_id,student_code,full_name,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,created_at,updated_at').single();
+  const payload={full_name:$('fullName').value.trim(),full_name_bn:$('fullNameBn').value.trim()||null,gender:$('gender').value,date_of_birth:$('dateOfBirth').value||null,phone:$('studentPhone').value.trim(),admission_date:$('admissionDate').value||null,status:$('status').value,notes:$('notes').value.trim(),father_name:$('fatherName').value.trim(),father_nid:$('fatherNid').value.trim(),mother_name:$('motherName').value.trim(),mother_nid:$('motherNid').value.trim(),birth_registration_no:$('birthRegistrationNo').value.trim()};
+  if(!payload.full_name)throw new Error('Student-এর English Name দিতে হবে।');
+  const {data,error}=await supabase.from('qa_students').update(payload).eq('student_id',studentId).select('student_id,student_code,full_name,full_name_bn,gender,date_of_birth,phone,admission_date,status,notes,father_name,father_nid,mother_name,mother_nid,birth_registration_no,user_id,created_at,updated_at').single();
   if(error)throw error;student=data;
   if(access.can('guardians.manage')){
     const selectedPrimary=document.querySelector('input[name="primaryGuardian"]:checked')?.value||guardians.find(g=>g.is_primary)?.guardian_id||'';
