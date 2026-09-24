@@ -38,6 +38,106 @@
     el.className = `message-inline${type ? ` ${type}` : ''}`;
   };
 
+  const schoolProfileDefaults = {
+    name_bn:'কোরআনের আলো',
+    name_en:'QURANER ALO',
+    tagline:'কোরআনের আলোয় গড়ি আলোকিত জীবন',
+    address:'',
+    phone:'',
+    email:'',
+    website:'',
+    logo_path:'assets/quraner-alo-logo.jpg'
+  };
+  let schoolProfileBaseline = { ...schoolProfileDefaults };
+
+  function setAccordion(buttonId, bodyId, openLabel, closeLabel, open) {
+    const button = $(buttonId);
+    const body = $(bodyId);
+    if (!button || !body) return;
+    body.classList.toggle('hidden', !open);
+    button.setAttribute('aria-expanded', String(open));
+    button.innerHTML = `${open ? closeLabel : openLabel} <span aria-hidden="true">${open ? '⌃' : '⌄'}</span>`;
+  }
+
+  function schoolProfileFromForm() {
+    return {
+      name_bn:$('schoolNameBn')?.value.trim() || '',
+      name_en:$('schoolNameEn')?.value.trim() || '',
+      tagline:$('schoolTagline')?.value.trim() || '',
+      address:$('schoolAddress')?.value.trim() || '',
+      phone:$('schoolPhone')?.value.trim() || '',
+      email:$('schoolEmail')?.value.trim() || '',
+      website:$('schoolWebsite')?.value.trim() || '',
+      logo_path:$('schoolLogoPath')?.value.trim() || schoolProfileDefaults.logo_path
+    };
+  }
+
+  function fillSchoolProfile(value) {
+    const p = { ...schoolProfileDefaults, ...(value || {}) };
+    schoolProfileBaseline = { ...p };
+    $('schoolNameBn').value = p.name_bn || '';
+    $('schoolNameEn').value = p.name_en || '';
+    $('schoolTagline').value = p.tagline || '';
+    $('schoolAddress').value = p.address || '';
+    $('schoolPhone').value = p.phone || '';
+    $('schoolEmail').value = p.email || '';
+    $('schoolWebsite').value = p.website || '';
+    $('schoolLogoPath').value = p.logo_path || schoolProfileDefaults.logo_path;
+    $('schoolLogoPreview').src = p.logo_path || schoolProfileDefaults.logo_path;
+    updateSchoolProfileStatus(p);
+  }
+
+  function updateSchoolProfileStatus(profile = schoolProfileFromForm()) {
+    const required = [profile.name_bn, profile.address, profile.phone, profile.email];
+    const complete = required.every(Boolean);
+    const badge = $('schoolProfileStatus');
+    if (!badge) return;
+    badge.textContent = complete ? 'Complete' : 'Needs setup';
+    badge.classList.toggle('is-complete', complete);
+    badge.classList.toggle('needs-attention', !complete);
+  }
+
+  async function loadSchoolProfile() {
+    if (!access?.can('settings.manage')) return;
+    show('schoolProfilePanel');
+    const { data, error } = await client.from('qa_app_settings')
+      .select('value').eq('key','school_profile').maybeSingle();
+    if (error) throw error;
+    fillSchoolProfile(data?.value);
+    message('schoolProfileMessage', '');
+  }
+
+  async function saveSchoolProfile(event) {
+    event.preventDefault();
+    if (!access?.can('settings.manage')) {
+      message('schoolProfileMessage', 'School Profile পরিবর্তনের permission নেই।', 'error');
+      return;
+    }
+    const profile = schoolProfileFromForm();
+    if (!profile.name_bn || !profile.address || !profile.phone || !profile.email) {
+      message('schoolProfileMessage', 'বাংলা নাম, ঠিকানা, ফোন ও Email পূরণ করুন।', 'error');
+      return;
+    }
+    const button = $('saveSchoolProfile');
+    button.disabled = true;
+    message('schoolProfileMessage', 'Saving…');
+    const { error } = await client.from('qa_app_settings')
+      .upsert({key:'school_profile',value:profile,updated_at:new Date().toISOString()},{onConflict:'key'});
+    button.disabled = false;
+    if (error) {
+      message('schoolProfileMessage', 'School Profile save করা যায়নি।', 'error');
+      return;
+    }
+    schoolProfileBaseline = { ...profile };
+    updateSchoolProfileStatus(profile);
+    message('schoolProfileMessage', 'School Profile সফলভাবে save হয়েছে।', 'success');
+  }
+
+  function resetSchoolProfile() {
+    fillSchoolProfile(schoolProfileBaseline);
+    message('schoolProfileMessage', 'Saved values restore করা হয়েছে।');
+  }
+
   async function profileFor(session) {
     const { data, error } = await client.from('qa_users')
       .select('user_id,email,full_name,role,active')
@@ -208,28 +308,89 @@
     grid.innerHTML = sections.length ? sections.join('') : '<p class="overview-report-muted" style="padding:16px">আপনার account-এর জন্য report-viewable module পাওয়া যায়নি।</p>';
   }
 
+  let previewEntities = [];
+  let selectedPreviewEntity = null;
+
+  function previewRoleLabel(type) {
+    return type === 'student' ? 'Student' : type === 'teacher' ? 'Teacher' : 'Helper';
+  }
+
+  function previewRoute(entity) {
+    if (entity.type === 'student') return `student-portal.html?preview_student=${encodeURIComponent(entity.id)}`;
+    if (entity.type === 'teacher') return `teacher-portal.html?preview_teacher=${encodeURIComponent(entity.id)}`;
+    return `helper-portal.html?preview_helper=${encodeURIComponent(entity.id)}`;
+  }
+
+  function hidePreviewResults() {
+    $('portalPreviewResults')?.classList.add('hidden');
+    $('portalPreviewSearch')?.setAttribute('aria-expanded', 'false');
+  }
+
+  function renderPreviewResults(query = '') {
+    const results = $('portalPreviewResults');
+    const input = $('portalPreviewSearch');
+    if (!results || !input) return;
+    const q = String(query || '').trim().toLocaleLowerCase();
+    const matches = previewEntities.filter((entity) => {
+      if (!q) return true;
+      return [entity.name, entity.code, previewRoleLabel(entity.type)]
+        .some((value) => String(value || '').toLocaleLowerCase().includes(q));
+    }).slice(0, 10);
+
+    if (!matches.length) {
+      results.innerHTML = '<div class="portal-preview-empty">কোনো matching profile পাওয়া যায়নি।</div>';
+    } else {
+      results.innerHTML = matches.map((entity) => `
+        <button class="portal-preview-result" type="button" role="option" data-preview-key="${esc(entity.type + ':' + entity.id)}">
+          <span class="portal-preview-result-main"><strong>${esc(entity.name)}</strong><small>${esc(entity.code)}</small></span>
+          <span class="portal-preview-role ${esc(entity.type)}">${esc(previewRoleLabel(entity.type))}</span>
+        </button>`).join('');
+      results.querySelectorAll('[data-preview-key]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.previewKey || '';
+          selectedPreviewEntity = previewEntities.find((entity) => entity.type + ':' + entity.id === key) || null;
+          if (!selectedPreviewEntity) return;
+          input.value = `${selectedPreviewEntity.name} · ${selectedPreviewEntity.code} · ${previewRoleLabel(selectedPreviewEntity.type)}`;
+          $('openPortalPreview').disabled = false;
+          message('previewMessage', `${previewRoleLabel(selectedPreviewEntity.type)} selected · ${selectedPreviewEntity.code}`);
+          hidePreviewResults();
+        });
+      });
+    }
+    results.classList.remove('hidden');
+    input.setAttribute('aria-expanded', 'true');
+  }
+
   async function loadPreview() {
     const box = $('portalPreview');
     if (!box || access.profile.role !== 'owner') return;
     box.classList.remove('hidden');
-    const [students, teachers] = await Promise.all([
+    const [students, teachers, helpers] = await Promise.all([
       client.from('qa_students').select('student_id,student_code,full_name').eq('status', 'active').order('student_code'),
-      client.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('teacher_code')
+      client.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('teacher_code'),
+      client.from('qa_staff').select('staff_id,staff_code,full_name,staff_type').eq('staff_type', 'helper').eq('active', true).order('staff_code')
     ]);
     if (students.error) throw students.error;
     if (teachers.error) throw teachers.error;
-    $('studentPreviewSelect').innerHTML = '<option value="">Student নির্বাচন করুন</option>' + (students.data || []).map((x) => `<option value="${esc(x.student_id)}">${esc(x.student_code)} · ${esc(x.full_name)}</option>`).join('');
-    $('teacherPreviewSelect').innerHTML = '<option value="">Teacher নির্বাচন করুন</option>' + (teachers.data || []).map((x) => `<option value="${esc(x.teacher_id)}">${esc(x.teacher_code)} · ${esc(x.full_name)}</option>`).join('');
-    message('previewMessage', (students.data || []).length || (teachers.data || []).length ? '' : 'এখনো কোনো active Student/Teacher পাওয়া যায়নি।');
+    if (helpers.error) throw helpers.error;
+
+    previewEntities = [
+      ...(students.data || []).map((x) => ({ type:'student', id:x.student_id, code:x.student_code, name:x.full_name })),
+      ...(teachers.data || []).map((x) => ({ type:'teacher', id:x.teacher_id, code:x.teacher_code, name:x.full_name })),
+      ...(helpers.data || []).map((x) => ({ type:'helper', id:x.staff_id, code:x.staff_code, name:x.full_name }))
+    ].filter((x) => x.id && x.code && x.name);
+
+    selectedPreviewEntity = null;
+    $('openPortalPreview').disabled = true;
+    message('previewMessage', previewEntities.length ? '' : 'এখনো কোনো active Student, Teacher বা Helper পাওয়া যায়নি।');
   }
 
-  function openPreview(kind) {
-    const id = kind === 'student' ? $('studentPreviewSelect').value : $('teacherPreviewSelect').value;
-    if (!id) {
-      message('previewMessage', kind === 'student' ? 'একজন Student নির্বাচন করুন।' : 'একজন Teacher নির্বাচন করুন.', 'error');
+  function openPreview() {
+    if (!selectedPreviewEntity) {
+      message('previewMessage', 'প্রথমে একজন Student, Teacher বা Helper নির্বাচন করুন।', 'error');
       return;
     }
-    window.location.href = `${kind === 'student' ? 'student-portal.html?preview_student=' : 'teacher-portal.html?preview_teacher='}${encodeURIComponent(id)}`;
+    window.location.href = previewRoute(selectedPreviewEntity);
   }
 
   function roleSelect(role) {
@@ -239,8 +400,14 @@
   async function loadUsers() {
     const { data, error } = await client.from('qa_users').select('user_id,email,full_name,role,active').order('created_at');
     if (error) throw error;
+    const rows = data || [];
     const body = $('userRows');
-    body.innerHTML = (data || []).map((u) => `<tr data-id="${esc(u.user_id)}"><td>${esc(u.email)}</td><td><input data-name value="${esc(u.full_name)}"></td><td>${roleSelect(u.role)}</td><td><select data-active><option value="true" ${u.active ? 'selected' : ''}>Active</option><option value="false" ${!u.active ? 'selected' : ''}>Inactive</option></select></td><td><div class="action-stack"><button class="save-btn" data-save type="button">Save</button>${u.role === 'sub_admin' ? '<button class="save-btn secondary" data-permissions type="button">Permissions</button>' : ''}</div></td></tr>`).join('');
+    body.innerHTML = rows.map((u) => `<tr data-id="${esc(u.user_id)}"><td>${esc(u.email)}</td><td><input data-name value="${esc(u.full_name)}"></td><td>${roleSelect(u.role)}</td><td><select data-active><option value="true" ${u.active ? 'selected' : ''}>Active</option><option value="false" ${!u.active ? 'selected' : ''}>Inactive</option></select></td><td><div class="action-stack"><button class="save-btn" data-save type="button">Save</button>${u.role === 'sub_admin' ? '<button class="save-btn secondary" data-permissions type="button">Permissions</button>' : ''}</div></td></tr>`).join('');
+    const activeCount = rows.filter((u) => u.active).length;
+    if ($('userManagementStatus')) {
+      $('userManagementStatus').textContent = `${activeCount} Active`;
+      $('userManagementStatus').classList.add('is-complete');
+    }
     body.querySelectorAll('[data-save]').forEach((b) => b.addEventListener('click', saveUser));
     body.querySelectorAll('[data-permissions]').forEach((b) => b.addEventListener('click', editPermissions));
   }
@@ -330,8 +497,42 @@
   }
 
   function bindUI() {
-    $('openStudentPreview')?.addEventListener('click', () => openPreview('student'));
-    $('openTeacherPreview')?.addEventListener('click', () => openPreview('teacher'));
+    const previewSearch = $('portalPreviewSearch');
+    previewSearch?.addEventListener('focus', () => renderPreviewResults(previewSearch.value));
+    previewSearch?.addEventListener('input', () => {
+      selectedPreviewEntity = null;
+      $('openPortalPreview').disabled = true;
+      message('previewMessage', '');
+      renderPreviewResults(previewSearch.value);
+    });
+    previewSearch?.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') hidePreviewResults();
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (selectedPreviewEntity) return openPreview();
+        const first = $('portalPreviewResults')?.querySelector('[data-preview-key]');
+        first?.click();
+      }
+    });
+    $('openPortalPreview')?.addEventListener('click', openPreview);
+    document.addEventListener('click', (event) => {
+      if (!$('portalPreview')?.contains(event.target)) hidePreviewResults();
+    });
+    $('toggleSchoolProfile')?.addEventListener('click', () => {
+      const open = $('toggleSchoolProfile').getAttribute('aria-expanded') !== 'true';
+      setAccordion('toggleSchoolProfile','schoolProfileBody','Open School Profile','Close School Profile',open);
+    });
+    $('toggleUserManagement')?.addEventListener('click', () => {
+      const open = $('toggleUserManagement').getAttribute('aria-expanded') !== 'true';
+      setAccordion('toggleUserManagement','userManagementBody','Open User & Role Management','Close User & Role Management',open);
+    });
+    $('schoolProfileForm')?.addEventListener('submit', saveSchoolProfile);
+    $('resetSchoolProfile')?.addEventListener('click', resetSchoolProfile);
+    $('schoolLogoPath')?.addEventListener('input', () => {
+      const value = $('schoolLogoPath').value.trim() || schoolProfileDefaults.logo_path;
+      $('schoolLogoPreview').src = value;
+      updateSchoolProfileStatus();
+    });
     $('selectAllPermissions')?.addEventListener('click', () => {
       document.querySelectorAll('input[name="subPerm"]').forEach((x) => { x.checked = true; });
       normalize('subPerm');
@@ -384,6 +585,9 @@
 
     void optional(loadMetrics, null, 'Dashboard metrics');
     void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+    if (access.can('settings.manage')) {
+      void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
+    }
 
     if (profile.role === 'owner') {
       show('userManagement');

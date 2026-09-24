@@ -1,14 +1,24 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
 import{mountDocumentsPanel}from'./documents-ui.js?v=20260922-2';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[];
+const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],editBaseline='',allowNavigation=false;
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
+function profileEditState(){
+  const ids=['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'];
+  return JSON.stringify(Object.fromEntries(ids.filter(x=>$(x)).map(x=>[x,$(x).value??''])));
+}
+function startEditTracking(){editBaseline=profileEditState();allowNavigation=false;}
+function clearEditTracking(){editBaseline='';allowNavigation=false;}
+function hasUnsavedProfileChanges(){return Boolean(editing&&editBaseline&&profileEditState()!==editBaseline);}
+function confirmDiscardChanges(){return !hasUnsavedProfileChanges()||window.confirm('আপনার কিছু পরিবর্তন এখনো Save করা হয়নি। এই পেজ থেকে বের হলে পরিবর্তনগুলো বাতিল হয়ে যাবে।\n\nবের হতে চান?');}
+function guardLink(id){$(id)?.addEventListener('click',event=>{if(!hasUnsavedProfileChanges())return;if(!confirmDiscardChanges()){event.preventDefault();return;}allowNavigation=true;});}
+window.addEventListener('beforeunload',event=>{if(allowNavigation||!hasUnsavedProfileChanges())return;event.preventDefault();event.returnValue='';});
 const esc=v=>String(v??'').replace(/[&<>\"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[x]));
 const canView=()=>access?.can(type==='teacher'?'teachers.view':'staff.view');
 const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage');
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
-function setInputs(on){['fullName','fullNameBn','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
+function setInputs(on){['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
 function updateContext(){
   const teacher=type==='teacher';
   $('topBack').href=`staff.html#${teacher?'teachers':'helpers'}`;
@@ -24,6 +34,7 @@ function fill(){
   $('code').value=teacher?row.teacher_code:row.staff_code;
   $('fullName').value=row.full_name||'';
   $('fullNameBn').value=row.full_name_bn||'';
+  $('gender').value=['male','female','unspecified'].includes(row.gender)?row.gender:'unspecified';
   $('phone').value=row.phone||'';
   $('email').value=row.email||'';
   $('specialization').value=teacher?row.specialization||'':'';
@@ -151,8 +162,8 @@ async function load(){
   updateContext();
   const table=type==='teacher'?'qa_teachers':'qa_staff';
   const fields=type==='teacher'
-    ?'teacher_id,teacher_code,full_name,full_name_bn,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
-    :'staff_id,staff_code,full_name,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
+    ?'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
+    :'staff_id,staff_code,full_name,gender,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
   const{data,error}=await supabase.from(table).select(fields).eq(type==='teacher'?'teacher_id':'staff_id',id).maybeSingle();
   if(error)throw error;
   if(!data)throw Error('Profile পাওয়া যায়নি।');
@@ -163,18 +174,18 @@ async function load(){
   if(type==='teacher') await loadTeacherAssignments();
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();};
-$('cancelBtn').onclick=async()=>{editing=false;msg('');await load()};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();startEditTracking();};
+$('cancelBtn').onclick=async()=>{editing=false;clearEditTracking();msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
   if(!canManage())return msg(`${type==='teacher'?'Teacher':'Helper'} edit permission নেই।`,'error');
   $('saveBtn').disabled=true;msg('Saving…');
-  const payload={full_name:$('fullName').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
+  const payload={full_name:$('fullName').value.trim(),gender:['male','female','unspecified'].includes($('gender').value)?$('gender').value:'unspecified',phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
   if(type==='teacher'){payload.full_name_bn=$('fullNameBn').value.trim();payload.specialization=$('specialization').value.trim()||null}
   try{
     const{error}=await supabase.from(type==='teacher'?'qa_teachers':'qa_staff').update(payload).eq(type==='teacher'?'teacher_id':'staff_id',id);
     if(error)throw error;
-    editing=false;await load();msg('Profile updated successfully.','success');
+    editing=false;clearEditTracking();await load();msg('Profile updated successfully.','success');
   }catch(e){console.error(e);msg(e.message||'Profile update করা যায়নি।','error')}finally{$('saveBtn').disabled=false}
 };
 $('removeBtn').onclick=async()=>{
@@ -190,7 +201,9 @@ $('removeBtn').onclick=async()=>{
     location.replace(`staff.html#${type==='teacher'?'teachers':'helpers'}`);
   }catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false}
 };
-$('signOut').onclick=async()=>{await supabase.auth.signOut();location.replace('./')};
+$('signOut').onclick=async()=>{if(!confirmDiscardChanges())return;allowNavigation=true;await supabase.auth.signOut();location.replace('./')};
+guardLink('backBtn');
+guardLink('topBack');
 (async()=>{
   try{
     access=await getAccess(supabase);

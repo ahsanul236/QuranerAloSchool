@@ -6,7 +6,7 @@
 <title>Finance & Vouchers | QURANER ALO</title>
 <link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-1">
-<link rel="stylesheet" href="dashboard.css?v=20260919-5">
+<link rel="stylesheet" href="dashboard.css?v=20260924-7">
 <style>
 .finance-page-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:12px 0 20px}
 .finance-page-head h1{margin:0;font-size:30px}
@@ -43,19 +43,30 @@
   <div class="page-head">
     <div><p class="eyebrow">আয়</p><h1>আয় ব্যবস্থাপনা</h1><p class="muted">আয়ের তথ্য ও রেকর্ড এখান থেকে পরিচালনা করুন। প্রতিটি নতুন আয়ের জন্য ভাউচার স্বয়ংক্রিয়ভাবে তৈরি হবে।</p></div>
   </div>
-  <div class="panel finance-entry-card">
-    <div class="panel-head"><h2>নতুন Income</h2><span class="eyebrow">INCOME.MANAGE</span></div>
-    <form id="financeForm" class="form-grid" style="padding:18px">
-      <input id="direction" type="hidden" value="income">
-      <label>Date<input id="transactionDate" type="date" required></label>
-      <label>Category<input id="category" required placeholder="Donation, Service, Other..."></label>
-      <label>Amount (৳)<input id="amount" type="number" min="0.01" step="0.01" required></label>
-      <label>Account<select id="accountName"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
-      <label>Reference<input id="reference" placeholder="Optional reference"></label>
-      <label class="span-2">Description<textarea id="description"></textarea></label>
-      <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Income & Generate Voucher</button></div>
-    </form>
-    <div id="financeMessage" class="message-inline" style="padding:0 18px 18px"></div>
+  <div class="panel finance-entry-card settings-accordion">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">＋</span>
+        <div><h2>নতুন Income</h2><p>নতুন আয় যোগ করুন এবং স্বয়ংক্রিয়ভাবে Voucher তৈরি করুন।</p></div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span class="settings-status-badge">INCOME.MANAGE</span>
+        <button id="toggleIncomeEntry" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="incomeEntryBody">Open New Income <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="incomeEntryBody" class="settings-accordion-body hidden">
+      <form id="financeForm" class="form-grid" style="padding:18px">
+        <input id="direction" type="hidden" value="income">
+        <label>Date<input id="transactionDate" type="date" required></label>
+        <label>Category<input id="category" required placeholder="Donation, Service, Other..."></label>
+        <label>Amount (৳)<input id="amount" type="number" min="0.01" step="0.01" required></label>
+        <label>Account<select id="accountName"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
+        <label>Reference<input id="reference" placeholder="Optional reference"></label>
+        <label class="span-2">Description<textarea id="description"></textarea></label>
+        <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Income & Generate Voucher</button></div>
+      </form>
+      <div id="financeMessage" class="message-inline" style="padding:0 18px 18px"></div>
+    </div>
   </div>
   <div class="panel"><div class="panel-head"><h2>Recent Income</h2><span id="incomeCount" class="eyebrow">0 records</span></div>
     <div class="table-wrap"><table class="user-table attendance-table"><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Account</th><th>Reference</th><th>Voucher</th></tr></thead><tbody id="incomeRows"></tbody></table></div>
@@ -66,18 +77,29 @@
   <div class="page-head">
     <div><p class="eyebrow">ব্যয়</p><h1>ব্যয় ব্যবস্থাপনা</h1><p class="muted">ব্যয়ের তথ্য ও রেকর্ড এখান থেকে পরিচালনা করুন। প্রতিটি নতুন ব্যয়ের জন্য ভাউচার স্বয়ংক্রিয়ভাবে তৈরি হবে।</p></div>
   </div>
-  <div class="panel finance-entry-card">
-    <div class="panel-head"><h2>নতুন Expense</h2><span class="eyebrow">EXPENSE.MANAGE</span></div>
-    <form id="expenseForm" class="form-grid" style="padding:18px">
-      <label>Date<input id="expenseDate" type="date" required></label>
-      <label>Category<input id="expenseCategory" required placeholder="Internet, Salary, Utilities..."></label>
-      <label>Amount (৳)<input id="expenseAmount" type="number" min="0.01" step="0.01" required></label>
-      <label>Account<select id="expenseAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
-      <label>Reference<input id="expenseReference" placeholder="Optional reference"></label>
-      <label class="span-2">Description<textarea id="expenseDescription"></textarea></label>
-      <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Expense & Generate Voucher</button></div>
-    </form>
-    <div id="expenseMessage" class="message-inline" style="padding:0 18px 18px"></div>
+  <div class="panel finance-entry-card settings-accordion">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">−</span>
+        <div><h2>নতুন Expense</h2><p>নতুন ব্যয় যোগ করুন এবং স্বয়ংক্রিয়ভাবে Voucher তৈরি করুন।</p></div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span class="settings-status-badge">EXPENSE.MANAGE</span>
+        <button id="toggleExpenseEntry" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="expenseEntryBody">Open New Expense <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="expenseEntryBody" class="settings-accordion-body hidden">
+      <form id="expenseForm" class="form-grid" style="padding:18px">
+        <label>Date<input id="expenseDate" type="date" required></label>
+        <label>Category<input id="expenseCategory" required placeholder="Internet, Salary, Utilities..."></label>
+        <label>Amount (৳)<input id="expenseAmount" type="number" min="0.01" step="0.01" required></label>
+        <label>Account<select id="expenseAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
+        <label>Reference<input id="expenseReference" placeholder="Optional reference"></label>
+        <label class="span-2">Description<textarea id="expenseDescription"></textarea></label>
+        <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Expense & Generate Voucher</button></div>
+      </form>
+      <div id="expenseMessage" class="message-inline" style="padding:0 18px 18px"></div>
+    </div>
   </div>
   <div class="panel"><div class="panel-head"><h2>Recent Expense</h2><span id="expenseCount" class="eyebrow">0 records</span></div>
     <div class="table-wrap"><table class="user-table attendance-table"><thead><tr><th>Date</th><th>Category</th><th>Amount</th><th>Account</th><th>Reference</th><th>Voucher</th></tr></thead><tbody id="expenseRows"></tbody></table></div>
@@ -86,6 +108,32 @@
 
 <section id="vouchersView" class="finance-view">
   <div class="page-head"><div><p class="eyebrow">ভাউচার</p><h1>ভাউচার ব্যবস্থাপনা</h1><p class="muted">ফি, বেতন, আয়, ব্যয় ও ম্যানুয়াল ভাউচার এক জায়গা থেকে দেখুন ও প্রিন্ট করুন।</p></div></div>
+  <div class="panel finance-entry-card settings-accordion">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">▣</span>
+        <div><h2>Manual Voucher</h2><p>প্রয়োজনে হাতে Manual Voucher তৈরি করুন।</p></div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span class="settings-status-badge">VOUCHERS.MANAGE</span>
+        <button id="toggleManualVoucher" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="manualVoucherBody">Open Manual Voucher <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="manualVoucherBody" class="settings-accordion-body hidden">
+      <form id="voucherForm" class="form-grid" style="padding:18px">
+        <label>Voucher Type<select id="voucherType"><option value="expense">Expense Voucher</option><option value="donation">Donation Receipt</option><option value="income">Income Voucher</option><option value="salary_payment">Salary Payment Voucher</option><option value="fee_receipt">Fee Receipt</option><option value="cash_transfer">Cash Transfer</option><option value="advance">Advance Voucher</option><option value="refund">Refund Voucher</option></select></label>
+        <label>Date<input id="voucherDate" type="date" required></label>
+        <label>Amount (৳)<input id="voucherAmount" type="number" min="0" step="0.01" required></label>
+        <label>Account<select id="voucherAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
+        <label>Party Name<input id="partyName" placeholder="Student / Teacher / Donor / Vendor"></label>
+        <label>Reference<input id="voucherReference"></label>
+        <label class="span-2">Description<textarea id="voucherDescription"></textarea></label>
+        <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Create Voucher</button></div>
+      </form>
+      <div id="voucherMessage" class="message-inline" style="padding:0 18px 18px"></div>
+    </div>
+  </div>
+
   <div class="panel vouchers-panel">
     <div class="panel-head vouchers-panel-head">
       <div>
@@ -94,7 +142,6 @@
       </div>
       <div class="vouchers-head-actions">
         <span id="voucherCount" class="eyebrow">0 vouchers</span>
-        <button id="openManualVoucher" class="secondary-btn" type="button">+ Manual Voucher</button>
       </div>
     </div>
 
@@ -151,28 +198,9 @@
   </div>
 </section></section>
 
-<div id="manualVoucherModal" class="voucher-modal hidden" aria-hidden="true">
-  <div class="voucher-modal-backdrop" data-close-voucher-modal></div>
-  <section class="voucher-modal-card" role="dialog" aria-modal="true" aria-labelledby="manualVoucherTitle">
-    <div class="voucher-modal-head">
-      <div><h2 id="manualVoucherTitle">Manual Voucher Entry</h2><p class="muted">আগের manual voucher তৈরির সুবিধাটি এখানেই রাখা হয়েছে।</p></div>
-      <button id="closeManualVoucher" class="secondary-btn" type="button">Close</button>
-    </div>
-    <form id="voucherForm" class="form-grid" style="padding:18px">
-      <label>Voucher Type<select id="voucherType"><option value="expense">Expense Voucher</option><option value="donation">Donation Receipt</option><option value="income">Income Voucher</option><option value="salary_payment">Salary Payment Voucher</option><option value="fee_receipt">Fee Receipt</option><option value="cash_transfer">Cash Transfer</option><option value="advance">Advance Voucher</option><option value="refund">Refund Voucher</option></select></label>
-      <label>Date<input id="voucherDate" type="date" required></label>
-      <label>Amount (৳)<input id="voucherAmount" type="number" min="0" step="0.01" required></label>
-      <label>Account<select id="voucherAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label>
-      <label>Party Name<input id="partyName" placeholder="Student / Teacher / Donor / Vendor"></label>
-      <label>Reference<input id="voucherReference"></label>
-      <label class="span-2">Description<textarea id="voucherDescription"></textarea></label>
-      <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Create Voucher</button></div>
-    </form>
-    <div id="voucherMessage" class="message-inline" style="padding:0 18px 18px"></div>
-  </section>
-</div><p class="footer-note">Income/Expense vouchers are generated server-side and linked to their source transaction.</p>
+<p class="footer-note">Income/Expense vouchers are generated server-side and linked to their source transaction.</p>
 </div></section></main>
 <script src="supabase-config.js"></script>
-<script type="module" src="finance.js?v=20260919-6"></script>
+<script type="module" src="finance.js?v=20260925-1"></script>
 <script src="management-nav.js?v=20260918-4"></script>
 </body></html>

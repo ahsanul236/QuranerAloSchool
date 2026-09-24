@@ -10,6 +10,7 @@ function msg(id,t,type=''){const el=$(id);if(!el)return;el.innerHTML=t;el.classN
 function today(){return new Date().toISOString().slice(0,10)}
 function setFormEnabled(formId,enabled){const form=$(formId);if(!form)return;form.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el=>el.disabled=!enabled)}
 let access=null,canFinanceView=false,canFinanceManage=false,canVoucherView=false,canVoucherManage=false,currentView='income',voucherRecords=[];
+function setAccordion(buttonId,bodyId,openLabel,closeLabel,open){const button=$(buttonId),body=$(bodyId);if(!button||!body)return;body.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.innerHTML=(open?closeLabel:openLabel)+' <span aria-hidden="true">'+(open?'⌃':'⌄')+'</span>';}
 function viewFromHash(){const hash=location.hash.replace('#','');return hash==='expense'?'expense':hash==='vouchers'?'vouchers':'income';}
 function updateView(){
   currentView=viewFromHash();
@@ -20,7 +21,7 @@ function updateView(){
   setFormEnabled('financeForm',currentView==='income'&&canFinanceManage);
   setFormEnabled('expenseForm',currentView==='expense'&&canFinanceManage);
   setFormEnabled('voucherForm',currentView==='vouchers'&&canVoucherManage);
-  $('openManualVoucher')?.classList.toggle('hidden',!canVoucherManage);
+  $('toggleManualVoucher')?.classList.toggle('hidden',!canVoucherManage);
 }
 async function findVoucher(sourceId){const {data,error}=await supabase.from('qa_vouchers').select('voucher_id,voucher_no,voucher_type').eq('source_type','finance_transaction').eq('source_id',sourceId).maybeSingle();if(error)throw error;return data;}
 function voucherLink(v){return v?'<a class="quick-link" target="_blank" rel="noopener" href="receipt.html?type=voucher&id='+encodeURIComponent(v.voucher_id)+'">'+esc(v.voucher_no)+'</a>':'—';}
@@ -144,22 +145,12 @@ $('voucherForm').addEventListener('submit',async e=>{
   const row={voucher_type:$('voucherType').value,voucher_date:$('voucherDate').value,amount:+$('voucherAmount').value,account_name:$('voucherAccount').value,party_name:$('partyName').value.trim(),reference:$('voucherReference').value.trim()||null,description:$('voucherDescription').value.trim()};
   const {data,error}=await supabase.from('qa_vouchers').insert(row).select('voucher_id,voucher_no').single();
   if(error){console.error(error);msg('voucherMessage','Voucher save করা যায়নি।','error');return;}
-  msg('voucherMessage','Voucher তৈরি হয়েছে: <strong>'+esc(data.voucher_no)+'</strong> &nbsp; <a class="quick-link" target="_blank" rel="noopener" href="receipt.html?type=voucher&id='+encodeURIComponent(data.voucher_id)+'">Open Voucher</a>','success');closeManualVoucherModal();
+  msg('voucherMessage','Voucher তৈরি হয়েছে: <strong>'+esc(data.voucher_no)+'</strong> &nbsp; <a class="quick-link" target="_blank" rel="noopener" href="receipt.html?type=voucher&id='+encodeURIComponent(data.voucher_id)+'">Open Voucher</a>','success');setAccordion('toggleManualVoucher','manualVoucherBody','Open Manual Voucher','Close Manual Voucher',false);
   e.target.reset();$('voucherDate').value=today();await refresh();
 });
-function openManualVoucherModal(){
-  if(!canVoucherManage)return;
-  const modal=$('manualVoucherModal');if(!modal)return;
-  modal.classList.remove('hidden');modal.setAttribute('aria-hidden','false');
-  $('voucherDate').value=today();$('voucherAmount').focus();
-}
-function closeManualVoucherModal(){
-  const modal=$('manualVoucherModal');if(!modal)return;
-  modal.classList.add('hidden');modal.setAttribute('aria-hidden','true');
-}
-$('openManualVoucher')?.addEventListener('click',openManualVoucherModal);
-$('closeManualVoucher')?.addEventListener('click',closeManualVoucherModal);
-document.querySelector('[data-close-voucher-modal]')?.addEventListener('click',closeManualVoucherModal);
+$('toggleIncomeEntry')?.addEventListener('click',()=>{const open=$('toggleIncomeEntry').getAttribute('aria-expanded')!=='true';setAccordion('toggleIncomeEntry','incomeEntryBody','Open New Income','Close New Income',open);});
+$('toggleExpenseEntry')?.addEventListener('click',()=>{const open=$('toggleExpenseEntry').getAttribute('aria-expanded')!=='true';setAccordion('toggleExpenseEntry','expenseEntryBody','Open New Expense','Close New Expense',open);});
+$('toggleManualVoucher')?.addEventListener('click',()=>{if(!canVoucherManage)return;const open=$('toggleManualVoucher').getAttribute('aria-expanded')!=='true';setAccordion('toggleManualVoucher','manualVoucherBody','Open Manual Voucher','Close Manual Voucher',open);if(open){$('voucherDate').value=today();setTimeout(()=>$('voucherAmount')?.focus(),0);}});
 ['voucherSearch','voucherTypeFilter','voucherDateFilter','voucherSourceFilter','voucherStatusFilter'].forEach(id=>{
   $(id)?.addEventListener('input',renderVoucherRows);
   $(id)?.addEventListener('change',renderVoucherRows);
@@ -172,7 +163,6 @@ $('clearVoucherSearch')?.addEventListener('click',()=>{
   if($('voucherStatusFilter'))$('voucherStatusFilter').value='all';
   renderVoucherRows();
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeManualVoucherModal();});
 $('signOut').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./')});
 window.addEventListener('hashchange',updateView);
 async function init(){

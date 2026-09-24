@@ -1,8 +1,7 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260919-5"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260924-7"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
 <div id="overviewView">
   <div class="page-head"><div><p class="eyebrow">সারসংক্ষেপ</p><h1>ওভারভিউ</h1><p class="muted">স্কুল ব্যবস্থাপনার গুরুত্বপূর্ণ সারসংক্ষেপ ও রিপোর্ট এক জায়গায় দেখুন।</p></div></div>
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2><a class="quick-link" href="exports.html">Lists & Export →</a></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
-</div>
 
   
 <div class="panel">
@@ -30,14 +29,85 @@
       <div class="portal-summary-card"><span>Helpers</span><strong id="helperActivationSummary">—</strong><small id="helperActivationHint">—</small></div>
     </div>
   </div>
-  <div id="portalPreview" class="panel hidden"><div class="panel-head"><h2>Portal Preview</h2><span class="eyebrow">SUPER ADMIN</span></div><div style="padding:16px"><p class="permission-note">Student বা Teacher-এর বাস্তব account data দিয়ে তাদের portal view দেখুন। এটি শুধু read-only preview; আপনার Super Admin session-ই থাকবে।</p><div class="form-grid"><label>Student portal preview<select id="studentPreviewSelect"><option value="">Student নির্বাচন করুন</option></select></label><label>Teacher portal preview<select id="teacherPreviewSelect"><option value="">Teacher নির্বাচন করুন</option></select></label><div class="page-actions"><button id="openStudentPreview" class="primary-btn" style="width:auto" type="button">Student View খুলুন</button><button id="openTeacherPreview" class="secondary-btn" style="width:auto" type="button">Teacher View খুলুন</button><span id="previewMessage" class="message-inline"></span></div></div></div></div>
-  <div id="userManagement" class="panel hidden"><div class="panel-head"><h2>User & Role Management</h2><span class="eyebrow">USERS.MANAGE</span></div><div id="subAdminPanel" class="hidden" style="padding:16px;border-bottom:1px solid var(--line)"><form id="subAdminForm" class="form-grid"><label>Email<input id="subAdminEmail" type="email" required placeholder="subadmin@example.com"></label><label>Full Name<input id="subAdminName" type="text" required placeholder="Sub Admin name"></label><label>Password<input id="subAdminPassword" type="password" minlength="10" required placeholder="কমপক্ষে ১০ অক্ষর"></label><label>Confirm Password<input id="subAdminPassword2" type="password" minlength="10" required placeholder="আবার password"></label><div class="span-2 permission-editor"><div class="permission-head"><h3>Select permissions for Sub Admin</h3><button id="selectAllPermissions" class="link-btn" type="button">Select all</button></div><p class="permission-note">নতুন Sub Admin তৈরির সময় permissions নির্ধারণ করুন।</p><div id="subAdminPermissions" class="permission-grid"></div></div><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Sub Admin Account তৈরি করুন</button><span id="subAdminMessage" class="message-inline"></span></div></form></div><div class="table-wrap"><table class="user-table"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody id="userRows"></tbody></table></div><div id="existingPermissionPanel" class="hidden permission-editor existing-permissions"><div class="panel-head"><h3 id="existingPermissionTitle">Sub Admin permissions</h3><button id="closePermissionEditor" class="link-btn" type="button">Close</button></div><p class="permission-note">এখানে পরিবর্তন করলে নির্বাচিত Sub Admin-এর access update হবে।</p><div id="existingPermissions" class="permission-grid"></div><div class="page-actions"><button id="saveExistingPermissions" class="primary-btn" style="width:auto" type="button">Save permissions</button><span id="existingPermissionMessage" class="message-inline"></span></div></div></div>
-  <div class="panel">
-    <div class="panel-head"><h2>School Profile</h2><span class="eyebrow">SCHOOL SETTINGS</span></div>
-    <div style="padding:18px">
-      <p class="permission-note">প্রতিষ্ঠানের নাম, ঠিকানা, phone, email এবং receipt header পরিবর্তনের জন্য School Profile খুলুন।</p>
-      <a class="primary-btn" style="display:inline-block;width:auto;text-decoration:none" href="school-profile.html">Open School Profile →</a>
+  <div id="portalPreview" class="panel hidden">
+    <div class="panel-head"><h2>Portal Preview</h2><span class="eyebrow">SUPER ADMIN</span></div>
+    <div class="portal-preview-compact">
+      <p class="permission-note">Student, Teacher বা Helper-এর নাম বা ID দিয়ে খুঁজে read-only portal preview খুলুন। আপনার Super Admin session-ই থাকবে।</p>
+      <div class="portal-preview-row">
+        <div class="portal-preview-search">
+          <input id="portalPreviewSearch" type="search" autocomplete="off" placeholder="নাম বা ID দিয়ে খুঁজুন — Student / Teacher / Helper" aria-label="Portal preview profile search" aria-expanded="false" aria-controls="portalPreviewResults">
+          <div id="portalPreviewResults" class="portal-preview-results hidden" role="listbox"></div>
+        </div>
+        <button id="openPortalPreview" class="primary-btn portal-preview-open" type="button" disabled>Preview খুলুন</button>
+      </div>
+      <span id="previewMessage" class="message-inline"></span>
+    </div>
+  </div>
+  <div id="schoolProfilePanel" class="panel settings-accordion hidden">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">⌂</span>
+        <div>
+          <h2>School Profile</h2>
+          <p>প্রতিষ্ঠানের নাম, ঠিকানা, যোগাযোগ ও receipt header-এর তথ্য পরিচালনা করুন।</p>
+        </div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span id="schoolProfileStatus" class="settings-status-badge">Checking…</span>
+        <button id="toggleSchoolProfile" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="schoolProfileBody">Open School Profile <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="schoolProfileBody" class="settings-accordion-body hidden">
+      <form id="schoolProfileForm" class="settings-profile-form">
+        <div class="settings-section-label">প্রতিষ্ঠানের তথ্য</div>
+        <div class="form-grid">
+          <label>প্রতিষ্ঠানের নাম (বাংলা)<input id="schoolNameBn" required placeholder="কোরআনের আলো"></label>
+          <label>Institution Name (English)<input id="schoolNameEn" placeholder="QURANER ALO"></label>
+          <label class="span-2">ঠিকানা<textarea id="schoolAddress" rows="2" placeholder="প্রতিষ্ঠানের পূর্ণ ঠিকানা"></textarea></label>
+        </div>
+        <div class="settings-section-label">যোগাযোগ</div>
+        <div class="form-grid">
+          <label>ফোন নম্বর<input id="schoolPhone" type="tel" placeholder="+880..."></label>
+          <label>Email<input id="schoolEmail" type="email" placeholder="info@example.com"></label>
+          <label class="span-2">Website<input id="schoolWebsite" type="url" placeholder="https://..."></label>
+        </div>
+        <div class="settings-section-label">Receipt Header</div>
+        <div class="form-grid">
+          <label class="span-2">রিসিটের tagline<input id="schoolTagline" placeholder="কোরআনের আলোয় গড়ি আলোকিত জীবন"></label>
+          <label class="span-2">লোগোর Path<input id="schoolLogoPath" placeholder="assets/quraner-alo-logo.jpg"></label>
+        </div>
+        <div class="school-logo-preview-row">
+          <img id="schoolLogoPreview" src="assets/quraner-alo-logo.jpg" alt="School logo">
+          <span class="permission-note">বর্তমানে ব্যবহৃত প্রতিষ্ঠানের লোগো। Logo asset বদলালে path-টিও আপডেট করা যাবে।</span>
+        </div>
+        <div class="settings-form-footer">
+          <span id="schoolProfileMessage" class="message-inline"></span>
+          <div class="settings-form-actions">
+            <button id="saveSchoolProfile" class="primary-btn" type="submit">Save Changes</button>
+            <button id="resetSchoolProfile" class="secondary-btn" type="button">Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="userManagement" class="panel settings-accordion hidden">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">👥</span>
+        <div>
+          <h2>User & Role Management</h2>
+          <p>Sub Admin account, role, status এবং granular permissions পরিচালনা করুন।</p>
+        </div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span id="userManagementStatus" class="settings-status-badge">Loading…</span>
+        <button id="toggleUserManagement" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="userManagementBody">Open User & Role Management <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="userManagementBody" class="settings-accordion-body hidden">
+      <div id="subAdminPanel" class="hidden" style="padding:16px;border-bottom:1px solid var(--line)"><form id="subAdminForm" class="form-grid"><label>Email<input id="subAdminEmail" type="email" required placeholder="subadmin@example.com"></label><label>Full Name<input id="subAdminName" type="text" required placeholder="Sub Admin name"></label><label>Password<input id="subAdminPassword" type="password" minlength="10" required placeholder="কমপক্ষে ১০ অক্ষর"></label><label>Confirm Password<input id="subAdminPassword2" type="password" minlength="10" required placeholder="আবার password"></label><div class="span-2 permission-editor"><div class="permission-head"><h3>Select permissions for Sub Admin</h3><button id="selectAllPermissions" class="link-btn" type="button">Select all</button></div><p class="permission-note">নতুন Sub Admin তৈরির সময় permissions নির্ধারণ করুন।</p><div id="subAdminPermissions" class="permission-grid"></div></div><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Sub Admin Account তৈরি করুন</button><span id="subAdminMessage" class="message-inline"></span></div></form></div><div class="table-wrap"><table class="user-table"><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Action</th></tr></thead><tbody id="userRows"></tbody></table></div><div id="existingPermissionPanel" class="hidden permission-editor existing-permissions"><div class="panel-head"><h3 id="existingPermissionTitle">Sub Admin permissions</h3><button id="closePermissionEditor" class="link-btn" type="button">Close</button></div><p class="permission-note">এখানে পরিবর্তন করলে নির্বাচিত Sub Admin-এর access update হবে।</p><div id="existingPermissions" class="permission-grid"></div><div class="page-actions"><button id="saveExistingPermissions" class="primary-btn" style="width:auto" type="button">Save permissions</button><span id="existingPermissionMessage" class="message-inline"></span></div></div>
     </div>
   </div>
 </div>
-<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260918-13"></script><script type="module" src="dashboard-documents.js?v=20260921-2"></script></body></html>
+<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260924-4"></script><script type="module" src="dashboard-documents.js?v=20260921-2"></script></body></html>
