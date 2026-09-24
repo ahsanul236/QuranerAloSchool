@@ -6,11 +6,39 @@ const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const studentId=new URLSearchParams(location.search).get('id');
-let access=null,student=null,guardians=[],teachers=[],editing=false;
+let access=null,student=null,guardians=[],teachers=[],editing=false,editBaseline='',allowNavigation=false;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]));
 const login=()=>location.replace('./');
 const msg=(t,type='')=>{$('saveMessage').textContent=t;$('saveMessage').className=`message-inline ${type}`.trim();};
+
+function profileEditState(){
+  const ids=['fullName','gender','dateOfBirth','admissionDate','studentPhone','status','notes','fatherName','fatherNid','motherName','motherNid','birthRegistrationNo'];
+  const fields=Object.fromEntries(ids.map(id=>[id,$(id)?.value??'']));
+  const guardianFields=[...document.querySelectorAll('[data-g-field][data-g-id]')]
+    .map(el=>({id:el.dataset.gId||'',field:el.dataset.gField||'',value:el.value??''}))
+    .sort((a,b)=>(a.id+a.field).localeCompare(b.id+b.field));
+  const primary=document.querySelector('input[name="primaryGuardian"]:checked')?.value||'';
+  return JSON.stringify({fields,guardianFields,primary});
+}
+function startEditTracking(){editBaseline=profileEditState();allowNavigation=false;}
+function clearEditTracking(){editBaseline='';allowNavigation=false;}
+function hasUnsavedProfileChanges(){return Boolean(editing&&editBaseline&&profileEditState()!==editBaseline);}
+function confirmDiscardChanges(){
+  return !hasUnsavedProfileChanges()||window.confirm('আপনার কিছু পরিবর্তন এখনো Save করা হয়নি। এই পেজ থেকে বের হলে পরিবর্তনগুলো বাতিল হয়ে যাবে।\n\nবের হতে চান?');
+}
+function guardLink(id){
+  $(id)?.addEventListener('click',event=>{
+    if(!hasUnsavedProfileChanges())return;
+    if(!confirmDiscardChanges()){event.preventDefault();return;}
+    allowNavigation=true;
+  });
+}
+window.addEventListener('beforeunload',event=>{
+  if(allowNavigation||!hasUnsavedProfileChanges())return;
+  event.preventDefault();
+  event.returnValue='';
+});
 
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
@@ -157,7 +185,7 @@ async function save(){
       const {error:gle}=await supabase.from('qa_student_guardians').update({is_primary:g.guardian_id===selectedPrimary}).eq('student_id',studentId).eq('guardian_id',g.guardian_id);if(gle)throw gle;
     }
   }
-  editing=false;await load();
+  editing=false;clearEditTracking();await load();
 }
 
 $('saveTeacherBtn')?.addEventListener('click',async()=>{const btn=$('saveTeacherBtn');btn.disabled=true;$('teacherSaveMessage').textContent='Saving…';$('teacherSaveMessage').className='message-inline';try{await saveTeacherAssignment();}catch(e){console.error(e);$('teacherSaveMessage').textContent=e.message||'Teacher assignment save করা যায়নি।';$('teacherSaveMessage').className='message-inline error';}finally{btn.disabled=false;}}); 
@@ -181,9 +209,11 @@ $('removeTeacherBtn')?.addEventListener('click',async()=>{
     $('teacherSaveMessage').className='message-inline error';
   }finally{btn.disabled=false;}
 });
-$('editBtn').onclick=async()=>{editing=true;msg('');mode();await renderStudentDocuments();};
-$('cancelBtn').onclick=async()=>{editing=false;msg('');await load();};$('removeBtn').onclick=async()=>{if(!access?.can('students.manage')){msg('Student remove permission নেই।','error');return;}const name=student?.full_name||student?.student_code||'এই শিক্ষার্থী';const ok=window.confirm(`আপনি কি "${name}"-এর profile remove করতে চান?\\n\\nRemove করলে profile-টি স্থায়ীভাবে মুছে ফেলা হবে না; Student status "Withdrawn" করা হবে এবং fee, attendance, Quran progress ও অন্যান্য history সংরক্ষিত থাকবে।\\n\\nনিশ্চিত করতে OK চাপুন।`);if(!ok)return;$('removeBtn').disabled=true;msg('Removing profile…');try{const {error}=await supabase.from('qa_students').update({status:'withdrawn'}).eq('student_id',studentId);if(error)throw error;window.location.replace('students.html');}catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false;}};
+$('editBtn').onclick=async()=>{editing=true;msg('');mode();await renderStudentDocuments();startEditTracking();};
+$('cancelBtn').onclick=async()=>{editing=false;clearEditTracking();msg('');await load();};$('removeBtn').onclick=async()=>{if(!access?.can('students.manage')){msg('Student remove permission নেই।','error');return;}const name=student?.full_name||student?.student_code||'এই শিক্ষার্থী';const ok=window.confirm(`আপনি কি "${name}"-এর profile remove করতে চান?\\n\\nRemove করলে profile-টি স্থায়ীভাবে মুছে ফেলা হবে না; Student status "Withdrawn" করা হবে এবং fee, attendance, Quran progress ও অন্যান্য history সংরক্ষিত থাকবে।\\n\\nনিশ্চিত করতে OK চাপুন।`);if(!ok)return;$('removeBtn').disabled=true;msg('Removing profile…');try{const {error}=await supabase.from('qa_students').update({status:'withdrawn'}).eq('student_id',studentId);if(error)throw error;window.location.replace('students.html');}catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false;}};
 $('profileForm').onsubmit=async e=>{e.preventDefault();$('saveBtn').disabled=true;msg('Saving changes…');try{await save();msg('Student profile updated successfully.','success');}catch(err){console.error(err);msg(err?.message||'Profile update করা যায়নি।','error');}finally{$('saveBtn').disabled=false;}};
-$('signOut').onclick=async()=>{await supabase.auth.signOut();login();};
+$('signOut').onclick=async()=>{if(!confirmDiscardChanges())return;allowNavigation=true;await supabase.auth.signOut();login();};
+guardLink('backBtn');
+guardLink('topBack');
 
 (async()=>{try{access=await getAccess(supabase);if(!access){await supabase.auth.signOut();return login();}if(!access.can('students.view')&&!access.can('students.manage'))throw new Error('Student profile দেখার permission নেই।');$('loading').classList.add('hidden');$('app').classList.remove('hidden');await load();}catch(e){console.error(e);$('loading').classList.add('hidden');$('errorBox').textContent=e.message||'Profile load করা যায়নি।';$('errorBox').classList.remove('hidden');}})();
