@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const entityType = String(body?.entityType || '').toLowerCase();
     const entityId = String(body?.entityId || '');
-    if (!entityId || !['student', 'teacher'].includes(entityType)) {
+    if (!entityId || !['student', 'teacher', 'helper'].includes(entityType)) {
       return json({ error: 'INVALID_INPUT' }, 400);
     }
 
@@ -49,6 +49,18 @@ Deno.serve(async (req) => {
         .from('qa_students')
         .select('student_id,student_code,full_name,status,phone,email')
         .eq('student_id', entityId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) return json({ error: 'NOT_FOUND' }, 404);
+      return json({ ok: true, entityType, entity: data });
+    }
+
+    if (entityType === 'helper') {
+      const { data, error } = await admin
+        .from('qa_staff')
+        .select('staff_id,staff_code,full_name,staff_type,active,user_id')
+        .eq('staff_id', entityId)
+        .eq('staff_type', 'helper')
         .maybeSingle();
       if (error) throw error;
       if (!data) return json({ error: 'NOT_FOUND' }, 404);
