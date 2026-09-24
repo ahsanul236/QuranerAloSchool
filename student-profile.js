@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
-import {mountDocumentsPanel} from './documents-ui.js?v=20260922-2';
+import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260922-2';
 
 const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -40,6 +40,7 @@ window.addEventListener('beforeunload',event=>{
   event.returnValue='';
 });
 
+async function loadProfileImageWithFallback(role,personId,img){if(!img)return false;img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');const loaded=await setProfileImage({role,personId,img});if(!loaded){img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');}return loaded;}
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
 async function loadTeachers(){
@@ -64,7 +65,10 @@ function renderTeacherAssignment(){
   const currentMeta=currentTeacher
     ? [currentTeacher.teacher_code,currentTeacher.specialization,currentTeacher.active===false?'Inactive':'Active'].filter(Boolean).join(' · ')
     : 'Edit Profile খুলে শিক্ষক নির্বাচন করা যাবে।';
-  view.innerHTML='<strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small>';
+  view.innerHTML=currentTeacher
+    ? '<div class="relationship-person"><img id="assignedTeacherProfileImage" class="profile-photo-small" src="assets/quraner-alo-logo.jpg" alt="" aria-hidden="true"><div class="relationship-person-copy"><strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small></div></div>'
+    : '<strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small>';
+  if(currentTeacher?.teacher_id)void loadProfileImageWithFallback('teacher',currentTeacher.teacher_id,$('assignedTeacherProfileImage'));
   const rows=[{teacher_id:'',teacher_code:'',full_name:'কোনো শিক্ষক নেই',full_name_bn:'',active:true},...teachers.filter(t=>t.active!==false||t.teacher_id===currentId)];
   select.innerHTML=rows.map(t=>{
     const name=t.teacher_id?(t.full_name_bn||t.full_name||t.teacher_code):'কোনো শিক্ষক নেই';
@@ -108,6 +112,7 @@ function fillStudent(){
   $('birthRegistrationNo').value=student.birth_registration_no||'';
   $('profileTitle').textContent=student.full_name||'শিক্ষার্থী প্রোফাইল';
   $('profileSubtitle').textContent=`Student ID: ${student.student_code||'—'} · Status: ${String(student.status||'').replaceAll('_',' ')}`;
+  void loadProfileImageWithFallback('student',student.student_id,$('studentProfileImage'));
   setWhatsAppLink(student.phone);
 }
 
