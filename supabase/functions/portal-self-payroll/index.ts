@@ -40,9 +40,10 @@ Deno.serve(async (req) => {
     const action = String(body?.action || 'list').toLowerCase();
     const payrollId = String(body?.payrollId || '');
     const previewTeacherId = String(body?.previewTeacherId || '');
+    const previewHelperId = String(body?.previewHelperId || '');
 
-    if (previewTeacherId && actor.role !== 'owner') return json({ error: 'OWNER_ONLY' }, 403);
-    if (!previewTeacherId && !['teacher', 'helper', 'owner'].includes(actor.role)) return json({ error: 'ROLE_NOT_ALLOWED' }, 403);
+    if ((previewTeacherId || previewHelperId) && actor.role !== 'owner') return json({ error: 'OWNER_ONLY' }, 403);
+    if (!previewTeacherId && !previewHelperId && !['teacher', 'helper', 'owner'].includes(actor.role)) return json({ error: 'ROLE_NOT_ALLOWED' }, 403);
 
     let employeeType = '';
     let employeeRefId = '';
@@ -65,6 +66,25 @@ Deno.serve(async (req) => {
         phone: t.phone || '',
         email: t.email || '',
         extra: t.specialization || '',
+      };
+    } else if (actor.role === 'owner' && previewHelperId) {
+      const { data: s, error: se } = await admin
+        .from('qa_staff')
+        .select('staff_id,staff_code,full_name,phone,email,active,staff_type')
+        .eq('staff_id', previewHelperId)
+        .eq('staff_type', 'helper')
+        .maybeSingle();
+      if (se) throw se;
+      if (!s) return json({ error: 'EMPLOYEE_NOT_FOUND' }, 404);
+      employeeType = 'helper';
+      employeeRefId = s.staff_id;
+      employee = {
+        code: s.staff_code,
+        name: s.full_name,
+        type: 'Helper',
+        phone: s.phone || '',
+        email: s.email || '',
+        extra: '',
       };
     } else {
       const { data: t, error: te } = await admin
