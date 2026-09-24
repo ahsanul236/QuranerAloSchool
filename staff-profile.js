@@ -28,7 +28,7 @@ function updateContext(){
   $('title').textContent=teacher?'Teacher Profile':'Helper Profile';
   $('modeBadge').textContent='View mode';
   $('specialWrap').classList.toggle('hidden',!teacher);
-  $('bnWrap').classList.toggle('hidden',!teacher);
+  $('bnWrap').classList.remove('hidden');
 }
 function fill(){
   const teacher=type==='teacher';
@@ -167,7 +167,7 @@ async function load(){
   const table=type==='teacher'?'qa_teachers':'qa_staff';
   const fields=type==='teacher'
     ?'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
-    :'staff_id,staff_code,full_name,gender,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
+    :'staff_id,staff_code,full_name,full_name_bn,gender,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
   const{data,error}=await supabase.from(table).select(fields).eq(type==='teacher'?'teacher_id':'staff_id',id).maybeSingle();
   if(error)throw error;
   if(!data)throw Error('Profile পাওয়া যায়নি।');
@@ -184,8 +184,8 @@ $('form').onsubmit=async e=>{
   e.preventDefault();
   if(!canManage())return msg(`${type==='teacher'?'Teacher':'Helper'} edit permission নেই।`,'error');
   $('saveBtn').disabled=true;msg('Saving…');
-  const payload={full_name:$('fullName').value.trim(),gender:['male','female','unspecified'].includes($('gender').value)?$('gender').value:'unspecified',phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
-  if(type==='teacher'){payload.full_name_bn=$('fullNameBn').value.trim();payload.specialization=$('specialization').value.trim()||null}
+  const payload={full_name:$('fullName').value.trim(),full_name_bn:$('fullNameBn').value.trim()||null,gender:['male','female','unspecified'].includes($('gender').value)?$('gender').value:'unspecified',phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
+  if(type==='teacher'){payload.specialization=$('specialization').value.trim()||null}
   try{
     const{error}=await supabase.from(type==='teacher'?'qa_teachers':'qa_staff').update(payload).eq(type==='teacher'?'teacher_id':'staff_id',id);
     if(error)throw error;
