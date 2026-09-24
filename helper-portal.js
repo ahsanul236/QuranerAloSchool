@@ -7,9 +7,8 @@ const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
 });
 const $ = (id) => document.getElementById(id);
 const qs = new URLSearchParams(window.location.search);
-const isVercelPreview = location.hostname.endsWith('.vercel.app');
-const portalPreviewFunction = isVercelPreview ? 'portal-preview-compact-test' : 'portal-preview';
-const portalPayrollFunction = isVercelPreview ? 'portal-self-payroll-compact-test' : 'portal-self-payroll';
+const portalPreviewFunction = 'portal-preview';
+const portalPayrollFunction = 'portal-self-payroll';
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (ch) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
