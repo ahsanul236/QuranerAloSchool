@@ -7,6 +7,9 @@ const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
 });
 const $ = (id) => document.getElementById(id);
 const qs = new URLSearchParams(window.location.search);
+const isVercelPreview = location.hostname.endsWith('.vercel.app');
+const portalPreviewFunction = isVercelPreview ? 'portal-preview-compact-test' : 'portal-preview';
+const portalPayrollFunction = isVercelPreview ? 'portal-self-payroll-compact-test' : 'portal-self-payroll';
 
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (ch) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
@@ -56,7 +59,7 @@ async function resolveHelper(session) {
 
   if (previewId) {
     if (!viewer || !viewer.active || viewer.role !== 'owner') throw new Error('PREVIEW_NOT_ALLOWED');
-    const { data, error } = await supabase.functions.invoke('portal-preview', {
+    const { data, error } = await supabase.functions.invoke(portalPreviewFunction, {
       body: { entityType: 'helper', entityId: previewId }
     });
     if (error) throw error;
@@ -88,7 +91,7 @@ async function loadHelperDetails(staffId) {
 }
 
 async function loadPayroll(previewHelperId = '') {
-  const { data, error } = await supabase.functions.invoke('portal-self-payroll', {
+  const { data, error } = await supabase.functions.invoke(portalPayrollFunction, {
     body: previewHelperId ? { action: 'list', previewHelperId } : { action: 'list' }
   });
   if (error) throw error;
