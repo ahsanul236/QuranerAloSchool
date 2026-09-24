@@ -8,7 +8,7 @@ const canView=()=>access?.can(type==='teacher'?'teachers.view':'staff.view');
 const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage');
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
-function setInputs(on){['fullName','fullNameBn','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
+function setInputs(on){['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
 function updateContext(){
   const teacher=type==='teacher';
   $('topBack').href=`staff.html#${teacher?'teachers':'helpers'}`;
@@ -24,6 +24,7 @@ function fill(){
   $('code').value=teacher?row.teacher_code:row.staff_code;
   $('fullName').value=row.full_name||'';
   $('fullNameBn').value=row.full_name_bn||'';
+  $('gender').value=['male','female','unspecified'].includes(row.gender)?row.gender:'unspecified';
   $('phone').value=row.phone||'';
   $('email').value=row.email||'';
   $('specialization').value=teacher?row.specialization||'':'';
@@ -151,8 +152,8 @@ async function load(){
   updateContext();
   const table=type==='teacher'?'qa_teachers':'qa_staff';
   const fields=type==='teacher'
-    ?'teacher_id,teacher_code,full_name,full_name_bn,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
-    :'staff_id,staff_code,full_name,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
+    ?'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
+    :'staff_id,staff_code,full_name,gender,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
   const{data,error}=await supabase.from(table).select(fields).eq(type==='teacher'?'teacher_id':'staff_id',id).maybeSingle();
   if(error)throw error;
   if(!data)throw Error('Profile পাওয়া যায়নি।');
@@ -169,7 +170,7 @@ $('form').onsubmit=async e=>{
   e.preventDefault();
   if(!canManage())return msg(`${type==='teacher'?'Teacher':'Helper'} edit permission নেই।`,'error');
   $('saveBtn').disabled=true;msg('Saving…');
-  const payload={full_name:$('fullName').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
+  const payload={full_name:$('fullName').value.trim(),gender:['male','female','unspecified'].includes($('gender').value)?$('gender').value:'unspecified',phone:$('phone').value.trim(),email:$('email').value.trim(),father_name:$('fatherName').value.trim(),mother_name:$('motherName').value.trim(),nid_number:$('nidNumber').value.trim(),address:$('address').value.trim(),joining_date:$('joiningDate').value||null,active:$('active').value==='true',notes:$('notes').value.trim()};
   if(type==='teacher'){payload.full_name_bn=$('fullNameBn').value.trim();payload.specialization=$('specialization').value.trim()||null}
   try{
     const{error}=await supabase.from(type==='teacher'?'qa_teachers':'qa_staff').update(payload).eq(type==='teacher'?'teacher_id':'staff_id',id);
