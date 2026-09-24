@@ -208,28 +208,89 @@
     grid.innerHTML = sections.length ? sections.join('') : '<p class="overview-report-muted" style="padding:16px">আপনার account-এর জন্য report-viewable module পাওয়া যায়নি।</p>';
   }
 
+  let previewEntities = [];
+  let selectedPreviewEntity = null;
+
+  function previewRoleLabel(type) {
+    return type === 'student' ? 'Student' : type === 'teacher' ? 'Teacher' : 'Helper';
+  }
+
+  function previewRoute(entity) {
+    if (entity.type === 'student') return `student-portal.html?preview_student=${encodeURIComponent(entity.id)}`;
+    if (entity.type === 'teacher') return `teacher-portal.html?preview_teacher=${encodeURIComponent(entity.id)}`;
+    return `helper-portal.html?preview_helper=${encodeURIComponent(entity.id)}`;
+  }
+
+  function hidePreviewResults() {
+    $('portalPreviewResults')?.classList.add('hidden');
+    $('portalPreviewSearch')?.setAttribute('aria-expanded', 'false');
+  }
+
+  function renderPreviewResults(query = '') {
+    const results = $('portalPreviewResults');
+    const input = $('portalPreviewSearch');
+    if (!results || !input) return;
+    const q = String(query || '').trim().toLocaleLowerCase();
+    const matches = previewEntities.filter((entity) => {
+      if (!q) return true;
+      return [entity.name, entity.code, previewRoleLabel(entity.type)]
+        .some((value) => String(value || '').toLocaleLowerCase().includes(q));
+    }).slice(0, 10);
+
+    if (!matches.length) {
+      results.innerHTML = '<div class="portal-preview-empty">কোনো matching profile পাওয়া যায়নি।</div>';
+    } else {
+      results.innerHTML = matches.map((entity) => `
+        <button class="portal-preview-result" type="button" role="option" data-preview-key="${esc(entity.type + ':' + entity.id)}">
+          <span class="portal-preview-result-main"><strong>${esc(entity.name)}</strong><small>${esc(entity.code)}</small></span>
+          <span class="portal-preview-role ${esc(entity.type)}">${esc(previewRoleLabel(entity.type))}</span>
+        </button>`).join('');
+      results.querySelectorAll('[data-preview-key]').forEach((button) => {
+        button.addEventListener('click', () => {
+          const key = button.dataset.previewKey || '';
+          selectedPreviewEntity = previewEntities.find((entity) => entity.type + ':' + entity.id === key) || null;
+          if (!selectedPreviewEntity) return;
+          input.value = `${selectedPreviewEntity.name} · ${selectedPreviewEntity.code} · ${previewRoleLabel(selectedPreviewEntity.type)}`;
+          $('openPortalPreview').disabled = false;
+          message('previewMessage', `${previewRoleLabel(selectedPreviewEntity.type)} selected · ${selectedPreviewEntity.code}`);
+          hidePreviewResults();
+        });
+      });
+    }
+    results.classList.remove('hidden');
+    input.setAttribute('aria-expanded', 'true');
+  }
+
   async function loadPreview() {
     const box = $('portalPreview');
     if (!box || access.profile.role !== 'owner') return;
     box.classList.remove('hidden');
-    const [students, teachers] = await Promise.all([
+    const [students, teachers, helpers] = await Promise.all([
       client.from('qa_students').select('student_id,student_code,full_name').eq('status', 'active').order('student_code'),
-      client.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('teacher_code')
+      client.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('teacher_code'),
+      client.from('qa_staff').select('staff_id,staff_code,full_name,staff_type').eq('staff_type', 'helper').eq('active', true).order('staff_code')
     ]);
     if (students.error) throw students.error;
     if (teachers.error) throw teachers.error;
-    $('studentPreviewSelect').innerHTML = '<option value="">Student নির্বাচন করুন</option>' + (students.data || []).map((x) => `<option value="${esc(x.student_id)}">${esc(x.student_code)} · ${esc(x.full_name)}</option>`).join('');
-    $('teacherPreviewSelect').innerHTML = '<option value="">Teacher নির্বাচন করুন</option>' + (teachers.data || []).map((x) => `<option value="${esc(x.teacher_id)}">${esc(x.teacher_code)} · ${esc(x.full_name)}</option>`).join('');
-    message('previewMessage', (students.data || []).length || (teachers.data || []).length ? '' : 'এখনো কোনো active Student/Teacher পাওয়া যায়নি।');
+    if (helpers.error) throw helpers.error;
+
+    previewEntities = [
+      ...(students.data || []).map((x) => ({ type:'student', id:x.student_id, code:x.student_code, name:x.full_name })),
+      ...(teachers.data || []).map((x) => ({ type:'teacher', id:x.teacher_id, code:x.teacher_code, name:x.full_name })),
+      ...(helpers.data || []).map((x) => ({ type:'helper', id:x.staff_id, code:x.staff_code, name:x.full_name }))
+    ].filter((x) => x.id && x.code && x.name);
+
+    selectedPreviewEntity = null;
+    $('openPortalPreview').disabled = true;
+    message('previewMessage', previewEntities.length ? '' : 'এখনো কোনো active Student, Teacher বা Helper পাওয়া যায়নি।');
   }
 
-  function openPreview(kind) {
-    const id = kind === 'student' ? $('studentPreviewSelect').value : $('teacherPreviewSelect').value;
-    if (!id) {
-      message('previewMessage', kind === 'student' ? 'একজন Student নির্বাচন করুন।' : 'একজন Teacher নির্বাচন করুন.', 'error');
+  function openPreview() {
+    if (!selectedPreviewEntity) {
+      message('previewMessage', 'প্রথমে একজন Student, Teacher বা Helper নির্বাচন করুন।', 'error');
       return;
     }
-    window.location.href = `${kind === 'student' ? 'student-portal.html?preview_student=' : 'teacher-portal.html?preview_teacher='}${encodeURIComponent(id)}`;
+    window.location.href = previewRoute(selectedPreviewEntity);
   }
 
   function roleSelect(role) {
@@ -330,8 +391,27 @@
   }
 
   function bindUI() {
-    $('openStudentPreview')?.addEventListener('click', () => openPreview('student'));
-    $('openTeacherPreview')?.addEventListener('click', () => openPreview('teacher'));
+    const previewSearch = $('portalPreviewSearch');
+    previewSearch?.addEventListener('focus', () => renderPreviewResults(previewSearch.value));
+    previewSearch?.addEventListener('input', () => {
+      selectedPreviewEntity = null;
+      $('openPortalPreview').disabled = true;
+      message('previewMessage', '');
+      renderPreviewResults(previewSearch.value);
+    });
+    previewSearch?.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') hidePreviewResults();
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        if (selectedPreviewEntity) return openPreview();
+        const first = $('portalPreviewResults')?.querySelector('[data-preview-key]');
+        first?.click();
+      }
+    });
+    $('openPortalPreview')?.addEventListener('click', openPreview);
+    document.addEventListener('click', (event) => {
+      if (!$('portalPreview')?.contains(event.target)) hidePreviewResults();
+    });
     $('selectAllPermissions')?.addEventListener('click', () => {
       document.querySelectorAll('input[name="subPerm"]').forEach((x) => { x.checked = true; });
       normalize('subPerm');
