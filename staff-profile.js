@@ -1,8 +1,18 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
 import{mountDocumentsPanel}from'./documents-ui.js?v=20260922-2';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[];
+const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],editBaseline='',allowNavigation=false;
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
+function profileEditState(){
+  const ids=['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'];
+  return JSON.stringify(Object.fromEntries(ids.filter(x=>$(x)).map(x=>[x,$(x).value??''])));
+}
+function startEditTracking(){editBaseline=profileEditState();allowNavigation=false;}
+function clearEditTracking(){editBaseline='';allowNavigation=false;}
+function hasUnsavedProfileChanges(){return Boolean(editing&&editBaseline&&profileEditState()!==editBaseline);}
+function confirmDiscardChanges(){return !hasUnsavedProfileChanges()||window.confirm('আপনার কিছু পরিবর্তন এখনো Save করা হয়নি। এই পেজ থেকে বের হলে পরিবর্তনগুলো বাতিল হয়ে যাবে।\n\nবের হতে চান?');}
+function guardLink(id){$(id)?.addEventListener('click',event=>{if(!hasUnsavedProfileChanges())return;if(!confirmDiscardChanges()){event.preventDefault();return;}allowNavigation=true;});}
+window.addEventListener('beforeunload',event=>{if(allowNavigation||!hasUnsavedProfileChanges())return;event.preventDefault();event.returnValue='';});
 const esc=v=>String(v??'').replace(/[&<>\"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[x]));
 const canView=()=>access?.can(type==='teacher'?'teachers.view':'staff.view');
 const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage');
@@ -164,8 +174,8 @@ async function load(){
   if(type==='teacher') await loadTeacherAssignments();
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();};
-$('cancelBtn').onclick=async()=>{editing=false;msg('');await load()};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();startEditTracking();};
+$('cancelBtn').onclick=async()=>{editing=false;clearEditTracking();msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
   if(!canManage())return msg(`${type==='teacher'?'Teacher':'Helper'} edit permission নেই।`,'error');
@@ -175,7 +185,7 @@ $('form').onsubmit=async e=>{
   try{
     const{error}=await supabase.from(type==='teacher'?'qa_teachers':'qa_staff').update(payload).eq(type==='teacher'?'teacher_id':'staff_id',id);
     if(error)throw error;
-    editing=false;await load();msg('Profile updated successfully.','success');
+    editing=false;clearEditTracking();await load();msg('Profile updated successfully.','success');
   }catch(e){console.error(e);msg(e.message||'Profile update করা যায়নি।','error')}finally{$('saveBtn').disabled=false}
 };
 $('removeBtn').onclick=async()=>{
@@ -191,7 +201,9 @@ $('removeBtn').onclick=async()=>{
     location.replace(`staff.html#${type==='teacher'?'teachers':'helpers'}`);
   }catch(e){console.error(e);msg(e?.message||'Profile remove করা যায়নি।','error');$('removeBtn').disabled=false}
 };
-$('signOut').onclick=async()=>{await supabase.auth.signOut();location.replace('./')};
+$('signOut').onclick=async()=>{if(!confirmDiscardChanges())return;allowNavigation=true;await supabase.auth.signOut();location.replace('./')};
+guardLink('backBtn');
+guardLink('topBack');
 (async()=>{
   try{
     access=await getAccess(supabase);
