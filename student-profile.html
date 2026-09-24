@@ -48,6 +48,11 @@
 .whatsapp-btn:hover:not(.is-disabled){background:#20bd5b;border-color:#20bd5b;transform:translateY(-1px)}
 .whatsapp-btn.is-disabled{opacity:.55;cursor:not-allowed;filter:grayscale(.15)}
 @media(max-width:720px){.profile-actions{grid-template-columns:1fr 1fr}}
+.profile-photo-box{width:104px;height:104px;border-radius:18px;padding:5px;background:#fff;border:1px solid #d7e2ee;box-shadow:0 10px 24px rgba(11,35,66,.10);display:grid;place-items:center;margin:0 auto 10px;overflow:hidden}
+.profile-photo-box img{width:100%;height:100%;object-fit:cover;border-radius:13px;background:#f8fafc}
+.relationship-person{display:flex;align-items:center;gap:12px;min-width:0}
+.relationship-person-copy{min-width:0}
+.profile-photo-small{width:48px;height:48px;flex:0 0 48px;border-radius:11px;object-fit:cover;border:1px solid var(--line);background:#fff;box-shadow:0 4px 12px rgba(11,35,66,.08)}
 </style>
 </head>
 <body>
@@ -62,6 +67,7 @@
 <div id="app" class="hidden">
 <div class="profile-head">
 <div class="profile-identity">
+<div class="profile-photo-box"><img id="studentProfileImage" src="assets/quraner-alo-logo.jpg" alt="" aria-hidden="true"></div>
 <p class="eyebrow">STUDENT PROFILE</p>
 <h1 id="profileTitle">শিক্ষার্থী প্রোফাইল</h1>
 <p id="profileSubtitle" class="muted">Student ID: —</p>
@@ -146,7 +152,7 @@
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="student-profile.js?v=20260924-2"></script>
+<script type="module" src="student-profile.js?v=20260925-1"></script>
 <script src="management-nav.js?v=20260918-4"></script>
 </body>
 </html>
