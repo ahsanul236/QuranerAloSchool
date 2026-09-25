@@ -138,7 +138,7 @@ function resetListFilters(loadNow = true) {
 }
 
 async function loadFilterOptions() {
-  populateYearSelect($('yearFilter'), 'সব বছর', 15);
+  populateYearSelect($('yearFilter'), 'সব বছর', 30);
   if (mode !== 'teacher') {
     $('specializationFilter').innerHTML = '<option value="">সব Specialization</option>';
     return;
@@ -184,7 +184,7 @@ function applyStaffFilters(query) {
 
   const phone = $('phoneFilter').value;
   if (phone === 'yes') query = query.not('phone', 'is', null).neq('phone', '');
-  if (phone === 'no') query = query.or('phone.is.null,phone.eq.');
+  if (phone === 'no') query = query.or('phone.is.null,phone.eq.""');
 
   if (mode === 'helper') query = query.eq('staff_type', 'helper');
   return query;
