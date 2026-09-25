@@ -1,4 +1,4 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260925-10"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260925-11"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
 <div id="overviewView">
   <div class="page-head"><div><p class="eyebrow">সারসংক্ষেপ</p><h1>ওভারভিউ</h1><p class="muted">স্কুল ব্যবস্থাপনার গুরুত্বপূর্ণ সারসংক্ষেপ ও রিপোর্ট এক জায়গায় দেখুন।</p></div></div>
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2><a class="quick-link" href="exports.html">Lists & Export →</a></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
@@ -91,6 +91,42 @@
     </div>
   </div>
 
+  <div id="financialSettingsPanel" class="panel settings-accordion hidden">
+    <div class="settings-accordion-summary">
+      <div class="settings-accordion-title">
+        <span class="settings-accordion-icon" aria-hidden="true">৳</span>
+        <div>
+          <h2>Financial Settings</h2>
+          <p>Current Balance হিসাবের জন্য system-এর শুরুর Opening Balance নির্ধারণ করুন।</p>
+        </div>
+      </div>
+      <div class="settings-accordion-controls">
+        <span id="financialSettingsStatus" class="settings-status-badge">Checking…</span>
+        <button id="toggleFinancialSettings" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="financialSettingsBody">Open Financial Settings <span aria-hidden="true">⌄</span></button>
+      </div>
+    </div>
+    <div id="financialSettingsBody" class="settings-accordion-body hidden">
+      <form id="financialSettingsForm" class="settings-profile-form">
+        <div class="settings-section-label">Balance Setup</div>
+        <div class="form-grid">
+          <label>Opening Balance (৳)
+            <input id="openingBalance" type="number" step="0.01" value="0" placeholder="0">
+          </label>
+          <div class="permission-note" style="align-self:end;padding-bottom:12px">
+            এই amount হবে system-এ record হওয়া প্রথম Income/Expense-এর আগের cash/bank balance। Current Balance = Opening Balance + received income − paid expense।
+          </div>
+        </div>
+        <div class="settings-form-footer">
+          <span id="financialSettingsMessage" class="message-inline"></span>
+          <div class="settings-form-actions">
+            <button id="saveFinancialSettings" class="primary-btn" type="submit">Save Opening Balance</button>
+            <button id="resetFinancialSettings" class="secondary-btn" type="button">Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="userManagement" class="panel settings-accordion hidden">
     <div class="settings-accordion-summary">
       <div class="settings-accordion-title">
@@ -110,4 +146,4 @@
     </div>
   </div>
 </div>
-<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260925-8"></script><script type="module" src="dashboard-documents.js?v=20260921-2"></script></body></html>
+<p class="footer-note">Security-first architecture · RLS enforced · passwords are never displayed or stored here.</p></div></section></main><script src="supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="management-nav.js?v=20260918-4"></script><script src="dashboard-guard.js?v=20260917-1"></script><script src="dashboard.js?v=20260925-9"></script><script type="module" src="dashboard-documents.js?v=20260921-2"></script></body></html>
