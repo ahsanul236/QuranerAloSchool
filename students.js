@@ -1,6 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
-import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, bindColumnMenu } from './list-tools.js';
+import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, bindColumnMenu, bindExportMenu } from './list-tools.js';
 
 const config = window.QURANER_ALO_CONFIG;
 const supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
@@ -249,10 +249,10 @@ async function loadStudents() {
   refreshFilterChips();
 }
 
-async function exportStudents() {
+async function exportStudents(format, actionButton) {
   const button = $('exportList');
   button.disabled = true;
-  button.textContent = 'Exporting…';
+  if (actionButton) actionButton.disabled = true;
   try {
     const exported = [];
     let from = 0;
@@ -273,7 +273,7 @@ async function exportStudents() {
       from += size;
     }
 
-    downloadCsv(`QuranerAlo_Students_${new Date().toISOString().slice(0,10)}.csv`, [
+    const columns = [
       { label:'Student ID', key:'student_code' },
       { label:'English Name', key:'full_name' },
       { label:'বাংলা নাম', key:'full_name_bn' },
@@ -284,14 +284,32 @@ async function exportStudents() {
       { label:'Phone', key:'phone' },
       { label:'Status', key:'status' },
       { label:'Portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
-    ], exported);
-    setMessage(`${exported.length} জন শিক্ষার্থীর filtered list export হয়েছে।`);
+    ];
+    const date = new Date().toISOString().slice(0,10);
+    const base = `QuranerAlo_Students_${date}`;
+    const note = filterItems().filter((item) => String(item.value || '').trim())
+      .map((item) => `${item.label}: ${item.text}`).join(' · ') || 'All students';
+
+    if (format === 'csv') {
+      downloadCsv(base + '.csv', columns, exported);
+    } else if (format === 'xlsx') {
+      await downloadXlsx(base + '.xlsx', 'Students', columns, exported);
+    } else if (format === 'pdf') {
+      await downloadPdf(base + '.pdf', 'Student List', columns, exported, note);
+    } else if (format === 'print') {
+      printRows('Student List', columns, exported, note);
+    } else {
+      throw new Error('Unsupported export format');
+    }
+
+    const label = format === 'xlsx' ? 'Excel' : format === 'pdf' ? 'PDF' : format === 'print' ? 'Print' : 'CSV';
+    setMessage(`${exported.length} জন শিক্ষার্থীর filtered list ${label} এর জন্য প্রস্তুত হয়েছে।`);
   } catch (error) {
     console.error(error);
     setMessage('Student export করা যায়নি।', 'error');
   } finally {
     button.disabled = false;
-    button.textContent = '⇩ Export';
+    if (actionButton) actionButton.disabled = false;
   }
 }
 
@@ -437,7 +455,11 @@ $('pageSize').addEventListener('change', () => {
 });
 $('prevPage').addEventListener('click', () => { if (page > 1) { page -= 1; void loadStudents(); } });
 $('nextPage').addEventListener('click', () => { page += 1; void loadStudents(); });
-$('exportList').addEventListener('click', exportStudents);
+bindExportMenu({
+  button:$('exportList'),
+  menu:$('exportMenu'),
+  onAction:(format, actionButton) => exportStudents(format, actionButton)
+});
 
 $('studentForm').addEventListener('submit', async (event) => {
   event.preventDefault();
