@@ -194,7 +194,12 @@
     financialSettingsBaseline = { ...settings };
     fillFinancialSettings(settings);
     message('financialSettingsMessage', 'Opening Balance সফলভাবে save হয়েছে।', 'success');
-    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+    try {
+      await loadOverviewReports();
+    } catch (error) {
+      console.error('Report summary refresh failed', error);
+      message('overviewReportMessage', 'Report summary refresh করা যায়নি।', 'error');
+    }
   }
 
   function resetFinancialSettings() {
