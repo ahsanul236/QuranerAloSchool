@@ -254,30 +254,27 @@
     const sections = [];
 
     if (access.can('students.view') || access.can('students.manage')) {
-      const [total, active, portal] = await Promise.all([
+      const [total, active] = await Promise.all([
         countRows('qa_students'),
-        countRows('qa_students', q => q.eq('status', 'active')),
-        countRows('qa_students', q => q.not('user_id', 'is', null))
+        countRows('qa_students', q => q.eq('status', 'active'))
       ]);
-      sections.push(card('Students', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr><tr><td>Portal activated</td><td>${portal}</td></tr><tr><td>Not activated</td><td>${Math.max(0, total - portal)}</td></tr></table>`));
+      sections.push(card('Students', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
     }
 
     if (access.can('teachers.view') || access.can('teachers.manage')) {
-      const [total, active, portal] = await Promise.all([
+      const [total, active] = await Promise.all([
         countRows('qa_teachers'),
-        countRows('qa_teachers', q => q.eq('active', true)),
-        countRows('qa_teachers', q => q.not('user_id', 'is', null))
+        countRows('qa_teachers', q => q.eq('active', true))
       ]);
-      sections.push(card('Teacher', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr><tr><td>Portal activated</td><td>${portal}</td></tr><tr><td>Not activated</td><td>${Math.max(0, total - portal)}</td></tr></table>`));
+      sections.push(card('Teacher', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
     }
 
     if (access.can('staff.view') || access.can('staff.manage')) {
-      const [total, active, portal] = await Promise.all([
+      const [total, active] = await Promise.all([
         countRows('qa_staff', q => q.eq('staff_type', 'helper')),
-        countRows('qa_staff', q => q.eq('staff_type', 'helper').eq('active', true)),
-        countRows('qa_staff', q => q.eq('staff_type', 'helper').not('user_id', 'is', null))
+        countRows('qa_staff', q => q.eq('staff_type', 'helper').eq('active', true))
       ]);
-      sections.push(card('Helper', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr><tr><td>Portal activated</td><td>${portal}</td></tr><tr><td>Not activated</td><td>${Math.max(0, total - portal)}</td></tr></table>`));
+      sections.push(card('Helper', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
     }
 
     if (access.can('fees.view') || access.can('fees.manage')) {
