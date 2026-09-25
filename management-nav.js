@@ -31,8 +31,6 @@
       'attendance.html': 'attendance',
       'quran.html': 'quran',
       'payroll.html': 'payroll',
-      'reports.html': 'reports',
-      'exports.html': 'reports',
       'class-sessions.html': 'attendance',
       'enrollments.html': 'students'
     })[path] || 'overview';
