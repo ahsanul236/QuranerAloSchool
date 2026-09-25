@@ -68,7 +68,15 @@
 <div class="panel-head">
   <div><h2 id="listTitle">Teacher List</h2><span id="countLabel" class="eyebrow"></span></div>
   <div class="list-head-actions">
-    <button id="exportList" class="secondary-btn list-action-btn" type="button">⇩ Export</button>
+    <div class="list-export-wrap">
+      <button id="exportList" class="secondary-btn list-action-btn" type="button" aria-haspopup="menu" aria-expanded="false">⇩ Export ▾</button>
+      <div id="exportMenu" class="list-export-menu hidden" role="menu">
+        <button type="button" data-export-format="csv" role="menuitem"><span>CSV</span><small>.csv</small></button>
+        <button type="button" data-export-format="xlsx" role="menuitem"><span>Excel</span><small>.xlsx</small></button>
+        <button type="button" data-export-format="pdf" role="menuitem"><span>PDF</span><small>.pdf</small></button>
+        <button type="button" data-export-format="print" role="menuitem"><span>Print</span><small>Direct</small></button>
+      </div>
+    </div>
     <div class="list-column-wrap">
       <button id="columnsButton" class="secondary-btn list-action-btn" type="button">Columns</button>
       <div id="columnMenu" class="list-column-menu hidden">
