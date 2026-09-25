@@ -34,7 +34,6 @@
 .loading-profile{text-align:center;padding:40px;color:var(--muted)}
 .save-row{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 @media(max-width:720px){.profile-grid,.profile-fields{grid-template-columns:1fr}.profile-card.full,.profile-field.full{grid-column:auto}.profile-actions{width:100%}.profile-actions a,.profile-actions button{flex:1}}
-.identity-card{border-color:#d8e5f2}.identity-intro{margin-bottom:12px}@media(max-width:720px){.identity-card{grid-column:auto}}\n
 /* Profile action-row update — visual-only and preserves existing behavior */
 .profile-head{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:center;text-align:center}
 .profile-head .profile-identity{width:100%;min-width:0;max-width:100%;display:flex;flex-direction:column;align-items:center;text-align:center}
@@ -53,6 +52,7 @@
 .relationship-person{display:flex;align-items:center;gap:12px;min-width:0}
 .relationship-person-copy{min-width:0}
 .profile-photo-small{width:48px;height:48px;flex:0 0 48px;border-radius:11px;object-fit:cover;border:1px solid var(--line);background:#fff;box-shadow:0 4px 12px rgba(11,35,66,.08)}
+.guardian-inline-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -93,8 +93,14 @@
 <div class="profile-field"><label>ফোন নম্বর</label><input id="studentPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></div>
 <div class="profile-field"><label>জন্ম নিবন্ধন নম্বর</label><input id="birthRegistrationNo" inputmode="numeric"></div>
 <div class="profile-field"><label>অবস্থা</label><select id="status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="graduated">Graduated</option><option value="suspended">Suspended</option><option value="withdrawn">Withdrawn</option></select></div>
+<div class="profile-field"><label>পিতার নাম</label><input id="fatherName"></div>
+<div class="profile-field"><label>পিতার NID নম্বর</label><input id="fatherNid" inputmode="numeric"></div>
+<div class="profile-field"><label>মাতার নাম</label><input id="motherName"></div>
+<div class="profile-field"><label>মাতার NID নম্বর</label><input id="motherNid" inputmode="numeric"></div>
 <div class="profile-field full"><label>নোট</label><textarea id="notes" rows="3"></textarea></div>
 </div>
+<div class="guardian-inline-meta"><p id="guardianNote" class="profile-note">পিতা, মাতা অথবা Other person-কে Guardian হিসেবে নির্বাচন করা যাবে।</p><span id="guardianPermissionBadge" class="readonly-badge">View mode</span></div>
+<div id="guardianList" style="margin-top:12px"></div>
 </div>
 </div>
 
@@ -124,26 +130,6 @@
 <div id="studentDocuments" class="document-manager"></div>
 </div>
 
-<div class="profile-card full identity-card">
-<div class="profile-card-head"><h2>পিতা-মাতা ও জন্ম নিবন্ধন</h2><span class="readonly-badge">Identity Information</span></div>
-<div class="profile-card-body">
-<p class="profile-note identity-intro">পিতা-মাতার পরিচয়, NID এবং জন্ম নিবন্ধনের তথ্য এখানে সংরক্ষণ করুন।</p>
-<div class="profile-fields">
-<div class="profile-field"><label>পিতার নাম</label><input id="fatherName"></div>
-<div class="profile-field"><label>পিতার NID নম্বর</label><input id="fatherNid" inputmode="numeric"></div>
-<div class="profile-field"><label>মাতার নাম</label><input id="motherName"></div>
-<div class="profile-field"><label>মাতার NID নম্বর</label><input id="motherNid" inputmode="numeric"></div>
-</div>
-</div>
-</div>
-
-<div class="profile-card full">
-<div class="profile-card-head"><h2>Guardian Information</h2><span id="guardianPermissionBadge" class="readonly-badge">View mode</span></div>
-<div class="profile-card-body">
-<p id="guardianNote" class="profile-note">পিতা, মাতা অথবা Other person-কে Guardian হিসেবে নির্বাচন করা যাবে।</p>
-<div id="guardianList" style="margin-top:12px"></div>
-</div>
-</div>
 </div>
 <div class="save-row" style="justify-content:flex-end!important">
 <span id="saveMessage" class="message-inline"></span>
