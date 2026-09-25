@@ -249,60 +249,30 @@
   async function loadOverviewReports() {
     const grid = $('overviewReportGrid');
     if (!grid) return;
-    const card = (title, body) => `<section class="overview-report-card"><h3>${title}</h3>${body}</section>`;
-    const moneyLocal = (v) => money(v);
-    const sections = [];
 
-    if (access.can('students.view') || access.can('students.manage')) {
-      const [total, active] = await Promise.all([
-        countRows('qa_students'),
-        countRows('qa_students', q => q.eq('status', 'active'))
-      ]);
-      sections.push(card('Students', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
-    }
+    const canStudents = access.can('students.view') || access.can('students.manage');
+    const canTeachers = access.can('teachers.view') || access.can('teachers.manage');
+    const canHelpers = access.can('staff.view') || access.can('staff.manage');
 
-    if (access.can('teachers.view') || access.can('teachers.manage')) {
-      const [total, active] = await Promise.all([
-        countRows('qa_teachers'),
-        countRows('qa_teachers', q => q.eq('active', true))
-      ]);
-      sections.push(card('Teacher', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
-    }
+    const [students, teachers, helpers] = await Promise.all([
+      canStudents ? countRows('qa_students') : Promise.resolve(null),
+      canTeachers ? countRows('qa_teachers') : Promise.resolve(null),
+      canHelpers ? countRows('qa_staff', q => q.eq('staff_type', 'helper')) : Promise.resolve(null)
+    ]);
 
-    if (access.can('staff.view') || access.can('staff.manage')) {
-      const [total, active] = await Promise.all([
-        countRows('qa_staff', q => q.eq('staff_type', 'helper')),
-        countRows('qa_staff', q => q.eq('staff_type', 'helper').eq('active', true))
-      ]);
-      sections.push(card('Helper', `<div class="big">${total}</div><table><tr><td>Active</td><td>${active}</td></tr></table>`));
-    }
+    const rows = [
+      canStudents ? `<tr><td>Total Students</td><td>${students}</td></tr>` : '',
+      canTeachers ? `<tr><td>Total Teachers</td><td>${teachers}</td></tr>` : '',
+      canHelpers ? `<tr><td>Total Helpers</td><td>${helpers}</td></tr>` : ''
+    ].join('');
 
-    if (access.can('fees.view') || access.can('fees.manage')) {
-      const { data, error } = await client.from('qa_fee_charges').select('current_payable,status').neq('status', 'paid');
-      if (error) throw error;
-      const rows = data || [];
-      const due = rows.reduce((sum, x) => sum + Number(x.current_payable || 0), 0);
-      sections.push(card('Fees Due', `<div class="big">${moneyLocal(due)}</div><table><tr><td>Open charges</td><td>${rows.length}</td></tr></table>`));
-    }
-
-    if (access.can('finance.view') || access.can('finance.manage')) {
-      const { data, error } = await client.from('qa_finance_transactions').select('direction,amount').limit(5000);
-      if (error) throw error;
-      const rows = data || [];
-      const income = rows.filter(x => x.direction === 'income').reduce((sum, x) => sum + Number(x.amount || 0), 0);
-      const expense = rows.filter(x => x.direction === 'expense').reduce((sum, x) => sum + Number(x.amount || 0), 0);
-      sections.push(card('Finance', `<div class="big">${moneyLocal(income - expense)}</div><table><tr><td>Income</td><td>${moneyLocal(income)}</td></tr><tr><td>Expense</td><td>${moneyLocal(expense)}</td></tr></table>`));
-    }
-
-    if (access.can('payroll.view') || access.can('payroll.manage')) {
-      const { data, error } = await client.from('qa_payroll_records').select('net_payable,status,payroll_month').order('payroll_month', { ascending: false }).limit(100);
-      if (error) throw error;
-      const rows = data || [];
-      const total = rows.filter(x => x.status !== 'cancelled').reduce((sum, x) => sum + Number(x.net_payable || 0), 0);
-      sections.push(card('Payroll', `<div class="big">${moneyLocal(total)}</div><table><tr><td>Recent records</td><td>${rows.length}</td></tr><tr><td>Latest month</td><td>${esc(rows[0]?.payroll_month || '—')}</td></tr></table>`));
-    }
-
-    grid.innerHTML = sections.length ? sections.join('') : '<p class="overview-report-muted" style="padding:16px">আপনার account-এর জন্য report-viewable module পাওয়া যায়নি।</p>';
+    grid.innerHTML = `
+      <section class="overview-report-card">
+        <table>${rows || '<tr><td>কোনো summary permission নেই।</td><td>—</td></tr>'}</table>
+      </section>
+      <section class="overview-report-card overview-report-card-empty" aria-hidden="true"></section>
+      <section class="overview-report-card overview-report-card-empty" aria-hidden="true"></section>
+    `;
   }
 
   let previewEntities = [];
