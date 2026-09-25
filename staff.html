@@ -8,7 +8,7 @@
 <title>Teachers & Helpers | QURANER ALO</title>
 <link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-1">
-<link rel="stylesheet" href="dashboard.css?v=20260919-5">
+<link rel="stylesheet" href="dashboard.css?v=20260926-1">
 <style>
 
 .page-head h1{font-size:32px;margin:0}
@@ -64,10 +64,60 @@
 </form>
 </div>
 
-<div class="panel">
-<div class="panel-head"><h2 id="listTitle">Teacher List</h2><span id="countLabel" class="eyebrow"></span></div>
-<div class="toolbar" style="padding:0 16px"><input id="search" placeholder="নাম / ID / Email দিয়ে খুঁজুন…"></div>
-<div class="table-wrap"><table class="staff-table"><thead><tr><th>ID</th><th>নাম</th><th>ফোন</th><th>Email</th><th id="detailHead">Specialization</th><th>Status</th><th>Portal</th><th>Portal Access</th></tr></thead><tbody id="staffRows"></tbody></table></div>
+<div class="panel list-management-panel">
+<div class="panel-head">
+  <div><h2 id="listTitle">Teacher List</h2><span id="countLabel" class="eyebrow"></span></div>
+  <div class="list-head-actions">
+    <button id="exportList" class="secondary-btn list-action-btn" type="button">⇩ Export</button>
+    <div class="list-column-wrap">
+      <button id="columnsButton" class="secondary-btn list-action-btn" type="button">Columns</button>
+      <div id="columnMenu" class="list-column-menu hidden">
+        <label><input type="checkbox" data-column="gender" checked> Gender</label>
+        <label><input type="checkbox" data-column="joining" checked> Joining</label>
+        <label id="detailColumnOption"><input type="checkbox" data-column="detail" checked> Specialization</label>
+        <label><input type="checkbox" data-column="phone" checked> Phone</label>
+        <label><input type="checkbox" data-column="email" checked> Email</label>
+        <label><input type="checkbox" data-column="status" checked> Status</label>
+        <label><input type="checkbox" data-column="portal" checked> Portal</label>
+        <label><input type="checkbox" data-column="access" checked> Portal Access</label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="list-filter-shell">
+  <div class="list-search-row">
+    <label class="list-search-field"><span id="searchLabel">Teacher খুঁজুন</span><input id="search" type="search" autocomplete="off" placeholder="নাম / ID / ফোন / Email দিয়ে খুঁজুন…"></label>
+    <button id="toggleFilters" class="secondary-btn list-filter-toggle" type="button" aria-expanded="false">Filters</button>
+  </div>
+  <div id="advancedFilters" class="list-filter-grid">
+    <label>যোগদানের বছর<select id="yearFilter"><option value="">সব বছর</option></select></label>
+    <label>লিঙ্গ<select id="genderFilter"><option value="">সব লিঙ্গ</option><option value="male">পুরুষ</option><option value="female">নারী</option><option value="unspecified">নির্ধারিত নয়</option></select></label>
+    <label>স্ট্যাটাস<select id="statusFilter"><option value="">সব স্ট্যাটাস</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
+    <label id="specializationFilterWrap">Specialization<select id="specializationFilter"><option value="">সব Specialization</option></select></label>
+    <label>Portal<select id="portalFilter"><option value="">সব Portal</option><option value="activated">Activated</option><option value="not_activated">Not Activated</option></select></label>
+    <label>Phone<select id="phoneFilter"><option value="">সব</option><option value="yes">Phone আছে</option><option value="no">Phone নেই</option></select></label>
+  </div>
+  <div class="list-filter-footer">
+    <div id="activeFilters" class="list-filter-chips is-empty"></div>
+    <button id="resetFilters" class="secondary-btn list-reset-btn" type="button">Reset Filters</button>
+  </div>
+</div>
+
+<div class="table-wrap"><table id="staffTable" class="staff-table list-data-table"><thead><tr>
+  <th>ID</th><th>নাম</th><th data-col="gender">লিঙ্গ</th><th data-col="joining">Joining</th>
+  <th id="detailHead" data-col="detail">Specialization</th><th data-col="phone">ফোন</th><th data-col="email">Email</th>
+  <th data-col="status">Status</th><th data-col="portal">Portal</th><th data-col="access">Portal Access</th>
+</tr></thead><tbody id="staffRows"></tbody></table></div>
+<div class="list-pagination">
+  <span id="paginationSummary" class="muted">0 records</span>
+  <div class="list-pagination-controls">
+    <label>প্রতি পৃষ্ঠা <select id="pageSize"><option>10</option><option>25</option><option>50</option></select></label>
+    <button id="prevPage" class="secondary-btn list-page-btn" type="button">‹</button>
+    <span id="pageLabel" class="list-page-label">1 / 1</span>
+    <button id="nextPage" class="secondary-btn list-page-btn" type="button">›</button>
+  </div>
+</div>
 </div>
 <p id="message" class="footer-note" aria-live="polite"></p>
 </div>
