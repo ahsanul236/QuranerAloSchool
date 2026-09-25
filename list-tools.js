@@ -69,7 +69,7 @@ export function bindColumnMenu({ button, menu, table }) {
   if (!button || !menu || !table) return;
   const sync = () => {
     menu.querySelectorAll('input[data-column]').forEach((input) => {
-      const selector = `[data-col="${CSS.escape(input.dataset.column)}"]`;
+      const selector = `[data-col="${input.dataset.column}"]`;
       table.querySelectorAll(selector).forEach((cell) => cell.classList.toggle('list-column-hidden', !input.checked));
     });
   };
