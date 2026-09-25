@@ -106,7 +106,7 @@ function resetFilters(load = true) {
 }
 
 async function loadFilterOptions() {
-  populateYearSelect($('yearFilter'), 'সব বছর', 15);
+  populateYearSelect($('yearFilter'), 'সব বছর', 30);
   const [{ data: teachers, error: teacherError }, { data: enrollments, error: enrollmentError }] = await Promise.all([
     supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('full_name'),
     supabase.from('qa_enrollments').select('course_code').eq('status', 'active').not('course_code', 'is', null).limit(1000)
@@ -169,7 +169,7 @@ function applyStudentFilters(query, allowedStudentIds) {
 
   const phone = $('phoneFilter').value;
   if (phone === 'yes') query = query.not('phone', 'is', null).neq('phone', '');
-  if (phone === 'no') query = query.or('phone.is.null,phone.eq.');
+  if (phone === 'no') query = query.or('phone.is.null,phone.eq.""');
 
   if (allowedStudentIds) query = query.in('student_id', allowedStudentIds);
   return query;
