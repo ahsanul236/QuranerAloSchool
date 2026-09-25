@@ -1,6 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
-import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, bindColumnMenu } from './list-tools.js';
+import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, bindColumnMenu, bindExportMenu } from './list-tools.js';
 
 const config = window.QURANER_ALO_CONFIG;
 const supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
@@ -260,11 +260,11 @@ async function load() {
   refreshFilterChips();
 }
 
-async function exportRows() {
+async function exportRows(format, actionButton) {
   const button = $('exportList');
   const exportMode = mode;
   button.disabled = true;
-  button.textContent = 'Exporting…';
+  if (actionButton) actionButton.disabled = true;
   try {
     const all = [];
     let from = 0;
@@ -294,14 +294,32 @@ async function exportRows() {
       { label:'Portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
     );
 
-    downloadCsv(`QuranerAlo_${teacher ? 'Teachers' : 'Helpers'}_${new Date().toISOString().slice(0,10)}.csv`, columns, all);
-    msg(`${all.length} জন ${teacher ? 'teacher' : 'helper'}-এর filtered list export হয়েছে।`, 'success');
+    const date = new Date().toISOString().slice(0,10);
+    const entity = teacher ? 'Teachers' : 'Helpers';
+    const base = `QuranerAlo_${entity}_${date}`;
+    const note = filterItems().filter((item) => String(item.value || '').trim())
+      .map((item) => `${item.label}: ${item.text}`).join(' · ') || `All ${entity.toLowerCase()}`;
+
+    if (format === 'csv') {
+      downloadCsv(base + '.csv', columns, all);
+    } else if (format === 'xlsx') {
+      await downloadXlsx(base + '.xlsx', entity, columns, all);
+    } else if (format === 'pdf') {
+      await downloadPdf(base + '.pdf', teacher ? 'Teacher List' : 'Helper List', columns, all, note);
+    } else if (format === 'print') {
+      printRows(teacher ? 'Teacher List' : 'Helper List', columns, all, note);
+    } else {
+      throw new Error('Unsupported export format');
+    }
+
+    const label = format === 'xlsx' ? 'Excel' : format === 'pdf' ? 'PDF' : format === 'print' ? 'Print' : 'CSV';
+    msg(`${all.length} জন ${teacher ? 'teacher' : 'helper'}-এর filtered list ${label} এর জন্য প্রস্তুত হয়েছে।`, 'success');
   } catch (error) {
     console.error(error);
     msg(`${mode === 'teacher' ? 'Teacher' : 'Helper'} export করা যায়নি।`, 'error');
   } finally {
     button.disabled = false;
-    button.textContent = '⇩ Export';
+    if (actionButton) actionButton.disabled = false;
   }
 }
 
@@ -400,7 +418,11 @@ $('pageSize').addEventListener('change', () => {
 });
 $('prevPage').addEventListener('click', () => { if (page > 1) { page -= 1; void load(); } });
 $('nextPage').addEventListener('click', () => { page += 1; void load(); });
-$('exportList').addEventListener('click', exportRows);
+bindExportMenu({
+  button:$('exportList'),
+  menu:$('exportMenu'),
+  onAction:(format, actionButton) => exportRows(format, actionButton)
+});
 
 $('staffForm').addEventListener('submit', async event => {
   event.preventDefault();
