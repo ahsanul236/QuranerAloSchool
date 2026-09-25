@@ -111,8 +111,8 @@ async function loadFilterOptions() {
     supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active', true).order('full_name'),
     supabase.from('qa_enrollments').select('course_code').eq('status', 'active').not('course_code', 'is', null).limit(1000)
   ]);
-  if (teacherError) throw teacherError;
-  if (enrollmentError) throw enrollmentError;
+  if (teacherError) console.warn('Teacher filter options unavailable', teacherError);
+  if (enrollmentError) console.warn('Course filter options unavailable', enrollmentError);
 
   teacherMap = new Map((teachers || []).map((teacher) => [teacher.teacher_id, `${teacher.teacher_code} · ${teacher.full_name}`]));
   $('teacherFilter').innerHTML = '<option value="">সব Teacher</option><option value="__unassigned">Unassigned</option>' +
@@ -192,7 +192,10 @@ async function courseMapForStudents(ids) {
   if (!ids.length) return map;
   const { data, error } = await supabase.from('qa_enrollments')
     .select('student_id,course_code').eq('status','active').in('student_id', ids);
-  if (error) throw error;
+  if (error) {
+    console.warn('Course labels unavailable', error);
+    return map;
+  }
   (data || []).forEach((row) => {
     if (!row.course_code) return;
     if (!map.has(row.student_id)) map.set(row.student_id, []);
