@@ -138,6 +138,70 @@
     message('schoolProfileMessage', 'Saved values restore করা হয়েছে।');
   }
 
+  const financialSettingsDefaults = { opening_balance: 0 };
+  let financialSettingsBaseline = { ...financialSettingsDefaults };
+
+  function financialSettingsFromForm() {
+    return {
+      opening_balance:Number($('openingBalance')?.value || 0)
+    };
+  }
+
+  function fillFinancialSettings(value) {
+    const settings = { ...financialSettingsDefaults, ...(value || {}) };
+    financialSettingsBaseline = { ...settings };
+    if ($('openingBalance')) $('openingBalance').value = Number(settings.opening_balance || 0);
+    const badge = $('financialSettingsStatus');
+    if (badge) {
+      const configured = value && Object.prototype.hasOwnProperty.call(value, 'opening_balance');
+      badge.textContent = configured ? money(settings.opening_balance) : 'Not set';
+      badge.classList.toggle('is-complete', configured);
+      badge.classList.toggle('needs-attention', !configured);
+    }
+  }
+
+  async function loadFinancialSettings() {
+    if (!access?.can('settings.manage')) return;
+    show('financialSettingsPanel');
+    const { data, error } = await client.from('qa_app_settings')
+      .select('value').eq('key','financial_settings').maybeSingle();
+    if (error) throw error;
+    fillFinancialSettings(data?.value);
+    message('financialSettingsMessage', '');
+  }
+
+  async function saveFinancialSettings(event) {
+    event.preventDefault();
+    if (!access?.can('settings.manage')) {
+      message('financialSettingsMessage', 'Financial Settings পরিবর্তনের permission নেই।', 'error');
+      return;
+    }
+    const settings = financialSettingsFromForm();
+    if (!Number.isFinite(settings.opening_balance)) {
+      message('financialSettingsMessage', 'Opening Balance সঠিক amount দিন।', 'error');
+      return;
+    }
+    const button = $('saveFinancialSettings');
+    button.disabled = true;
+    message('financialSettingsMessage', 'Saving…');
+    const { error } = await client.from('qa_app_settings')
+      .upsert({key:'financial_settings',value:settings,updated_at:new Date().toISOString()},{onConflict:'key'});
+    button.disabled = false;
+    if (error) {
+      message('financialSettingsMessage', 'Financial Settings save করা যায়নি।', 'error');
+      return;
+    }
+    financialSettingsBaseline = { ...settings };
+    fillFinancialSettings(settings);
+    message('financialSettingsMessage', 'Opening Balance সফলভাবে save হয়েছে।', 'success');
+    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+  }
+
+  function resetFinancialSettings() {
+    fillFinancialSettings(financialSettingsBaseline);
+    message('financialSettingsMessage', 'Saved value restore করা হয়েছে।');
+  }
+
   async function profileFor(session) {
     const { data, error } = await client.from('qa_users')
       .select('user_id,email,full_name,role,active')
@@ -210,22 +274,25 @@
     return `৳ ${Number(value || 0).toLocaleString('en-BD', { maximumFractionDigits: 0 })}`;
   }
 
-  async function loadFinanceRows() {
-    if (!access?.can('finance.view') && !access?.can('finance.manage')) return null;
+  async function loadPagedRows(table, columns, orderColumn) {
     const rows = [];
     let from = 0;
     const pageSize = 1000;
     while (true) {
-      const { data, error } = await client.from('qa_finance_transactions')
-        .select('transaction_date,direction,amount')
-        .order('transaction_date', { ascending: false })
-        .range(from, from + pageSize - 1);
+      let query = client.from(table).select(columns);
+      if (orderColumn) query = query.order(orderColumn, { ascending: false });
+      const { data, error } = await query.range(from, from + pageSize - 1);
       if (error) throw error;
       rows.push(...(data || []));
       if (!data || data.length < pageSize) break;
       from += pageSize;
     }
     return rows;
+  }
+
+  async function loadFinanceRows() {
+    if (!access?.can('finance.view') && !access?.can('finance.manage')) return null;
+    return loadPagedRows('qa_finance_transactions','transaction_date,direction,amount','transaction_date');
   }
 
   async function loadMetrics() {
@@ -254,17 +321,13 @@
     const canTeachers = access.can('teachers.view') || access.can('teachers.manage');
     const canHelpers = access.can('staff.view') || access.can('staff.manage');
     const canFinance = access.can('finance.view') || access.can('finance.manage');
+    const canFees = access.can('fees.view') || access.can('fees.manage');
     const canPayments = access.can('payments.view') || access.can('payments.manage');
     const canPayroll = access.can('payroll.view') || access.can('payroll.manage');
-    const canIncomeSummary = canFinance && canPayments;
-    const canExpenseSummary = canFinance && canPayroll;
 
     const now = new Date();
     const today = localDateISO(now);
-    const monthStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const nextMonthStartDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const monthStart = localDateISO(monthStartDate);
-    const nextMonthStart = localDateISO(nextMonthStartDate);
+    const monthKey = today.slice(0, 7);
 
     const peoplePromise = Promise.all([
       canStudents ? countRows('qa_students') : Promise.resolve(null),
@@ -272,36 +335,36 @@
       canHelpers ? countRows('qa_staff', q => q.eq('staff_type', 'helper')) : Promise.resolve(null)
     ]);
 
-    const incomePromise = canIncomeSummary ? Promise.all([
-      client.from('qa_finance_transactions')
-        .select('transaction_date,amount')
-        .eq('direction','income')
-        .gte('transaction_date', monthStart)
-        .lt('transaction_date', nextMonthStart),
-      client.from('qa_fee_payments')
-        .select('paid_at,amount')
-        .gte('paid_at', monthStartDate.toISOString())
-        .lt('paid_at', nextMonthStartDate.toISOString())
-    ]) : Promise.resolve(null);
+    const financePromise = canFinance ? loadFinanceRows() : Promise.resolve(null);
+    const feePaymentsPromise = canPayments
+      ? loadPagedRows('qa_fee_payments','student_id,paid_at,amount','paid_at')
+      : Promise.resolve(null);
+    const feeChargesPromise = canFees
+      ? loadPagedRows('qa_fee_charges','student_id,billing_month,expected_amount,discount,previous_due,created_at','billing_month')
+      : Promise.resolve(null);
+    const payrollPromise = canPayroll
+      ? loadPagedRows('qa_payroll_records','employee_type,net_payable,status,paid_at,created_at','created_at')
+      : Promise.resolve(null);
+    const openingPromise = client.from('qa_app_settings')
+      .select('value').eq('key','financial_settings').maybeSingle();
 
-    const expensePromise = canExpenseSummary ? Promise.all([
-      client.from('qa_finance_transactions')
-        .select('transaction_date,amount')
-        .eq('direction','expense')
-        .gte('transaction_date', monthStart)
-        .lt('transaction_date', nextMonthStart),
-      client.from('qa_payroll_records')
-        .select('paid_at,net_payable,employee_type')
-        .eq('status','paid')
-        .gte('paid_at', monthStartDate.toISOString())
-        .lt('paid_at', nextMonthStartDate.toISOString())
-    ]) : Promise.resolve(null);
-
-    const [[students, teachers, helpers], incomeSources, expenseSources] = await Promise.all([
+    const [
+      [students, teachers, helpers],
+      financeRows,
+      feePayments,
+      feeCharges,
+      payrollRows,
+      openingResult
+    ] = await Promise.all([
       peoplePromise,
-      incomePromise,
-      expensePromise
+      financePromise,
+      feePaymentsPromise,
+      feeChargesPromise,
+      payrollPromise,
+      openingPromise
     ]);
+
+    if (openingResult.error) throw openingResult.error;
 
     const peopleRows = [
       canStudents ? `<div class="overview-people-row"><span class="overview-people-icon student">S</span><span class="overview-people-label">Total Students</span><strong>${students}</strong></div>` : '',
@@ -309,52 +372,93 @@
       canHelpers ? `<div class="overview-people-row"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Total Helpers</span><strong>${helpers}</strong></div>` : ''
     ].join('');
 
-    const sum = (items, key = 'amount') => items.reduce((total, item) => total + Number(item[key] || 0), 0);
+    const sum = (items, key = 'amount') => (items || []).reduce((total, item) => total + Number(item[key] || 0), 0);
+    const financeIncomeRows = (financeRows || []).filter((item) => item.direction === 'income');
+    const financeExpenseRows = (financeRows || []).filter((item) => item.direction === 'expense');
+    const paidPayrollRows = (payrollRows || []).filter((item) => item.status === 'paid' && item.paid_at);
+    const unpaidPayrollRows = (payrollRows || []).filter((item) => !['paid','cancelled'].includes(item.status));
+
+    const incomeReady = canFinance && canPayments;
+    const expenseReady = canFinance && canPayroll;
+    const balanceReady = canFinance && canFees && canPayments && canPayroll;
 
     let todayIncome = null;
     let monthIncome = null;
-    if (incomeSources) {
-      const [financeResult, feeResult] = incomeSources;
-      if (financeResult.error) throw financeResult.error;
-      if (feeResult.error) throw feeResult.error;
-
-      const financeRows = financeResult.data || [];
-      const feeRows = feeResult.data || [];
-
-      monthIncome = sum(financeRows) + sum(feeRows);
+    if (incomeReady) {
       todayIncome =
-        sum(financeRows.filter((item) => item.transaction_date === today)) +
-        sum(feeRows.filter((item) => localDateISO(item.paid_at) === today));
+        sum(financeIncomeRows.filter((item) => item.transaction_date === today)) +
+        sum((feePayments || []).filter((item) => localDateISO(item.paid_at) === today));
+      monthIncome =
+        sum(financeIncomeRows.filter((item) => String(item.transaction_date || '').slice(0,7) === monthKey)) +
+        sum((feePayments || []).filter((item) => localDateISO(item.paid_at).slice(0,7) === monthKey));
     }
 
     let todayExpense = null;
     let monthExpense = null;
-    if (expenseSources) {
-      const [financeResult, payrollResult] = expenseSources;
-      if (financeResult.error) throw financeResult.error;
-      if (payrollResult.error) throw payrollResult.error;
-
-      const financeRows = financeResult.data || [];
-      const payrollRows = payrollResult.data || [];
-
-      monthExpense = sum(financeRows) + sum(payrollRows, 'net_payable');
+    if (expenseReady) {
       todayExpense =
-        sum(financeRows.filter((item) => item.transaction_date === today)) +
-        sum(payrollRows.filter((item) => localDateISO(item.paid_at) === today), 'net_payable');
+        sum(financeExpenseRows.filter((item) => item.transaction_date === today)) +
+        sum(paidPayrollRows.filter((item) => localDateISO(item.paid_at) === today), 'net_payable');
+      monthExpense =
+        sum(financeExpenseRows.filter((item) => String(item.transaction_date || '').slice(0,7) === monthKey)) +
+        sum(paidPayrollRows.filter((item) => localDateISO(item.paid_at).slice(0,7) === monthKey), 'net_payable');
+    }
+
+    let todayNet = null;
+    let currentBalance = null;
+    let studentDues = null;
+    let schoolPayables = null;
+
+    if (balanceReady) {
+      todayNet = Number(todayIncome || 0) - Number(todayExpense || 0);
+      const openingBalance = Number(openingResult.data?.value?.opening_balance || 0);
+      const allIncome = sum(financeIncomeRows) + sum(feePayments || []);
+      const allPaidExpense = sum(financeExpenseRows) + sum(paidPayrollRows, 'net_payable');
+      currentBalance = openingBalance + allIncome - allPaidExpense;
+
+      const chargesByStudent = new Map();
+      (feeCharges || []).forEach((charge) => {
+        const key = charge.student_id || 'unknown';
+        if (!chargesByStudent.has(key)) chargesByStudent.set(key, []);
+        chargesByStudent.get(key).push(charge);
+      });
+      const paymentsByStudent = new Map();
+      (feePayments || []).forEach((payment) => {
+        const key = payment.student_id || 'unknown';
+        paymentsByStudent.set(key, (paymentsByStudent.get(key) || 0) + Number(payment.amount || 0));
+      });
+
+      studentDues = 0;
+      chargesByStudent.forEach((charges, studentId) => {
+        const ordered = [...charges].sort((a,b) => {
+          const ad = String(a.billing_month || '');
+          const bd = String(b.billing_month || '');
+          if (ad !== bd) return ad.localeCompare(bd);
+          return String(a.created_at || '').localeCompare(String(b.created_at || ''));
+        });
+        const baseCharges = ordered.reduce((total, charge) =>
+          total + Math.max(0, Number(charge.expected_amount || 0) - Number(charge.discount || 0)), 0);
+        const initialPreviousDue = Math.max(0, Number(ordered[0]?.previous_due || 0));
+        const paid = Number(paymentsByStudent.get(studentId) || 0);
+        studentDues += Math.max(0, baseCharges + initialPreviousDue - paid);
+      });
+
+      schoolPayables = sum(unpaidPayrollRows, 'net_payable');
     }
 
     grid.innerHTML = `
       <section class="overview-report-card overview-people-card">
-        <div class="overview-card-kicker">People Overview</div>
+        <div class="overview-card-title"><span class="overview-card-symbol people">●</span><strong>People Overview</strong></div>
         <div class="overview-people-list">
           ${peopleRows || '<div class="overview-people-empty">কোনো summary permission নেই।</div>'}
         </div>
       </section>
 
       <section class="overview-report-card overview-financial-card overview-income-card">
+        <div class="overview-card-title"><span class="overview-card-symbol income">↗</span><strong>Income</strong></div>
         <div class="overview-financial-main">
           <span class="overview-financial-label">Today’s Income</span>
-          <strong class="overview-financial-value">${todayIncome === null ? '—' : money(todayIncome)}</strong>
+          <strong class="overview-financial-value income">${todayIncome === null ? '—' : money(todayIncome)}</strong>
         </div>
         <div class="overview-financial-month">
           <span>This Month’s Total Income</span>
@@ -363,13 +467,30 @@
       </section>
 
       <section class="overview-report-card overview-financial-card overview-expense-card">
+        <div class="overview-card-title"><span class="overview-card-symbol expense">↘</span><strong>Expense</strong></div>
         <div class="overview-financial-main">
           <span class="overview-financial-label">Today’s Expense</span>
-          <strong class="overview-financial-value">${todayExpense === null ? '—' : money(todayExpense)}</strong>
+          <strong class="overview-financial-value expense">${todayExpense === null ? '—' : money(todayExpense)}</strong>
         </div>
         <div class="overview-financial-month">
           <span>This Month’s Total Expense</span>
           <strong>${monthExpense === null ? '—' : money(monthExpense)}</strong>
+        </div>
+      </section>
+
+      <section class="overview-report-card overview-balance-card">
+        <div class="overview-card-title"><span class="overview-card-symbol balance">◒</span><strong>Balance &amp; Dues</strong></div>
+        <div class="overview-balance-main">
+          <span>Today’s Net Balance</span>
+          <strong>${todayNet === null ? '—' : money(todayNet)}</strong>
+        </div>
+        <div class="overview-current-balance">
+          <span>Current Balance</span>
+          <strong>${currentBalance === null ? '—' : money(currentBalance)}</strong>
+        </div>
+        <div class="overview-dues-grid">
+          <div><span>Student Dues</span><strong>${studentDues === null ? '—' : money(studentDues)}</strong></div>
+          <div><span>School Payables</span><strong>${schoolPayables === null ? '—' : money(schoolPayables)}</strong></div>
         </div>
       </section>
     `;
@@ -589,12 +710,18 @@
       const open = $('toggleSchoolProfile').getAttribute('aria-expanded') !== 'true';
       setAccordion('toggleSchoolProfile','schoolProfileBody','Open School Profile','Close School Profile',open);
     });
+    $('toggleFinancialSettings')?.addEventListener('click', () => {
+      const open = $('toggleFinancialSettings').getAttribute('aria-expanded') !== 'true';
+      setAccordion('toggleFinancialSettings','financialSettingsBody','Open Financial Settings','Close Financial Settings',open);
+    });
     $('toggleUserManagement')?.addEventListener('click', () => {
       const open = $('toggleUserManagement').getAttribute('aria-expanded') !== 'true';
       setAccordion('toggleUserManagement','userManagementBody','Open User & Role Management','Close User & Role Management',open);
     });
     $('schoolProfileForm')?.addEventListener('submit', saveSchoolProfile);
     $('resetSchoolProfile')?.addEventListener('click', resetSchoolProfile);
+    $('financialSettingsForm')?.addEventListener('submit', saveFinancialSettings);
+    $('resetFinancialSettings')?.addEventListener('click', resetFinancialSettings);
     $('schoolLogoPath')?.addEventListener('input', () => {
       const value = $('schoolLogoPath').value.trim() || schoolProfileDefaults.logo_path;
       $('schoolLogoPreview').src = value;
@@ -654,6 +781,7 @@
     void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
     if (access.can('settings.manage')) {
       void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
+      void optional(loadFinancialSettings, 'financialSettingsMessage', 'Financial Settings');
     }
 
     if (profile.role === 'owner') {
