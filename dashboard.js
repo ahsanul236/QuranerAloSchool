@@ -253,12 +253,36 @@
     const canStudents = access.can('students.view') || access.can('students.manage');
     const canTeachers = access.can('teachers.view') || access.can('teachers.manage');
     const canHelpers = access.can('staff.view') || access.can('staff.manage');
+    const canFinance = access.can('finance.view') || access.can('finance.manage');
+    const canPayments = access.can('payments.view') || access.can('payments.manage');
+    const canIncomeSummary = canFinance && canPayments;
 
-    const [students, teachers, helpers] = await Promise.all([
+    const now = new Date();
+    const today = localDateISO(now);
+    const monthStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    const nextMonthStartDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthStart = localDateISO(monthStartDate);
+    const nextMonthStart = localDateISO(nextMonthStartDate);
+
+    const peoplePromise = Promise.all([
       canStudents ? countRows('qa_students') : Promise.resolve(null),
       canTeachers ? countRows('qa_teachers') : Promise.resolve(null),
       canHelpers ? countRows('qa_staff', q => q.eq('staff_type', 'helper')) : Promise.resolve(null)
     ]);
+
+    const incomePromise = canIncomeSummary ? Promise.all([
+      client.from('qa_finance_transactions')
+        .select('transaction_date,amount')
+        .eq('direction','income')
+        .gte('transaction_date', monthStart)
+        .lt('transaction_date', nextMonthStart),
+      client.from('qa_fee_payments')
+        .select('paid_at,amount')
+        .gte('paid_at', monthStartDate.toISOString())
+        .lt('paid_at', nextMonthStartDate.toISOString())
+    ]) : Promise.resolve(null);
+
+    const [[students, teachers, helpers], incomeSources] = await Promise.all([peoplePromise, incomePromise]);
 
     const rows = [
       canStudents ? `<tr><td>Total Students</td><td>${students}</td></tr>` : '',
@@ -266,11 +290,38 @@
       canHelpers ? `<tr><td>Total Helpers</td><td>${helpers}</td></tr>` : ''
     ].join('');
 
+    let todayIncome = null;
+    let monthIncome = null;
+
+    if (incomeSources) {
+      const [financeResult, feeResult] = incomeSources;
+      if (financeResult.error) throw financeResult.error;
+      if (feeResult.error) throw feeResult.error;
+
+      const financeRows = financeResult.data || [];
+      const feeRows = feeResult.data || [];
+      const sum = (items) => items.reduce((total, item) => total + Number(item.amount || 0), 0);
+
+      monthIncome = sum(financeRows) + sum(feeRows);
+      todayIncome =
+        sum(financeRows.filter((item) => item.transaction_date === today)) +
+        sum(feeRows.filter((item) => localDateISO(item.paid_at) === today));
+    }
+
     grid.innerHTML = `
-      <section class="overview-report-card">
+      <section class="overview-report-card overview-people-card">
         <table>${rows || '<tr><td>কোনো summary permission নেই।</td><td>—</td></tr>'}</table>
       </section>
-      <section class="overview-report-card overview-report-card-empty" aria-hidden="true"></section>
+      <section class="overview-report-card overview-income-card">
+        <div class="overview-income-main">
+          <span class="overview-income-label">Today’s Income</span>
+          <strong class="overview-income-value">${todayIncome === null ? '—' : money(todayIncome)}</strong>
+        </div>
+        <div class="overview-income-month">
+          <span>This Month’s Total Income</span>
+          <strong>${monthIncome === null ? '—' : money(monthIncome)}</strong>
+        </div>
+      </section>
       <section class="overview-report-card overview-report-card-empty" aria-hidden="true"></section>
     `;
   }
