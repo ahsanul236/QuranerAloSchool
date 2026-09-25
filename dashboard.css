@@ -519,3 +519,18 @@
   .list-pagination-controls{justify-content:space-between}
   .list-pagination-controls label{width:100%;justify-content:flex-end}
 }
+
+
+/* Multi-format export dropdown */
+.list-export-wrap{position:relative}
+.list-export-menu{position:absolute;right:0;top:calc(100% + 7px);z-index:35;width:190px;padding:7px;border:1px solid var(--line-strong);border-radius:12px;background:#fff;box-shadow:0 16px 34px rgba(11,35,66,.15)}
+.list-export-menu button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;border:0;border-radius:8px;background:#fff;color:var(--navy2);padding:9px 10px;font:inherit;text-align:left;cursor:pointer}
+.list-export-menu button:hover,.list-export-menu button:focus-visible{background:#f2f7fc;outline:none}
+.list-export-menu button:disabled{opacity:.55;cursor:wait}
+.list-export-menu span{font-size:13px;font-weight:800}
+.list-export-menu small{font-size:11px;color:var(--muted);font-weight:700}
+@media(max-width:520px){
+  .list-export-wrap{flex:1}
+  .list-export-wrap>.list-action-btn{width:100%!important}
+  .list-export-menu{left:0;right:auto;width:min(220px,85vw)}
+}
