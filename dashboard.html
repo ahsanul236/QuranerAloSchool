@@ -1,4 +1,4 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net https://quraneralo-school-drive-test.vercel.app;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260925-11"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342"><meta name="description" content="QURANER ALO management dashboard"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://cdn.jsdelivr.net https://quraneralo-school-drive-test.vercel.app;"><title>Management Dashboard | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260926-12"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>QURANER ALO School Management</span></div></div><div class="top-actions"><span id="rolePill" class="role-pill">AUTHENTICATED</span><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><div id="loading" class="notice-box">Dashboard load হচ্ছে…</div><div id="app" class="hidden">
 <div id="overviewView">
   <div class="page-head"><div><p class="eyebrow">সারসংক্ষেপ</p><h1>ওভারভিউ</h1><p class="muted">স্কুল ব্যবস্থাপনার গুরুত্বপূর্ণ সারসংক্ষেপ ও রিপোর্ট এক জায়গায় দেখুন।</p></div></div>
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
@@ -37,26 +37,27 @@
 
 <div id="settingsView" class="settings-view hidden">
   <div class="page-head"><div><p class="eyebrow">সেটিংস ও প্রশাসন</p><h1>সেটিংস ও প্রশাসন</h1><p class="muted">পোর্টাল, ব্যবহারকারী, অনুমতি ও প্রশাসনিক সেটিংস এখান থেকে পরিচালনা করুন।</p></div></div>
-  <div class="panel">
-    <div class="panel-head"><h2>Portal Activation / Login Status</h2><span class="eyebrow">PORTAL STATUS</span></div>
-    <div class="portal-summary-grid" style="padding:16px">
-      <div class="portal-summary-card"><span>Students</span><strong id="studentActivationSummary">—</strong><small id="studentActivationHint">—</small></div>
-      <div class="portal-summary-card"><span>Teachers</span><strong id="teacherActivationSummary">—</strong><small id="teacherActivationHint">—</small></div>
-      <div class="portal-summary-card"><span>Helpers</span><strong id="helperActivationSummary">—</strong><small id="helperActivationHint">—</small></div>
-    </div>
-  </div>
-  <div id="portalPreview" class="panel hidden">
-    <div class="panel-head"><h2>Portal Preview</h2><span class="eyebrow">SUPER ADMIN</span></div>
-    <div class="portal-preview-compact">
-      <p class="permission-note">Student, Teacher বা Helper-এর নাম বা ID দিয়ে খুঁজে read-only portal preview খুলুন। আপনার Super Admin session-ই থাকবে।</p>
-      <div class="portal-preview-row">
-        <div class="portal-preview-search">
-          <input id="portalPreviewSearch" type="search" autocomplete="off" placeholder="নাম বা ID দিয়ে খুঁজুন — Student / Teacher / Helper" aria-label="Portal preview profile search" aria-expanded="false" aria-controls="portalPreviewResults">
-          <div id="portalPreviewResults" class="portal-preview-results hidden" role="listbox"></div>
-        </div>
-        <button id="openPortalPreview" class="primary-btn portal-preview-open" type="button" disabled>Preview খুলুন</button>
+  <div class="portal-settings-cards">
+    <div class="panel portal-status-card">
+      <div class="portal-mini-head"><span class="portal-mini-icon" aria-hidden="true">●</span><h2>Portal Activation / Login Status</h2></div>
+      <div class="portal-summary-grid portal-summary-list">
+        <div class="portal-summary-card"><span class="portal-role-mark student" aria-hidden="true">S</span><span class="portal-role-copy"><span>Students</span><small id="studentActivationHint">—</small></span><strong id="studentActivationSummary">—</strong></div>
+        <div class="portal-summary-card"><span class="portal-role-mark teacher" aria-hidden="true">T</span><span class="portal-role-copy"><span>Teachers</span><small id="teacherActivationHint">—</small></span><strong id="teacherActivationSummary">—</strong></div>
+        <div class="portal-summary-card"><span class="portal-role-mark helper" aria-hidden="true">H</span><span class="portal-role-copy"><span>Helpers</span><small id="helperActivationHint">—</small></span><strong id="helperActivationSummary">—</strong></div>
       </div>
-      <span id="previewMessage" class="message-inline"></span>
+    </div>
+    <div id="portalPreview" class="panel portal-preview-card hidden">
+      <div class="portal-mini-head"><span class="portal-mini-icon" aria-hidden="true">●</span><h2>Portal Preview</h2></div>
+      <div class="portal-preview-compact">
+        <div class="portal-preview-row">
+          <div class="portal-preview-search">
+            <input id="portalPreviewSearch" type="search" autocomplete="off" placeholder="নাম বা ID দিয়ে খুঁজুন — Student / Teacher / Helper" aria-label="Portal preview profile search" aria-expanded="false" aria-controls="portalPreviewResults">
+            <div id="portalPreviewResults" class="portal-preview-results hidden" role="listbox"></div>
+          </div>
+          <button id="openPortalPreview" class="primary-btn portal-preview-open" type="button" disabled>Preview খুলুন</button>
+        </div>
+        <span id="previewMessage" class="message-inline"></span>
+      </div>
     </div>
   </div>
   <div id="schoolProfilePanel" class="panel settings-accordion hidden">
