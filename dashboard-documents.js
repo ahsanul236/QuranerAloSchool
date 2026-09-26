@@ -27,3 +27,16 @@ async function init() {
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
+
+async function loadGithubStorage(){
+ const status=$('githubStorageStatus'); if(!status)return;
+ try{
+  const {data:{session}}=await window.supabaseClient.auth.getSession(); if(!session?.access_token)throw new Error('UNAUTHORIZED');
+  const res=await fetch('/api/storage-github',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}); const data=await res.json();
+  if(!res.ok||data.status!=='connected')throw new Error(data.error||data.detail||'GITHUB_USAGE_UNAVAILABLE');
+  const rows=Array.isArray(data.usage?.usageItems)?data.usage.usageItems:[]; const sr=rows.filter(x=>/storage/i.test(String(x?.product||'')+' '+String(x?.sku||'')));
+  const q=sr.reduce((s,x)=>s+(Number(x?.quantity)||0),0);
+  $('githubStorageUsed').textContent=q?q.toFixed(q<10?2:1)+' '+(sr[0]?.unitType||''):'0'; $('githubStorageFree').textContent='Plan based'; $('githubStoragePercent').textContent='Live'; status.textContent='Connected';
+ }catch(e){console.warn('GitHub usage unavailable',e);status.textContent='Unavailable';$('githubStorageUsed').textContent='—';$('githubStorageFree').textContent='—';$('githubStoragePercent').textContent='—';}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadGithubStorage,{once:true});else loadGithubStorage();
