@@ -1,6 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
-import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-2';
+import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, visibleExportColumns, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-3';
 
 const config = window.QURANER_ALO_CONFIG;
 const supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
@@ -277,27 +277,28 @@ async function exportStudents(format, actionButton) {
       { label:'Student ID', key:'student_code' },
       { label:'English Name', key:'full_name' },
       { label:'বাংলা নাম', key:'full_name_bn' },
-      { label:'Gender', value:(row) => genderLabel(row.gender) },
-      { label:'Class / Course', key:'courses' },
-      { label:'Admission Year', value:(row) => yearLabel(row.admission_date) },
-      { label:'Assigned Teacher', key:'teacher_name' },
-      { label:'Phone', key:'phone' },
-      { label:'Status', key:'status' },
-      { label:'Portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
+      { label:'Gender', column:'gender', value:(row) => genderLabel(row.gender) },
+      { label:'Class / Course', column:'course', key:'courses' },
+      { label:'Admission Year', column:'admission', value:(row) => yearLabel(row.admission_date) },
+      { label:'Assigned Teacher', column:'teacher', key:'teacher_name' },
+      { label:'Phone', column:'phone', key:'phone' },
+      { label:'Status', column:'status', key:'status' },
+      { label:'Portal', column:'portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
     ];
+    const exportColumns = visibleExportColumns(columns, $('columnMenu'));
     const date = new Date().toISOString().slice(0,10);
     const base = `QuranerAlo_Students_${date}`;
     const note = filterItems().filter((item) => String(item.value || '').trim())
       .map((item) => `${item.label}: ${item.text}`).join(' · ') || 'All students';
 
     if (format === 'csv') {
-      downloadCsv(base + '.csv', columns, exported);
+      downloadCsv(base + '.csv', exportColumns, exported);
     } else if (format === 'xlsx') {
-      await downloadXlsx(base + '.xlsx', 'Students', columns, exported);
+      await downloadXlsx(base + '.xlsx', 'Students', exportColumns, exported);
     } else if (format === 'pdf') {
-      await downloadPdf(base + '.pdf', 'Student List', columns, exported, note);
+      await downloadPdf(base + '.pdf', 'Student List', exportColumns, exported, note);
     } else if (format === 'print') {
-      printRows('Student List', columns, exported, note);
+      printRows('Student List', exportColumns, exported, note);
     } else {
       throw new Error('Unsupported export format');
     }
