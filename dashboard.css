@@ -788,3 +788,78 @@
 .overview-people-link:hover{border-color:#bddbd2;background:#fbfefd;box-shadow:0 5px 16px rgba(7,63,53,.07);transform:translateY(-1px)}
 .overview-people-link:focus-visible{outline:3px solid rgba(21,150,111,.22);outline-offset:2px;border-color:#15966f}
 .overview-people-link:active{transform:translateY(0)}
+
+
+/* 2026 compact management hierarchy — final visual cascade */
+.management-layout .page-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-height:0;
+  margin:0 0 12px;
+  padding:12px 16px;
+  border-radius:14px;
+  box-shadow:0 4px 14px rgba(7,63,53,.035);
+}
+.management-layout .page-head>div:first-child{
+  min-width:0;
+  max-width:none;
+  text-align:left;
+  justify-self:auto;
+}
+.management-layout .page-head .eyebrow{
+  margin:0 0 2px;
+  font-size:11px;
+  line-height:1.25;
+  letter-spacing:.08em;
+}
+.management-layout .page-head h1{
+  margin:0;
+  font-size:25px;
+  line-height:1.2;
+}
+.management-layout .page-head .muted{
+  max-width:900px;
+  margin:3px 0 0;
+  font-size:13px;
+  line-height:1.45;
+}
+.management-layout .page-head>.tools{
+  grid-column:auto;
+  justify-self:auto;
+  flex:0 0 auto;
+}
+.management-layout .panel{margin-top:12px}
+.management-layout .panel-head{
+  min-height:0;
+  padding:12px 16px;
+}
+.management-layout .panel-head h2{font-size:19px;line-height:1.25}
+.management-layout .panel-head p,
+.management-layout .panel-head .muted{margin-top:3px;margin-bottom:0;line-height:1.45}
+.management-layout .settings-accordion-summary{padding:13px 16px}
+.management-layout .settings-accordion-title h2{margin-bottom:2px}
+.management-layout .settings-accordion-title p{margin-top:0;line-height:1.45}
+.management-layout .settings-profile-form{padding:16px}
+.management-layout .settings-form-footer{margin-top:14px;padding-top:13px}
+.management-layout .list-search-row,
+.management-layout .list-filter-grid{gap:10px}
+.management-layout .overview-reports>.panel-head{padding:12px 16px}
+
+@media(max-width:700px){
+  .management-layout .page-head{
+    display:flex;
+    align-items:flex-start;
+    padding:11px 13px;
+    margin-bottom:10px;
+  }
+  .management-layout .page-head>div:first-child{width:auto;flex:1 1 auto}
+  .management-layout .page-head h1{font-size:22px}
+  .management-layout .page-head .muted{font-size:12.5px;line-height:1.4}
+  .management-layout .page-head>.tools{width:auto;flex:0 0 auto}
+  .management-layout .panel{margin-top:10px}
+  .management-layout .panel-head{padding:11px 13px}
+  .management-layout .panel-head h2{font-size:17px}
+  .management-layout .settings-accordion-summary{padding:12px 13px}
+}
