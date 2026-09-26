@@ -781,3 +781,10 @@
  .management-layout .brand-mini span{display:none}
  .management-layout .top-actions .secondary-btn{padding:8px;font-size:11px}
 }
+
+
+/* People Overview quick navigation */
+.overview-people-link{color:inherit;text-decoration:none;cursor:pointer;transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease,background .16s ease}
+.overview-people-link:hover{border-color:#bddbd2;background:#fbfefd;box-shadow:0 5px 16px rgba(7,63,53,.07);transform:translateY(-1px)}
+.overview-people-link:focus-visible{outline:3px solid rgba(21,150,111,.22);outline-offset:2px;border-color:#15966f}
+.overview-people-link:active{transform:translateY(0)}
