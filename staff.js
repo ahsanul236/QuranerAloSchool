@@ -85,7 +85,7 @@ function updatePageContext() {
   $('search').placeholder = teacher ? 'নাম / ID / ফোন / Email / Specialization…' : 'নাম / ID / ফোন / Email দিয়ে খুঁজুন…';
   $('detailHead').textContent = 'Specialization';
   $('specializationWrap').classList.toggle('hidden', !teacher);
-  $('fullNameBn').closest('label').classList.toggle('hidden', !teacher);
+  $('fullNameBn').closest('label').classList.remove('hidden');
   $('specializationFilterWrap').classList.toggle('hidden', !teacher);
   $('detailColumnOption').classList.toggle('hidden', !teacher);
   $('staffTable').classList.toggle('hide-detail-column', !teacher);
@@ -453,6 +453,7 @@ $('staffForm').addEventListener('submit', async event => {
     } else {
       const { data, error } = await supabase.from('qa_staff').insert({
         full_name: String(form.get('full_name') || '').trim(),
+        full_name_bn: String(form.get('full_name_bn') || '').trim() || null,
         staff_type: 'helper',
         phone: String(form.get('phone') || '').trim(),
         email: String(form.get('email') || '').trim(),
