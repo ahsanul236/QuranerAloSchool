@@ -534,3 +534,68 @@
   .list-export-wrap>.list-action-btn{width:100%!important}
   .list-export-menu{left:0;right:auto;width:min(220px,85vw)}
 }
+
+
+/* 2026 Professional shell v1 — visual-only foundation, no feature changes */
+:root{--qa-sidebar:#073f35;--qa-sidebar-deep:#052f28;--qa-surface:#f4f8f7;--qa-card:#fff;--qa-accent:#15966f;--qa-mobile-nav-h:66px}
+.management-layout .dashboard-card{background:var(--qa-surface)}
+.management-layout .dashboard-card>.topbar{height:76px;padding:10px 22px;background:rgba(255,255,255,.97);border-bottom:1px solid #dfe9e6;box-shadow:0 4px 18px rgba(7,63,53,.06)}
+.management-layout{--management-header-height:76px}
+.management-layout .dashboard-card{padding:calc(var(--management-header-height) + 22px) 24px 28px}
+.management-layout .dashboard-card>#loading,.management-layout .dashboard-card>#app{margin-left:248px}
+.management-sidebar{top:0;width:232px;padding:92px 12px 24px;background:linear-gradient(180deg,var(--qa-sidebar) 0%,var(--qa-sidebar-deep) 100%);box-shadow:8px 0 26px rgba(5,47,40,.12)}
+.sidebar-title{color:#b9d8cf}
+.management-nav-link{font-size:14px;padding:10px 12px;border-radius:12px;color:#edf9f6}
+.management-nav-link.is-active{background:#d9fff2;color:#073f35;box-shadow:none}
+.management-nav-link.is-active .nav-icon{color:#073f35}
+.management-nav-link.is-active::before{display:none}
+.page-head{min-height:104px;margin:0 auto 18px;padding:16px 20px;border-radius:18px;background:#fff;border-color:#dfe9e6;box-shadow:0 7px 22px rgba(7,63,53,.05)}
+.page-head h1{font-size:30px}
+.panel{border-color:#dfe9e6;border-radius:16px;box-shadow:0 6px 20px rgba(7,63,53,.045)}
+.panel-head{padding:15px 18px}
+.management-layout input:not([type="checkbox"]):not([type="radio"]),.management-layout select,.management-layout textarea,.management-layout .user-table input:not([type="checkbox"]):not([type="radio"]),.management-layout .user-table select{background:#fff}
+.management-layout .voucher-search-panel{background:#fff}
+.dashboard-grid .stat,.portal-summary-card,.module,.overview-report-card{border-color:#dfe9e6;box-shadow:0 5px 16px rgba(7,63,53,.04)}
+
+@media(max-width:980px){
+ .management-layout{--management-header-height:68px}
+ .management-layout .dashboard-card{padding:calc(var(--management-header-height) + 14px) 12px calc(var(--qa-mobile-nav-h) + 18px)}
+ .management-layout .dashboard-card>.topbar{height:var(--management-header-height);padding:8px 12px 8px 58px}
+ .management-layout .dashboard-card>#loading,.management-layout .dashboard-card>#app{margin-left:0}
+ .management-layout .brand-mini img{width:42px;height:42px}
+ .management-layout .brand-mini strong{font-size:16px}
+ .management-layout .brand-mini span{font-size:10px}
+ .management-layout .top-actions{margin-left:auto;flex-wrap:nowrap}
+ .management-layout .top-actions .role-pill{display:none}
+ .management-layout .top-actions .secondary-btn{width:auto;padding:8px 10px;font-size:12px}
+ .management-mobile-toggle{display:grid;place-items:center;top:13px;left:12px;width:40px;height:40px;border:0;box-shadow:none;background:#edf7f4;color:#073f35}
+ .management-sidebar{top:0;width:min(82vw,300px);padding:78px 12px 24px;z-index:2200}
+ .management-nav-backdrop.is-visible{z-index:2100}
+ .page-head{min-height:auto;padding:15px 14px;margin-bottom:14px}
+ .page-head h1{font-size:25px}
+ .page-head .muted{font-size:13px;line-height:1.55}
+}
+@media(max-width:620px){
+ body.management-layout{padding:0;background:var(--qa-surface)}
+ .management-layout .dashboard-card{padding:82px 10px 82px}
+ .management-layout .dashboard-card>#app{padding-top:0}
+ .management-layout .dashboard-card>.topbar{height:68px;padding:8px 10px 8px 56px}
+ .management-layout .brand-mini img{width:38px;height:38px}
+ .management-layout .brand-mini strong{font-size:15px}
+ .management-layout .brand-mini span{max-width:145px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .page-head{border-radius:14px;text-align:left}
+ .page-head>div:first-child{text-align:left;justify-self:stretch}
+ .page-head .muted{margin:6px 0 0}
+ .panel{margin-top:12px;border-radius:14px}
+ .panel-head{padding:13px 14px}
+ .panel-head h2{font-size:18px}
+ .overview-report-grid{padding:10px;gap:10px}
+ .overview-report-card{padding:14px;border-radius:14px}
+ .overview-financial-value{font-size:25px}
+ .portal-summary-grid{gap:10px!important;padding:10px!important}
+ .form-grid{gap:10px}
+ .form-grid input,.form-grid select,.form-grid textarea{min-height:44px;font-size:16px}
+ .primary-btn,.secondary-btn,.save-btn{min-height:42px}
+ .table-wrap{margin:0 -1px;-webkit-overflow-scrolling:touch}
+ .management-layout .user-table,.management-layout .student-table,.management-layout .staff-table{font-size:13px}
+}
