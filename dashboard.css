@@ -599,3 +599,47 @@
  .table-wrap{margin:0 -1px;-webkit-overflow-scrolling:touch}
  .management-layout .user-table,.management-layout .student-table,.management-layout .staff-table{font-size:13px}
 }
+
+
+/* 2026 list workspace v1 — Students / Teachers / Helpers */
+.list-management-panel{overflow:visible}
+.list-management-panel>.panel-head{position:relative;z-index:8}
+.list-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.list-action-btn{min-width:96px;background:#fff}
+.list-filter-shell{padding:14px 16px 12px;border-bottom:1px solid #e2ebe8;background:#fbfdfc}
+.list-search-row{display:grid;grid-template-columns:minmax(260px,1fr) auto;gap:10px;align-items:end}
+.list-search-field{display:grid;gap:6px;font-size:12px;font-weight:700;color:var(--muted)}
+.list-search-field input{height:44px;border-radius:12px}
+.list-filter-toggle{height:44px;min-width:96px}
+.list-filter-grid{grid-template-columns:repeat(4,minmax(140px,1fr));gap:10px;margin-top:12px}
+.list-filter-grid label{font-size:12px}
+.list-filter-grid select{height:42px;border-radius:10px}
+.list-filter-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:10px}
+.list-filter-chips{min-width:0}
+.list-pagination{padding:12px 16px 14px;background:#fff}
+.list-data-table thead th{position:sticky;top:0;z-index:2;background:#f2f7f5;color:#36554d;white-space:nowrap}
+.list-data-table tbody tr{transition:background .15s ease}
+.list-data-table tbody tr:hover{background:#f7fbfa}
+.list-export-menu,.list-column-menu{border-color:#dce8e4;box-shadow:0 14px 34px rgba(7,63,53,.14);border-radius:12px}
+
+@media(max-width:980px){
+ .list-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+ .page-head>.tools{position:fixed;right:14px;bottom:calc(var(--qa-mobile-nav-h) + 16px);z-index:900;width:auto}
+ .page-head>.tools .primary-btn{width:52px;height:52px;min-height:52px;padding:0;border-radius:50%;font-size:0;box-shadow:0 10px 28px rgba(7,63,53,.24)}
+ .page-head>.tools .primary-btn::before{content:'+';font-size:28px;font-weight:400;line-height:1}
+ .list-management-panel>.panel-head{align-items:flex-start;flex-direction:column}
+ .list-head-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+ .list-export-wrap,.list-column-wrap{width:100%}
+ .list-action-btn{width:100%;min-height:42px}
+ .list-search-row{grid-template-columns:1fr}
+ .list-filter-toggle{width:100%}
+ .list-filter-grid{grid-template-columns:1fr}
+ .list-filter-footer{align-items:stretch;flex-direction:column}
+ .list-reset-btn{width:100%}
+ .list-management-panel .table-wrap{max-width:100vw}
+ .list-data-table{min-width:760px}
+ .list-pagination{display:grid;gap:10px}
+ .list-pagination-controls{justify-content:space-between;flex-wrap:wrap}
+}
