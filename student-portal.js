@@ -157,6 +157,10 @@ async function init() {
   const previewStudentId = qs.get('preview_student') || '';
   $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('signOut').addEventListener('click', async () => {
+    if (previewStudentId) {
+      location.href = 'dashboard.html#settings';
+      return;
+    }
     await supabase.auth.signOut();
     location.replace('./');
   });
