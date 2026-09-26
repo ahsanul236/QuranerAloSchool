@@ -176,26 +176,81 @@ export async function downloadXlsx(filename, sheetName, columns, rows) {
   XLSX.writeFile(workbook, fileBase(filename) + '.xlsx');
 }
 
+export function visibleExportColumns(columns, menu) {
+  const visibility = new Map(
+    [...(menu?.querySelectorAll('input[data-column]') || [])]
+      .map((input) => [input.dataset.column, input.checked])
+  );
+  return columns.filter((column) => !column.column || visibility.get(column.column) !== false);
+}
+
 export async function downloadPdf(filename, title, columns, rows, note = '') {
-  const html2pdf = await loadScriptOnce('https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js', 'html2pdf');
+  await Promise.all([
+    loadScriptOnce('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js', 'html2canvas'),
+    loadScriptOnce('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js')
+  ]);
+  const html2canvas = window.html2canvas;
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!html2canvas || !jsPDF) throw new Error('PDF libraries did not load.');
+
   await document.fonts?.ready;
   const holder = document.createElement('div');
+  holder.setAttribute('aria-hidden', 'true');
   holder.style.position = 'fixed';
-  holder.style.left = '-100000px';
+  holder.style.left = '0';
   holder.style.top = '0';
-  holder.style.width = '1100px';
+  holder.style.width = columns.length > 7 ? '1180px' : '860px';
+  holder.style.background = '#fff';
+  holder.style.zIndex = '-2147483000';
+  holder.style.pointerEvents = 'none';
   holder.innerHTML = '<style>' + exportStyles() + '</style>' + tableMarkup(title, columns, rows, note);
   document.body.appendChild(holder);
+
   try {
-    const options = {
-      margin: [8, 7, 8, 7],
-      filename: fileBase(filename) + '.pdf',
-      image: { type: 'jpeg', quality: 0.96 },
-      html2canvas: { scale: 1.45, useCORS: true, logging: false, backgroundColor: '#ffffff' },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: columns.length > 7 ? 'landscape' : 'portrait' },
-      pagebreak: { mode: ['css', 'legacy'], avoid: ['tr'] }
-    };
-    await html2pdf().set(options).from(holder.querySelector('.qa-export-document')).save();
+    const content = holder.querySelector('.qa-export-document');
+    const canvas = await html2canvas(content, {
+      scale: 1.4,
+      useCORS: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: Math.max(holder.scrollWidth, content.scrollWidth),
+      windowHeight: Math.max(holder.scrollHeight, content.scrollHeight)
+    });
+    if (!canvas.width || !canvas.height) throw new Error('PDF canvas is empty.');
+
+    const orientation = columns.length > 7 ? 'landscape' : 'portrait';
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation });
+    const margin = 7;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const drawWidth = pageWidth - (margin * 2);
+    const drawHeight = pageHeight - (margin * 2);
+    const mmPerPixel = drawWidth / canvas.width;
+    const pagePixelHeight = Math.max(1, Math.floor(drawHeight / mmPerPixel));
+
+    let offsetY = 0;
+    let pageIndex = 0;
+    while (offsetY < canvas.height) {
+      const sliceHeight = Math.min(pagePixelHeight, canvas.height - offsetY);
+      const pageCanvas = document.createElement('canvas');
+      pageCanvas.width = canvas.width;
+      pageCanvas.height = sliceHeight;
+      const ctx = pageCanvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+      ctx.drawImage(canvas, 0, offsetY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+      if (pageIndex > 0) pdf.addPage('a4', orientation);
+      const imageData = pageCanvas.toDataURL('image/jpeg', 0.94);
+      pdf.addImage(imageData, 'JPEG', margin, margin, drawWidth, sliceHeight * mmPerPixel, undefined, 'FAST');
+
+      offsetY += sliceHeight;
+      pageIndex += 1;
+    }
+
+    pdf.save(fileBase(filename) + '.pdf');
   } finally {
     holder.remove();
   }
