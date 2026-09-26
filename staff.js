@@ -1,6 +1,6 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
-import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-2';
+import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, visibleExportColumns, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-3';
 
 const config = window.QURANER_ALO_CONFIG;
 const supabase = createClient(config.supabaseUrl, config.supabasePublishableKey, {
@@ -283,16 +283,17 @@ async function exportRows(format, actionButton) {
       { label:teacher ? 'Teacher ID' : 'Helper ID', value:(row) => teacher ? row.teacher_code : row.staff_code },
       { label:'English Name', key:'full_name' },
       { label:'বাংলা নাম', key:'full_name_bn' },
-      { label:'Gender', value:(row) => genderLabel(row.gender) },
-      { label:'Joining Year', value:(row) => yearLabel(row.joining_date) }
+      { label:'Gender', column:'gender', value:(row) => genderLabel(row.gender) },
+      { label:'Joining Year', column:'joining', value:(row) => yearLabel(row.joining_date) }
     ];
-    if (teacher) columns.push({ label:'Specialization', key:'specialization' });
+    if (teacher) columns.push({ label:'Specialization', column:'detail', key:'specialization' });
     columns.push(
-      { label:'Phone', key:'phone' },
-      { label:'Email', key:'email' },
-      { label:'Status', value:(row) => row.active ? 'Active' : 'Inactive' },
-      { label:'Portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
+      { label:'Phone', column:'phone', key:'phone' },
+      { label:'Email', column:'email', key:'email' },
+      { label:'Status', column:'status', value:(row) => row.active ? 'Active' : 'Inactive' },
+      { label:'Portal', column:'portal', value:(row) => row.user_id ? 'Activated' : 'Not Activated' }
     );
+    const exportColumns = visibleExportColumns(columns, $('columnMenu'));
 
     const date = new Date().toISOString().slice(0,10);
     const entity = teacher ? 'Teachers' : 'Helpers';
@@ -301,13 +302,13 @@ async function exportRows(format, actionButton) {
       .map((item) => `${item.label}: ${item.text}`).join(' · ') || `All ${entity.toLowerCase()}`;
 
     if (format === 'csv') {
-      downloadCsv(base + '.csv', columns, all);
+      downloadCsv(base + '.csv', exportColumns, all);
     } else if (format === 'xlsx') {
-      await downloadXlsx(base + '.xlsx', entity, columns, all);
+      await downloadXlsx(base + '.xlsx', entity, exportColumns, all);
     } else if (format === 'pdf') {
-      await downloadPdf(base + '.pdf', teacher ? 'Teacher List' : 'Helper List', columns, all, note);
+      await downloadPdf(base + '.pdf', teacher ? 'Teacher List' : 'Helper List', exportColumns, all, note);
     } else if (format === 'print') {
-      printRows(teacher ? 'Teacher List' : 'Helper List', columns, all, note);
+      printRows(teacher ? 'Teacher List' : 'Helper List', exportColumns, all, note);
     } else {
       throw new Error('Unsupported export format');
     }
