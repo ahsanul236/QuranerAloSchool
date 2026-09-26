@@ -4,17 +4,33 @@
   <div class="panel overview-reports"><div class="panel-head"><h2>Reports & Summaries</h2></div><div id="overviewReportGrid" class="overview-report-grid"></div><p id="overviewReportMessage" class="message-inline" style="padding:0 16px 16px"></p></div>
 
   
-<div class="panel">
-    <div class="panel-head"><h2>Google Drive Storage</h2><span class="eyebrow" id="googleDriveStorageStatus">Checking…</span></div>
-    <div id="googleDriveStorageCard" class="google-storage-card hidden" style="border:0;box-shadow:none;border-radius:0">
-      <div class="google-storage-head"><div><h3>Document Storage</h3><span class="muted">Website documents-এর Google Drive storage status</span></div></div>
-      <div class="google-storage-grid">
-        <div class="google-storage-item"><small>Total</small><strong id="googleDriveStorageTotal">—</strong></div>
-        <div class="google-storage-item"><small>Used</small><strong id="googleDriveStorageUsed">—</strong></div>
-        <div class="google-storage-item"><small>Free</small><strong id="googleDriveStorageFree">—</strong></div>
-        <div class="google-storage-item"><small>Usage</small><strong id="googleDriveStoragePercent">—</strong></div>
-      </div>
-      <div class="google-storage-progress"><div id="googleDriveStorageBar" class="google-storage-bar"></div></div>
+<div class="panel storage-overview-panel">
+    <div class="panel-head"><div><h2>Storage</h2><p class="muted">Connected services-এর storage ও usage status এক জায়গায় দেখুন।</p></div><span class="eyebrow" id="storageOverviewStatus">Checking…</span></div>
+    <div class="storage-provider-grid">
+      <article id="googleDriveStorageCard" class="storage-provider-card">
+        <div class="storage-provider-head"><div><span class="storage-provider-mark google">G</span><div><h3>Google</h3><small id="googleDriveStorageStatus">Checking…</small></div></div><strong id="googleDriveStoragePercent">—</strong></div>
+        <div class="storage-provider-metrics"><span>Used <strong id="googleDriveStorageUsed">—</strong></span><span>Free <strong id="googleDriveStorageFree">—</strong></span></div>
+        <div class="storage-provider-progress"><div id="googleDriveStorageBar"></div></div>
+        <small class="storage-provider-note">Drive · Total <span id="googleDriveStorageTotal">—</span></small>
+      </article>
+      <article class="storage-provider-card">
+        <div class="storage-provider-head"><div><span class="storage-provider-mark github">GH</span><div><h3>GitHub</h3><small id="githubStorageStatus">Setup required</small></div></div><strong id="githubStoragePercent">—</strong></div>
+        <div class="storage-provider-metrics"><span>Used <strong id="githubStorageUsed">—</strong></span><span>Available <strong id="githubStorageFree">—</strong></span></div>
+        <div class="storage-provider-progress"><div id="githubStorageBar"></div></div>
+        <small class="storage-provider-note">Billing storage usage</small>
+      </article>
+      <article class="storage-provider-card">
+        <div class="storage-provider-head"><div><span class="storage-provider-mark supabase">S</span><div><h3>Supabase</h3><small id="supabaseStorageStatus">Setup required</small></div></div><strong id="supabaseStoragePercent">—</strong></div>
+        <div class="storage-provider-metrics"><span>Used <strong id="supabaseStorageUsed">—</strong></span><span>Limit <strong id="supabaseStorageFree">—</strong></span></div>
+        <div class="storage-provider-progress"><div id="supabaseStorageBar"></div></div>
+        <small class="storage-provider-note">Project storage usage</small>
+      </article>
+      <article class="storage-provider-card">
+        <div class="storage-provider-head"><div><span class="storage-provider-mark vercel">V</span><div><h3>Vercel</h3><small id="vercelStorageStatus">Setup required</small></div></div><strong id="vercelStoragePercent">—</strong></div>
+        <div class="storage-provider-metrics"><span>Used <strong id="vercelStorageUsed">—</strong></span><span>Limit <strong id="vercelStorageFree">—</strong></span></div>
+        <div class="storage-provider-progress"><div id="vercelStorageBar"></div></div>
+        <small class="storage-provider-note">Project resource usage</small>
+      </article>
     </div>
   </div>
 </div>
