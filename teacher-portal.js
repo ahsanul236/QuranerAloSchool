@@ -150,6 +150,10 @@ async function init() {
 
   $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
   $('signOut').addEventListener('click', async () => {
+    if (previewTeacherId) {
+      location.href = 'dashboard.html#settings';
+      return;
+    }
     await supabase.auth.signOut();
     location.replace('./');
   });
