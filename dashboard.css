@@ -863,3 +863,23 @@
   .management-layout .panel-head h2{font-size:17px}
   .management-layout .settings-accordion-summary{padding:12px 13px}
 }
+
+
+/* Unified provider storage overview */
+.storage-provider-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:14px 16px 16px}
+.storage-provider-card{min-width:0;padding:14px;border:1px solid #dfe9e6;border-radius:14px;background:#fff;box-shadow:0 4px 14px rgba(7,63,53,.035)}
+.storage-provider-head,.storage-provider-head>div{display:flex;align-items:center;gap:10px}
+.storage-provider-head{justify-content:space-between}
+.storage-provider-head h3{margin:0;color:var(--navy);font-size:17px}
+.storage-provider-head small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.storage-provider-head>strong{font-size:18px;color:var(--navy);white-space:nowrap}
+.storage-provider-mark{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:10px;font-size:12px;font-weight:800;background:#eef5f3;color:#073f35}
+.storage-provider-mark.google{background:#eef4ff;color:#2467c8}.storage-provider-mark.github{background:#f0f1f3;color:#24292f}.storage-provider-mark.supabase{background:#e9f8f1;color:#16865f}.storage-provider-mark.vercel{background:#f1f1f1;color:#111}
+.storage-provider-metrics{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.storage-provider-metrics>span{padding:9px 10px;border-radius:10px;background:#f8fbfa;color:var(--muted);font-size:11px}
+.storage-provider-metrics strong{display:block;margin-top:3px;color:var(--navy);font-size:14px}
+.storage-provider-progress{height:7px;margin-top:12px;border-radius:999px;background:#edf2f1;overflow:hidden}
+.storage-provider-progress>div{height:100%;width:0;border-radius:inherit;background:#15966f;transition:width .2s ease}
+.storage-provider-note{display:block;margin-top:8px;color:var(--muted);font-size:10.5px}
+@media(max-width:1050px){.storage-provider-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.storage-provider-grid{grid-template-columns:1fr;padding:10px 12px 12px;gap:9px}.storage-provider-card{padding:12px}}
