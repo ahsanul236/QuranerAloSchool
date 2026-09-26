@@ -4,8 +4,9 @@ function $(id) { return document.getElementById(id); }
 
 async function storageSession(){
  const cfg=window.QURANER_ALO_CONFIG;
- if(!window.supabase||!cfg) throw new Error('AUTH_CLIENT_UNAVAILABLE');
- const client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+ const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+ if(!cfg) throw new Error('AUTH_CONFIG_UNAVAILABLE');
+ const client=createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
  return (await client.auth.getSession()).data.session;
 }
 
