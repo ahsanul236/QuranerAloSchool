@@ -23,5 +23,5 @@ export default async function handler(req:Request){
   const br=await fetch(`https://api.github.com/users/${encodeURIComponent(user.login)}/settings/billing/usage`,{headers});
   if(!br.ok) return json({provider:'github',status:'unavailable',httpStatus:br.status,detail:(await br.text()).slice(0,180)});
   return json({provider:'github',status:'connected',login:user.login,usage:await br.json()});
- }catch(e:any){const m=String(e?.message||e);return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:500);}
+ }catch(e:any){const m=String(e?.message||e);console.error('[storage-github]',m);return json({error:m},m==='UNAUTHORIZED'?401:m==='FORBIDDEN'?403:500);}
 }
