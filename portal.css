@@ -94,3 +94,56 @@
 .portal-relationship-avatar.small{width:42px;height:42px;border-radius:10px;flex:none}
 .assigned-person-inline{display:flex;align-items:center;gap:10px;min-width:180px}
 .document-manager{border:0;border-radius:0;overflow:hidden}
+
+
+/* 2026 portal experience v1 — shared Teacher / Helper / Student UI */
+body.portal-page{background:#f3f8f6}
+.portal-shell{max-width:1180px}
+.portal-card{border-color:#dfe9e6;box-shadow:0 12px 36px rgba(7,63,53,.07)}
+.portal-head{border-bottom:1px solid #e2ebe8;padding-bottom:14px}
+.portal-brand img{filter:drop-shadow(0 5px 10px rgba(7,63,53,.10))}
+.portal-hero{background:linear-gradient(135deg,#f4fbf8 0%,#fff 62%,#fffaf0 100%);border-color:#dceae5;border-radius:18px;box-shadow:0 7px 22px rgba(7,63,53,.05)}
+.portal-avatar{border-color:#d5e6e0;box-shadow:0 8px 22px rgba(7,63,53,.10)}
+.portal-summary-grid{gap:12px}
+.portal-stat{background:#fff;border-color:#dfe9e6;border-radius:14px;box-shadow:0 4px 14px rgba(7,63,53,.035)}
+.portal-stat strong{letter-spacing:-.015em}
+.portal-panel{border-color:#dfe9e6;border-radius:16px;box-shadow:0 5px 18px rgba(7,63,53,.04)}
+.portal-panel h2{background:#fbfdfc;border-bottom-color:#e2ebe8}
+.portal-info-item,.portal-list li{border-color:#e1ebe8;background:#fff}
+.portal-table thead th{background:#f2f7f5;color:#36554d}
+.document-manager-head{background:#f2f8f6}
+.document-row,.document-profile-box,.document-empty{background:#fbfdfc;border-color:#dfe9e6}
+
+@media(max-width:620px){
+ body.portal-page{padding:0 0 72px;background:#f3f8f6}
+ .portal-shell{width:100%;margin:0}
+ .portal-card{padding:0 10px 14px;border:0;border-radius:0;box-shadow:none;background:#f3f8f6}
+ .portal-head{position:sticky;top:0;z-index:1000;margin:0 -10px 10px;padding:9px 10px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);box-shadow:0 3px 14px rgba(7,63,53,.07)}
+ .portal-brand img{width:40px;height:40px}
+ .portal-brand strong{font-size:15px}
+ .portal-brand span{font-size:10px}
+ .portal-actions{display:flex;width:auto;gap:6px;margin-left:auto}
+ .portal-actions .portal-badge{display:none}
+ .portal-actions .whatsapp-btn,.portal-actions .secondary-btn{width:auto;min-width:42px;min-height:40px;padding:8px 10px;font-size:12px}
+ .portal-hero{grid-template-columns:58px minmax(0,1fr);padding:14px;border-radius:16px;gap:11px}
+ .portal-avatar{width:58px;height:58px;border-radius:14px}
+ .portal-hero h1{font-size:22px}
+ .portal-hero-meta{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .portal-hero-meta>*{min-width:0}
+ .portal-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .portal-stat{padding:12px;min-height:82px;border-radius:13px}
+ .portal-stat span{font-size:11px}
+ .portal-stat strong{font-size:20px}
+ .portal-grid,.portal-info-grid{grid-template-columns:1fr;gap:10px}
+ .portal-panel{border-radius:14px;margin-top:10px}
+ .portal-panel h2{min-height:auto;padding:12px 13px;font-size:17px}
+ .portal-body{padding:12px 13px}
+ .portal-info-item{min-height:58px;padding:10px 11px;border-radius:11px}
+ .portal-list li{padding:11px 12px;border-radius:11px}
+ .portal-table-wrap{margin:0 -13px;padding:0 13px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ .portal-table{min-width:620px}
+ .document-manager-upload{padding:12px}
+ .document-list{padding:12px}
+ .document-profile-box{margin:12px}
+ .preview-banner{margin:0 -10px 10px;border-radius:0}
+}
