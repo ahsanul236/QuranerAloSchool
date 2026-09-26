@@ -9,7 +9,7 @@ async function requireAdmin(req:Request){
  const service=env('SUPABASE_SERVICE_ROLE_KEY')||env('SUPABASE_SECRET_KEY'); if(!service) throw new Error('SERVER_NOT_CONFIGURED');
  const authDb=createClient(url,anon,{auth:{persistSession:false}}); const adminDb=createClient(url,service,{auth:{persistSession:false}});
  const {data:{user},error}=await authDb.auth.getUser(auth.slice(7)); if(error||!user) throw new Error('UNAUTHORIZED');
- const {data,error:pe}=await adminDb.from('qa_users').select('role,active').eq('id',user.id).maybeSingle();
+ const {data,error:pe}=await adminDb.from('qa_users').select('role,active').eq('user_id',user.id).maybeSingle();
  if(pe||!data?.active||data.role!=='super_admin') throw new Error('FORBIDDEN');
 }
 export default async function handler(req:Request){
