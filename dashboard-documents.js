@@ -50,3 +50,14 @@ async function loadVercelStorage(){
  }catch(e){console.warn('Vercel status unavailable',e);status.textContent='Unavailable';$('vercelStorageUsed').textContent='—';$('vercelStorageFree').textContent='—';$('vercelStoragePercent').textContent='—';}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadVercelStorage,{once:true});else loadVercelStorage();
+
+async function loadSupabaseStorage(){
+ const status=$('supabaseStorageStatus');if(!status)return;
+ try{
+  const session=(await window.supabaseClient.auth.getSession()).data.session;if(!session?.access_token)throw new Error('UNAUTHORIZED');
+  const r=await fetch('/api/storage-supabase',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'SUPABASE_UNAVAILABLE');
+  const used=Number(data.database_bytes)||0,free=Number(data.database_free_bytes)||0,pct=Number(data.database_used_percent)||0;
+  $('supabaseStorageUsed').textContent=bytesToHuman(used);$('supabaseStorageFree').textContent=bytesToHuman(free);$('supabaseStoragePercent').textContent=pct.toFixed(pct<10?1:0)+'%';$('supabaseStorageBar').style.width=Math.min(100,Math.max(0,pct))+'%';status.textContent='Live · Database';
+ }catch(e){console.warn('Supabase storage unavailable',e);status.textContent='Unavailable';$('supabaseStorageUsed').textContent='—';$('supabaseStorageFree').textContent='—';$('supabaseStoragePercent').textContent='—';}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadSupabaseStorage,{once:true});else loadSupabaseStorage();
