@@ -39,6 +39,8 @@
   function closeMobile() {
     document.querySelector('.management-sidebar')?.classList.remove('is-open');
     document.querySelector('.management-nav-backdrop')?.classList.remove('is-visible');
+    const toggle = document.querySelector('.management-mobile-toggle');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 
   function init() {
