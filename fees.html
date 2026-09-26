@@ -3,24 +3,36 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co;">
-<title>Fees & Receipts | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260919-5">
+<title>Fees & Receipts | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260926-13">
 </head>
 <body><main class="dashboard-shell"><section class="card dashboard-card">
 <div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>Fees & Receipt Management</span></div></div><div class="top-actions"><a class="quick-link" href="dashboard.html">← Dashboard</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div>
 <div id="loading" class="notice-box">Fees module load হচ্ছে…</div><div id="app" class="hidden">
 <div class="page-head"><div><p class="eyebrow">ফি</p><h1>ফি ব্যবস্থাপনা</h1><p class="muted">শিক্ষার্থীর ফি চার্জ, পেমেন্ট ও রিসিট এখান থেকে পরিচালনা করুন।</p></div></div>
-<div class="panel"><div class="panel-head"><h2>New Monthly Fee Charge</h2><span class="eyebrow">FEES.MANAGE</span></div><form id="chargeForm" class="form-grid" style="padding:18px">
-<label>Student<select id="studentSelect" required></select></label><label>Billing Month<input id="billingMonth" type="month" required></label>
-<label>Expected Amount (৳)<input id="expectedAmount" type="number" min="0" step="0.01" value="0" required></label><label>Discount (৳)<input id="discount" type="number" min="0" step="0.01" value="0"></label>
-<label>Previous Due (৳)<input id="previousDue" type="number" min="0" step="0.01" value="0"></label><label>Due Date<input id="dueDate" type="date"></label>
-<label class="span-2">Notes<textarea id="chargeNotes" placeholder="Optional note"></textarea></label>
-<div class="span-2 page-actions"><strong>Current Payable: ৳ <span id="currentPayable">0.00</span></strong><button class="primary-btn" style="width:auto" type="submit">Save Fee Charge</button></div></form><div id="chargeMessage" class="message-inline"></div></div>
-<div class="panel"><div class="panel-head"><h2>Receive Fee Payment</h2><span class="eyebrow">RECEIPT</span></div><form id="paymentForm" class="form-grid" style="padding:18px">
-<label>Open/Partial Charge<select id="chargeSelect" required></select></label><label>Amount Paid (৳)<input id="paymentAmount" type="number" min="0.01" step="0.01" required></label>
-<label>Payment Method<select id="paymentMethod" required><option value="cash">Cash</option><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="bank_transfer">Bank Transfer</option><option value="online_payment">Online Payment</option><option value="other">Other</option></select></label><label>Payment Date<input id="paidAt" type="datetime-local" required></label>
-<label>Reference<input id="paymentReference" type="text" placeholder="Transaction / bank reference"></label><label>Notes<input id="paymentNotes" type="text" placeholder="Optional note"></label>
-<div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Payment & Generate Receipt No.</button></div></form><div id="paymentMessage" class="message-inline"></div></div>
+<div class="panel fee-action-panel">
+  <div class="fee-action-tabs" role="tablist" aria-label="Fee actions">
+    <button id="paymentTab" class="fee-action-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="paymentPane">Receive Fee Payment</button>
+    <button id="chargeTab" class="fee-action-tab" type="button" role="tab" aria-selected="false" aria-controls="chargePane">Generate Fee Payment</button>
+  </div>
+  <div id="paymentPane" class="fee-action-pane" role="tabpanel" aria-labelledby="paymentTab">
+    <form id="paymentForm" class="form-grid fee-action-form">
+      <label>Open/Partial Charge<select id="chargeSelect" required></select></label><label>Amount Paid (৳)<input id="paymentAmount" type="number" min="0.01" step="0.01" required></label>
+      <label>Payment Method<select id="paymentMethod" required><option value="cash">Cash</option><option value="bkash">bKash</option><option value="nagad">Nagad</option><option value="rocket">Rocket</option><option value="bank_transfer">Bank Transfer</option><option value="online_payment">Online Payment</option><option value="other">Other</option></select></label><label>Payment Date<input id="paidAt" type="datetime-local" required></label>
+      <label>Reference<input id="paymentReference" type="text" placeholder="Transaction / bank reference"></label><label>Notes<input id="paymentNotes" type="text" placeholder="Optional note"></label>
+      <div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Payment & Generate Receipt No.</button></div>
+    </form><div id="paymentMessage" class="message-inline"></div>
+  </div>
+  <div id="chargePane" class="fee-action-pane hidden" role="tabpanel" aria-labelledby="chargeTab">
+    <form id="chargeForm" class="form-grid fee-action-form">
+      <label>Student<select id="studentSelect" required></select></label><label>Billing Month<input id="billingMonth" type="month" required></label>
+      <label>Expected Amount (৳)<input id="expectedAmount" type="number" min="0" step="0.01" value="0" required></label><label>Discount (৳)<input id="discount" type="number" min="0" step="0.01" value="0"></label>
+      <label>Previous Due (৳)<input id="previousDue" type="number" min="0" step="0.01" value="0"></label><label>Due Date<input id="dueDate" type="date"></label>
+      <label class="span-2">Notes<textarea id="chargeNotes" placeholder="Optional note"></textarea></label>
+      <div class="span-2 page-actions"><strong>Current Payable: ৳ <span id="currentPayable">0.00</span></strong><button class="primary-btn" style="width:auto" type="submit">Save Fee Charge</button></div>
+    </form><div id="chargeMessage" class="message-inline"></div>
+  </div>
+</div>
 <div class="panel"><div class="panel-head"><h2>Fee Ledger</h2><span id="chargeCount" class="eyebrow">0 records</span></div><div class="table-wrap"><table class="user-table attendance-table"><thead><tr><th>Month</th><th>Student</th><th>Payable</th><th>Paid</th><th>Remaining</th><th>Status</th><th>Payments</th></tr></thead><tbody id="feeRows"></tbody></table></div></div>
 <div class="panel"><div class="panel-head"><h2>Recent Receipts</h2><span id="receiptCount" class="eyebrow">0 receipts</span></div><div class="table-wrap"><table class="user-table attendance-table"><thead><tr><th>Receipt No.</th><th>Date</th><th>Student</th><th>Amount</th><th>Method</th><th>Reference</th><th>Print</th></tr></thead><tbody id="receiptRows"></tbody></table></div></div>
 <p class="footer-note">RLS enforced · Receipt numbers are generated server-side · Payments are never stored in browser local storage.</p>
-</div></section></main><script src="supabase-config.js"></script><script type="module" src="fees.js?v=20260918-5"></script><script src="management-nav.js?v=20260918-4"></script></body></html>
+</div></section></main><script src="supabase-config.js"></script><script type="module" src="fees.js?v=20260926-6"></script><script src="management-nav.js?v=20260918-4"></script></body></html>
