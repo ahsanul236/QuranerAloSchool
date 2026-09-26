@@ -40,3 +40,13 @@ async function loadGithubStorage(){
  }catch(e){console.warn('GitHub usage unavailable',e);status.textContent='Unavailable';$('githubStorageUsed').textContent='—';$('githubStorageFree').textContent='—';$('githubStoragePercent').textContent='—';}
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadGithubStorage,{once:true});else loadGithubStorage();
+
+async function loadVercelStorage(){
+ const status=$('vercelStorageStatus');if(!status)return;
+ try{
+  const session=(await window.supabaseClient.auth.getSession()).data.session;if(!session?.access_token)throw new Error('UNAUTHORIZED');
+  const r=await fetch('/api/storage-vercel',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'VERCEL_UNAVAILABLE');
+  $('vercelStorageUsed').textContent=String(data.deploymentCount??0);$('vercelStorageFree').textContent=String(data.latest||'—');$('vercelStoragePercent').textContent='Live';status.textContent='Connected';$('vercelStorageBar').style.width=data.latest==='READY'?'100%':'55%';
+ }catch(e){console.warn('Vercel status unavailable',e);status.textContent='Unavailable';$('vercelStorageUsed').textContent='—';$('vercelStorageFree').textContent='—';$('vercelStoragePercent').textContent='—';}
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadVercelStorage,{once:true});else loadVercelStorage();
