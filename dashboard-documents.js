@@ -2,6 +2,10 @@ import { getStorage, bytesToHuman } from './documents-client.js';
 
 function $(id) { return document.getElementById(id); }
 
+function storageApi(path){
+ return location.hostname.endsWith('.vercel.app')?path:'https://quraneralo-school-drive-test.vercel.app'+path;
+}
+
 async function storageSession(){
  const cfg=window.QURANER_ALO_CONFIG;
  const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
@@ -40,7 +44,7 @@ async function loadGithubStorage(){
  const status=$('githubStorageStatus'); if(!status)return;
  try{
   const session=await storageSession(); if(!session?.access_token)throw new Error('UNAUTHORIZED');
-  const res=await fetch('/api/storage-github',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}); const data=await res.json();
+  const res=await fetch(storageApi('/api/storage-github'),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}); const data=await res.json();
   if(!res.ok||data.status!=='connected')throw new Error(data.error||data.detail||'GITHUB_USAGE_UNAVAILABLE');
   const rows=Array.isArray(data.usage?.usageItems)?data.usage.usageItems:[]; const sr=rows.filter(x=>/storage/i.test(String(x?.product||'')+' '+String(x?.sku||'')));
   const q=sr.reduce((s,x)=>s+(Number(x?.quantity)||0),0);
@@ -53,7 +57,7 @@ async function loadVercelStorage(){
  const status=$('vercelStorageStatus');if(!status)return;
  try{
   const session=await storageSession();if(!session?.access_token)throw new Error('UNAUTHORIZED');
-  const r=await fetch('/api/storage-vercel',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'VERCEL_UNAVAILABLE');
+  const r=await fetch(storageApi('/api/storage-vercel'),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'VERCEL_UNAVAILABLE');
   $('vercelStorageUsed').textContent=String(data.deploymentCount??0);$('vercelStorageFree').textContent=String(data.latest||'—');$('vercelStoragePercent').textContent='Live';status.textContent='Connected';$('vercelStorageBar').style.width=data.latest==='READY'?'100%':'55%';
  }catch(e){console.warn('Vercel status unavailable',e);status.textContent='Unavailable';$('vercelStorageUsed').textContent='—';$('vercelStorageFree').textContent='—';$('vercelStoragePercent').textContent='—';}
 }
@@ -63,7 +67,7 @@ async function loadSupabaseStorage(){
  const status=$('supabaseStorageStatus');if(!status)return;
  try{
   const session=await storageSession();if(!session?.access_token)throw new Error('UNAUTHORIZED');
-  const r=await fetch('/api/storage-supabase',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'SUPABASE_UNAVAILABLE');
+  const r=await fetch(storageApi('/api/storage-supabase'),{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'}),data=await r.json();if(!r.ok)throw new Error(data.error||'SUPABASE_UNAVAILABLE');
   const used=Number(data.database_bytes)||0,free=Number(data.database_free_bytes)||0,pct=Number(data.database_used_percent)||0;
   $('supabaseStorageUsed').textContent=bytesToHuman(used);$('supabaseStorageFree').textContent=bytesToHuman(free);$('supabaseStoragePercent').textContent=pct.toFixed(pct<10?1:0)+'%';$('supabaseStorageBar').style.width=Math.min(100,Math.max(0,pct))+'%';status.textContent='Live · Database';
  }catch(e){console.warn('Supabase storage unavailable',e);status.textContent='Unavailable';$('supabaseStorageUsed').textContent='—';$('supabaseStorageFree').textContent='—';$('supabaseStoragePercent').textContent='—';}
