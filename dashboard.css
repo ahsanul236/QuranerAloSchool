@@ -719,3 +719,27 @@
  #sessionForm .primary-btn,#enrollmentForm .primary-btn,#attendanceForm .primary-btn,#quranForm .primary-btn{width:100%}
  .attendance-table{min-width:620px}
 }
+
+
+/* 2026 profile workspace v1 */
+.profile-head{border-color:#dfe9e6!important;border-radius:18px!important;box-shadow:0 7px 22px rgba(7,63,53,.05)!important}
+.profile-photo-box{border-color:#d5e6e0!important;box-shadow:0 7px 20px rgba(7,63,53,.08)}
+.profile-card{border-color:#dfe9e6!important;border-radius:16px!important;box-shadow:0 5px 18px rgba(7,63,53,.04)!important}
+.profile-card-head{background:#fbfdfc!important;border-bottom-color:#e2ebe8!important}
+.profile-field,.field{border-color:#e1ebe8!important;background:#fff!important}
+.guardian-card,.staff-assignment-list{border-color:#dfe9e6!important}
+.profile-actions{gap:8px}
+@media(max-width:620px){
+ .profile-head{padding:14px!important;border-radius:14px!important;align-items:flex-start!important}
+ .profile-identity{align-items:flex-start!important}
+ .profile-photo-box{width:64px!important;height:64px!important;flex:none}
+ .profile-head h1{font-size:23px!important}
+ .profile-actions{width:100%;display:grid!important;grid-template-columns:1fr 1fr}
+ .profile-actions>*{width:100%!important;min-width:0!important}
+ .profile-grid{grid-template-columns:1fr!important;gap:10px!important}
+ .profile-card{border-radius:14px!important}
+ .profile-fields,.fields{grid-template-columns:1fr!important}
+ .save-row{display:grid!important;grid-template-columns:1fr!important}
+ .save-row .primary-btn{width:100%!important}
+ .staff-assignment-grid,.staff-assignment-controls{grid-template-columns:1fr!important}
+}
