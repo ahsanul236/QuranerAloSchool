@@ -647,16 +647,46 @@
     const perms = selectedPermissions('existingPerm');
     button.disabled = true;
     message('existingPermissionMessage', 'Permissions saving হচ্ছে…');
-    const del = await client.from('qa_user_permissions').delete().eq('user_id', userId);
-    if (del.error) { button.disabled = false; message('existingPermissionMessage', 'Existing permissions clear করা যায়নি।', 'error'); return; }
-    if (perms.length) {
-      const ins = await client.from('qa_user_permissions').insert(perms.map((permission_code) => ({ user_id: userId, permission_code, allowed: true })));
-      if (ins.error) { button.disabled = false; message('existingPermissionMessage', 'নতুন permissions save করা যায়নি।', 'error'); return; }
+    try {
+      const previous = await client.from('qa_user_permissions')
+        .select('permission_code,allowed').eq('user_id', userId);
+      if (previous.error) throw previous.error;
+      const previousRows = previous.data || [];
+
+      const del = await client.from('qa_user_permissions').delete().eq('user_id', userId);
+      if (del.error) throw del.error;
+
+      if (perms.length) {
+        const ins = await client.from('qa_user_permissions')
+          .insert(perms.map((permission_code) => ({ user_id: userId, permission_code, allowed: true })));
+        if (ins.error) {
+          if (previousRows.length) {
+            const rollback = await client.from('qa_user_permissions').insert(
+              previousRows.map((row) => ({ user_id: userId, permission_code: row.permission_code, allowed: row.allowed }))
+            );
+            if (rollback.error) console.error('Permission rollback failed', rollback.error);
+          }
+          throw ins.error;
+        }
+      }
+
+      const audit = await client.from('qa_audit_log').insert({
+        actor_user_id: access.profile.user_id,
+        action: 'subadmin.permissions_updated',
+        entity_type: 'qa_users',
+        entity_id: userId,
+        metadata: { permissions: perms }
+      });
+      if (audit.error) console.warn('Permission audit log unavailable', audit.error);
+
+      message('existingPermissionMessage', 'Permissions সফলভাবে save হয়েছে।', 'success');
+      await loadUsers();
+    } catch (error) {
+      console.error('Permission save failed', error);
+      message('existingPermissionMessage', 'Permissions save করা যায়নি। আগের permissions সংরক্ষণের চেষ্টা করা হয়েছে।', 'error');
+    } finally {
+      button.disabled = false;
     }
-    await client.from('qa_audit_log').insert({ actor_user_id: access.profile.user_id, action: 'subadmin.permissions_updated', entity_type: 'qa_users', entity_id: userId, metadata: { permissions: perms } });
-    button.disabled = false;
-    message('existingPermissionMessage', 'Permissions সফলভাবে save হয়েছে।', 'success');
-    await loadUsers();
   }
 
   async function createSubAdmin(event) {
