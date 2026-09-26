@@ -37,3 +37,28 @@ input:focus-visible,select:focus-visible,textarea:focus-visible{outline:none}
   html{scroll-behavior:auto}
   *,*::before,*::after{transition:none!important;animation:none!important}
 }
+
+
+/* 2026 auth experience — lightweight, no additional assets */
+.auth-card{max-width:720px;margin:0 auto;border-color:#dce8e4;box-shadow:0 20px 54px rgba(7,63,53,.10)}
+.auth-card .brand-logo{width:clamp(120px,20vw,165px)}
+.auth-card h1{color:#073f35}
+.auth-panel{max-width:500px}
+.auth-tabs{grid-template-columns:1fr 1fr;background:#f2f8f6;border-color:#dce8e4}
+.tab.is-active{color:#073f35;box-shadow:0 3px 12px rgba(7,63,53,.08)}
+.auth-form input{min-height:46px;border-color:#cfddd8}
+.auth-form input:focus{border-color:#15966f;box-shadow:0 0 0 3px rgba(21,150,111,.12)}
+.auth-card .primary-btn{min-height:46px;border-color:#073f35;background:#073f35}
+.auth-card .primary-btn:hover{background:#0a5849}
+@media(max-width:560px){
+ body{padding:0;background:#f3f8f6}
+ .shell{width:100%;min-height:100vh}
+ .auth-card{min-height:100vh;border:0;border-radius:0;padding:28px 18px;box-shadow:none;display:flex;flex-direction:column;justify-content:center}
+ .auth-card .brand-logo{width:118px}
+ .auth-card h1{font-size:34px}
+ .auth-card .lead{margin:7px 0 20px;font-size:16px}
+ .auth-tabs{grid-template-columns:1fr 1fr}
+ .tab{min-height:44px}
+ .auth-form input{font-size:16px}
+ .footer-note{margin-top:20px;font-size:12px}
+}
