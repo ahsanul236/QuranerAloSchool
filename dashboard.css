@@ -643,3 +643,37 @@
  .list-pagination{display:grid;gap:10px}
  .list-pagination-controls{justify-content:space-between;flex-wrap:wrap}
 }
+
+
+/* 2026 finance workspace v1 — existing forms and ledgers only */
+.finance-entry-card,.settings-accordion{border-color:#dfe9e6}
+.settings-accordion-summary{padding:16px 18px;background:#fff}
+.settings-accordion-title{gap:12px}
+.settings-accordion-icon{background:#e9f7f2;color:#08745a;border-color:#d5ebe4}
+.settings-toggle-btn{border-radius:10px;min-height:40px}
+.settings-accordion-body{background:#fbfdfc}
+.finance-summary .stat{background:#fff;border-color:#dfe9e6}
+.finance-summary .stat strong{letter-spacing:-.02em}
+.vouchers-panel-head{gap:12px}
+.voucher-search-panel{border-color:#dfe9e6!important}
+.finance-view .form-grid input,.finance-view .form-grid select,.finance-view .form-grid textarea,
+#chargeForm input,#chargeForm select,#chargeForm textarea,#paymentForm input,#paymentForm select,#paymentForm textarea,
+#payrollForm input,#payrollForm select,#payrollForm textarea{min-height:44px;border-radius:10px}
+.finance-view .page-actions .primary-btn,#chargeForm .primary-btn,#paymentForm .primary-btn,#payrollForm .primary-btn{width:auto;min-width:150px}
+
+@media(max-width:620px){
+ .finance-summary{margin-top:12px}
+ .finance-summary-grid,.finance-summary.dashboard-grid{grid-template-columns:1fr 1fr;gap:9px;padding:0}
+ .finance-summary .stat{padding:13px;border-radius:13px}
+ .finance-summary .stat strong{font-size:22px}
+ .finance-summary .stat small{font-size:11px}
+ .settings-accordion-summary{padding:14px;align-items:flex-start}
+ .settings-accordion-controls{width:100%}
+ .settings-toggle-btn{width:100%}
+ .settings-accordion-body{padding-left:12px!important;padding-right:12px!important}
+ .finance-view .page-actions,.settings-form-actions{width:100%}
+ .finance-view .page-actions .primary-btn,#chargeForm .primary-btn,#paymentForm .primary-btn,#payrollForm .primary-btn{width:100%}
+ .voucher-search-row,.voucher-search-main{grid-template-columns:1fr!important}
+ .vouchers-head-actions{width:100%}
+ .vouchers-head-actions>*{width:100%}
+}
