@@ -66,7 +66,7 @@
     toggle.className = 'management-mobile-toggle';
     toggle.setAttribute('aria-label', 'Open management navigation');
     toggle.setAttribute('aria-expanded', 'false');
-    toggle.textContent = '☰';
+    toggle.innerHTML = '<span aria-hidden="true">☰</span>';
     document.body.appendChild(toggle);
 
     const backdrop = document.createElement('div');
