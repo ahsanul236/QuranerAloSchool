@@ -883,3 +883,26 @@
 .storage-provider-note{display:block;margin-top:8px;color:var(--muted);font-size:10.5px}
 @media(max-width:1050px){.storage-provider-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.storage-provider-grid{grid-template-columns:1fr;padding:10px 12px 12px;gap:9px}.storage-provider-card{padding:12px}}
+
+
+/* 2026 compact portal settings cards */
+.portal-settings-cards{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:14px;align-items:stretch}
+.portal-settings-cards>.panel{margin-top:0!important}
+.portal-status-card,.portal-preview-card{padding:14px 16px;border-radius:16px;overflow:visible}
+.portal-mini-head{display:flex;align-items:center;gap:10px;padding:0 0 12px;border-bottom:1px solid #e5ecea}
+.portal-mini-head h2{margin:0;color:var(--navy);font-size:17px;line-height:1.25}
+.portal-mini-icon{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:10px;background:#eef4ff;color:#2875cf;font-size:11px}
+.portal-summary-list{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:12px 0 0!important}
+.portal-summary-list .portal-summary-card{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;min-height:54px;padding:8px 11px!important;text-align:left;border:1px solid #e1e9e7;border-radius:13px;background:#fff;box-shadow:none}
+.portal-role-mark{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;font-size:11px;font-weight:800;background:#eef4ff;color:#315d8c}
+.portal-role-mark.teacher{background:#edf8f4;color:#187c61}.portal-role-mark.helper{background:#f5effc;color:#72519a}
+.portal-role-copy{min-width:0}.portal-role-copy>span{display:block;color:#607086;font-size:12px;font-weight:700}.portal-role-copy small{display:block;margin-top:1px;color:var(--muted);font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.portal-summary-list .portal-summary-card>strong{margin:0;color:var(--navy);font-size:20px;line-height:1;white-space:nowrap}
+.portal-preview-card .portal-preview-compact{padding:14px 0 0}
+.portal-preview-card .portal-preview-row{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px;align-items:stretch}
+.portal-preview-card .portal-preview-search{min-width:0}
+.portal-preview-card #portalPreviewSearch{height:48px;min-height:48px}
+.portal-preview-card .portal-preview-open{width:auto!important;min-width:150px;padding:0 18px}
+.portal-preview-card .message-inline{display:block;margin-top:7px}
+@media(max-width:900px){.portal-settings-cards{grid-template-columns:1fr}}
+@media(max-width:620px){.portal-status-card,.portal-preview-card{padding:12px}.portal-mini-head{padding-bottom:10px}.portal-preview-card .portal-preview-row{grid-template-columns:1fr!important}.portal-preview-card .portal-preview-open{width:100%!important;min-height:46px}.portal-role-copy small{white-space:normal}}
