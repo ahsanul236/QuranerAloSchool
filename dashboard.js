@@ -372,9 +372,9 @@
     if (openingResult.error) throw openingResult.error;
 
     const peopleRows = [
-      canStudents ? `<div class="overview-people-row"><span class="overview-people-icon student">S</span><span class="overview-people-label">Total Students</span><strong>${students}</strong></div>` : '',
-      canTeachers ? `<div class="overview-people-row"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Total Teachers</span><strong>${teachers}</strong></div>` : '',
-      canHelpers ? `<div class="overview-people-row"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Total Helpers</span><strong>${helpers}</strong></div>` : ''
+      canStudents ? `<a class="overview-people-row overview-people-link" href="students.html" aria-label="Open Students list"><span class="overview-people-icon student">S</span><span class="overview-people-label">Total Students</span><strong>${students}</strong></a>` : '',
+      canTeachers ? `<a class="overview-people-row overview-people-link" href="staff.html#teachers" aria-label="Open Teachers list"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Total Teachers</span><strong>${teachers}</strong></a>` : '',
+      canHelpers ? `<a class="overview-people-row overview-people-link" href="staff.html#helpers" aria-label="Open Helpers list"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Total Helpers</span><strong>${helpers}</strong></a>` : ''
     ].join('');
 
     const sum = (items, key = 'amount') => (items || []).reduce((total, item) => total + Number(item[key] || 0), 0);
