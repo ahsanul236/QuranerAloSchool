@@ -502,6 +502,15 @@ $('studentForm').addEventListener('submit', async (event) => {
     });
 
     if (error) throw error;
+
+    const fullNameBn = String(form.get('full_name_bn') || '').trim();
+    if (fullNameBn && data?.student_id) {
+      const { error: bengaliNameError } = await supabase.from('qa_students')
+        .update({ full_name_bn: fullNameBn })
+        .eq('student_id', data.student_id);
+      if (bengaliNameError) throw bengaliNameError;
+    }
+
     event.currentTarget.reset();
     resetGuardianForm();
     $('studentFormPanel').classList.add('hidden');
