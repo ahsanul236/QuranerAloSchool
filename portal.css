@@ -147,3 +147,27 @@ body.portal-page{background:#f3f8f6}
  .document-profile-box{margin:12px}
  .preview-banner{margin:0 -10px 10px;border-radius:0}
 }
+
+
+/* 2026 portal QA consolidation */
+.portal-card,.portal-panel,.portal-stat,.portal-info-item{min-width:0}
+.portal-table-wrap{max-width:100%;overflow-x:auto}
+.portal-brand,.portal-identity{min-width:0}
+.portal-brand span,.portal-identity p,.portal-info-item strong{overflow-wrap:anywhere}
+@media(max-width:620px){
+ .portal-head{display:flex;align-items:center;flex-wrap:nowrap}
+ .portal-brand{flex:1}
+ .portal-actions{flex:none}
+ .portal-actions .secondary-btn,.portal-actions .whatsapp-btn{white-space:nowrap}
+ .portal-summary-grid{width:100%}
+ .portal-table-wrap{width:100%;max-width:100%}
+ .document-manager{min-width:0}
+ .document-manager-upload{grid-template-columns:1fr!important}
+ .google-storage-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:390px){
+ .portal-brand span{display:none}
+ .portal-actions .secondary-btn,.portal-actions .whatsapp-btn{padding:8px;font-size:11px}
+ .portal-summary-grid{grid-template-columns:1fr 1fr}
+ .portal-hero-meta{grid-template-columns:1fr}
+}
