@@ -1,6 +1,7 @@
 export const config = { runtime: 'edge' };
 import { createClient } from '@supabase/supabase-js';
-const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
+const cors={'Access-Control-Allow-Origin':'https://ahsanul236.github.io','Access-Control-Allow-Headers':'authorization,content-type','Access-Control-Allow-Methods':'GET,OPTIONS','Vary':'Origin'};
+const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store',...cors}});
 function env(name:string){const r=globalThis as any;return String(r?.process?.env?.[name]||r?.Deno?.env?.get?.(name)||'');}
 async function requireAdmin(req:Request){
  const auth=req.headers.get('authorization')||''; if(!auth.startsWith('Bearer ')) throw new Error('UNAUTHORIZED');
@@ -13,6 +14,7 @@ async function requireAdmin(req:Request){
  if(pe||!data?.active||data.role!=='super_admin') throw new Error('FORBIDDEN');
 }
 export default async function handler(req:Request){
+ if(req.method==='OPTIONS') return new Response(null,{status:204,headers:cors});
  if(req.method!=='GET') return json({error:'METHOD_NOT_ALLOWED'},405);
  try{
   await requireAdmin(req); const token=env('GITHUB_STORAGE_TOKEN'); if(!token) throw new Error('GITHUB_STORAGE_NOT_CONFIGURED');
