@@ -77,9 +77,9 @@ async function getViewerProfile(session) {
 
 async function resolveStudent(session) {
   const previewId = qs.get('preview_student');
-  const viewer = await getViewerProfile(session);
 
   if (previewId) {
+    const viewer = await getViewerProfile(session);
     if (!viewer || !viewer.active || viewer.role !== 'owner') {
       throw new Error('PREVIEW_NOT_ALLOWED');
     }
@@ -196,26 +196,21 @@ async function init() {
   $('motherName').textContent = student.mother_name || '—';
   $('birthRegistrationNo').textContent = student.birth_registration_no || '—';
 
-  const assignedTeacher = await loadAssignedTeacher(student.student_id, previewStudentId);
-  await loadAttendanceHistory(student.student_id);
-  await setProfileImage({ role:'student', personId:student.student_id, img:$('studentPortalProfileImage') });
-  await mountDocumentsPanel({
+  const assignedTeacherPromise=loadAssignedTeacher(student.student_id, previewStudentId);
+  const attendancePromise=loadAttendanceHistory(student.student_id);
+  const studentPhotoPromise=setProfileImage({ role:'student', personId:student.student_id, img:$('studentPortalProfileImage') }).catch(error=>console.warn('student profile image unavailable',error));
+  const documentsPromise=mountDocumentsPanel({
     container:$('studentPortalDocuments'),
     role:'student',
     personId:student.student_id,
     editable:!previewStudentId,
     canDelete:false,
     title:'My Documents'
-  });
-  if (assignedTeacher?.teacher_id) {
-    await setProfileImage({
-      role:'teacher',
-      personId:assignedTeacher.teacher_id,
-      img:$('assignedTeacherProfileImage')
-    });
-  }
+  }).catch(error=>console.warn('student documents unavailable',error));
 
-  const [enrollmentResult, guardianLinkResult, feeChargeResult, feePaymentResult] = await Promise.all([
+  const [assignedTeacher,,enrollmentResult, guardianLinkResult, feeChargeResult, feePaymentResult] = await Promise.all([
+    assignedTeacherPromise,
+    attendancePromise,
     supabase
       .from('qa_enrollments')
       .select('course_code,start_date,end_date,status,teacher_user_id,notes')
@@ -238,6 +233,8 @@ async function init() {
       .order('paid_at', { ascending: false })
       .limit(12)
   ]);
+
+  if (assignedTeacher?.teacher_id) setProfileImage({role:'teacher',personId:assignedTeacher.teacher_id,img:$('assignedTeacherProfileImage')}).catch(error=>console.warn('teacher profile image unavailable',error));
 
   for (const result of [enrollmentResult, guardianLinkResult, feeChargeResult, feePaymentResult]) {
     if (result.error) throw result.error;
@@ -373,7 +370,8 @@ async function init() {
     ? notes.map((note) => `<div>${esc(note)}</div>`).join('')
     : 'No new notes.';
 
-  try { await setSchoolWhatsApp(); } catch (error) { console.warn('school WhatsApp link unavailable', error); }
+  setSchoolWhatsApp().catch(error=>console.warn('school WhatsApp link unavailable',error));
+  Promise.allSettled([studentPhotoPromise,documentsPromise]);
 
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
