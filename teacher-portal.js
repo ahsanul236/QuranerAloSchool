@@ -52,9 +52,9 @@ async function getViewerProfile(session) {
 
 async function resolveTeacher(session) {
   const previewId = qs.get('preview_teacher');
-  const viewer = await getViewerProfile(session);
 
   if (previewId) {
+    const viewer = await getViewerProfile(session);
     if (!viewer || !viewer.active || viewer.role !== 'owner') throw new Error('PREVIEW_NOT_ALLOWED');
 
     const { data, error } = await supabase.functions.invoke('portal-preview', {
@@ -156,10 +156,10 @@ async function renderGroups(groupData,mode=false,date='',readOnly=false){
   const rows=[];
   for(const g of groupData.groups){
     const list=groupData.memberships.filter(m=>m.group_id===g.group_id).map(m=>groupData.studentMap[m.student_id]).filter(Boolean);
-    if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td>—</td><td>0</td></tr>');continue}
+    if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td>—</td><td>—</td><td>0</td></tr>');continue}
     list.forEach((s,i)=>{const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td>'+attendance+'</td><td>'+(i===0?list.length:'')+'</td></tr>')});
   }
-  $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="4">কোনো active Group assigned নেই।</td></tr>';
+  $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="5">কোনো active Group assigned নেই।</td></tr>';
 }
 function setupAttendanceSection({teacher,students,getGroupData,buttonId,dateId,dateWrapId,messageId,containerId,render,readOnly}){
   const button=$(buttonId),input=$(dateId),wrap=$(dateWrapId),message=$(messageId);const today=new Date().toISOString().slice(0,10);input.max=today;input.value=today;
@@ -210,15 +210,15 @@ async function init() {
     return;
   }
 
-  await setProfileImage({role:'teacher',personId:teacher.teacher_id,img:$('teacherPortalProfileImage')});
-  await mountDocumentsPanel({
+  const teacherPhotoPromise=setProfileImage({role:'teacher',personId:teacher.teacher_id,img:$('teacherPortalProfileImage')}).catch(error=>console.warn('teacher profile image unavailable',error));
+  const documentsPromise=mountDocumentsPanel({
     container:$('teacherPortalDocuments'),
     role:'teacher',
     personId:teacher.teacher_id,
     editable:!previewTeacherId,
     canDelete:false,
     title:'My Documents'
-  });
+  }).catch(error=>console.warn('teacher documents unavailable',error));
 
   $('teacherCodeBadge').textContent = teacher.teacher_code || '—';
   $('teacherName').textContent = teacher.full_name_bn || teacher.full_name || '—';
@@ -299,7 +299,8 @@ async function init() {
     </tr>
   `).join('') || '<tr><td colspan="6">No payroll record.</td></tr>';
 
-  try { await setSchoolWhatsApp(); } catch (error) { console.warn('school WhatsApp link unavailable', error); }
+  setSchoolWhatsApp().catch(error=>console.warn('school WhatsApp link unavailable',error));
+  Promise.allSettled([teacherPhotoPromise,documentsPromise]);
 
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
