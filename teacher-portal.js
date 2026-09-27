@@ -250,11 +250,13 @@ async function init() {
   ]);
 
   if (enrollmentError) throw enrollmentError;
-  await renderAssignedStudents(assignedStudents,false,'',Boolean(previewTeacherId));
+  const groupStudentIds=new Set(groupData.students.map(s=>s.student_id));
+  const singleStudents=assignedStudents.filter(s=>!groupStudentIds.has(s.student_id));
+  await renderAssignedStudents(singleStudents,false,'',Boolean(previewTeacherId));
   await renderGroups(groupData,false,'',Boolean(previewTeacherId));
-  setupAttendanceSection({teacher,students:assignedStudents,buttonId:'singleAttendanceToggle',dateId:'singleAttendanceDate',dateWrapId:'singleAttendanceDateWrap',messageId:'singleAttendanceMessage',containerId:'assignedStudentRows',render:renderAssignedStudents,readOnly:Boolean(previewTeacherId)});
+  setupAttendanceSection({teacher,students:singleStudents,buttonId:'singleAttendanceToggle',dateId:'singleAttendanceDate',dateWrapId:'singleAttendanceDateWrap',messageId:'singleAttendanceMessage',containerId:'assignedStudentRows',render:renderAssignedStudents,readOnly:Boolean(previewTeacherId)});
   setupAttendanceSection({teacher,getGroupData:()=>groupData,buttonId:'groupAttendanceToggle',dateId:'groupAttendanceDate',dateWrapId:'groupAttendanceDateWrap',messageId:'groupAttendanceMessage',containerId:'groupRows',render:renderGroups,readOnly:Boolean(previewTeacherId)});
-  const attendanceStudents=[...new Map([...assignedStudents,...groupData.students].map(s=>[s.student_id,s])).values()];
+  const attendanceStudents=[...new Map([...singleStudents,...groupData.students].map(s=>[s.student_id,s])).values()];
 
   const enrollments = enrollmentData || [];
   $('studentCount').textContent = String(attendanceStudents.length);
