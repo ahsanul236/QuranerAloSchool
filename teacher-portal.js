@@ -124,7 +124,7 @@ async function loadTeachingGroups(teacherId){
 async function loadDailyAttendance(teacher,students,readOnly){
   const input=$('portalAttendanceDate'); if(!input)return; const today=new Date().toISOString().slice(0,10); input.max=today;if(!input.value)input.value=today;
   const date=input.value; const ids=[...new Set(students.map(s=>s.student_id))];let existing={};
-  if(ids.length){const r=await supabase.from('qa_attendance').select('attendance_id,student_id,status,remarks').eq('teacher_id',teacher.teacher_id).eq('attendance_date',date).is('session_id',null).in('student_id',ids);if(r.error)throw r.error;existing=Object.fromEntries((r.data||[]).map(x=>[x.student_id,x]))}
+  if(ids.length){const r=await supabase.from('qa_attendance').select('attendance_id,student_id,status,remarks').eq('attendance_date',date).is('session_id',null).in('student_id',ids);if(r.error)throw r.error;existing=Object.fromEntries((r.data||[]).map(x=>[x.student_id,x]))}
   $('portalAttendanceRows').innerHTML=students.map(s=>{const a=existing[s.student_id]||{};return '<tr data-id="'+esc(s.student_id)+'"><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td><select data-status '+(readOnly?'disabled':'')+'><option value="" '+(!a.status?'selected':'')+'>Not Recorded</option><option value="present" '+(a.status==='present'?'selected':'')+'>Present</option><option value="absent" '+(a.status==='absent'?'selected':'')+'>Absent</option></select></td><td><input data-remarks value="'+esc(a.remarks||'')+'" '+(readOnly?'disabled':'')+'></td></tr>'}).join('')||'<tr><td colspan="3">Assigned student নেই।</td></tr>';
   $('savePortalAttendance').classList.toggle('hidden',readOnly);
   $('savePortalAttendance').onclick=async()=>{if(input.value>today){$('portalAttendanceMessage').textContent='Future date save করা যাবে না।';return}let saved=0;for(const row of document.querySelectorAll('#portalAttendanceRows tr[data-id]')){const status=row.querySelector('[data-status]').value;if(!status)continue;const remarks=row.querySelector('[data-remarks]').value.trim();const old=existing[row.dataset.id];const payload={teacher_id:teacher.teacher_id,student_id:row.dataset.id,attendance_date:input.value,session_id:null,status,remarks,updated_at:new Date().toISOString()};const r=old?await supabase.from('qa_attendance').update(payload).eq('attendance_id',old.attendance_id):await supabase.from('qa_attendance').insert(payload);if(r.error)throw r.error;saved++}$('portalAttendanceMessage').textContent=saved+'টি attendance record save হয়েছে।';await loadDailyAttendance(teacher,students,readOnly)};
@@ -210,7 +210,7 @@ async function init() {
   await loadDailyAttendance(teacher,attendanceStudents,Boolean(previewTeacherId));
 
   const enrollments = enrollmentData || [];
-  $('studentCount').textContent = String(assignedStudents.length);
+  $('studentCount').textContent = String(attendanceStudents.length);
   const studentIds = [...new Set(enrollments.map((item) => item.student_id).filter(Boolean))];
   let studentNames = {};
   if (studentIds.length) {
