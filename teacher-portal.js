@@ -146,6 +146,16 @@ async function init() {
     return;
   }
 
+  const previewTeacherId = qs.get('preview_teacher') || '';
+  $('signOut').addEventListener('click', async () => {
+    if (previewTeacherId) {
+      location.href = 'dashboard.html#settings';
+      return;
+    }
+    try { await supabase.auth.signOut(); } finally { location.replace('./'); }
+  });
+  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
+
   const baseTeacher = await resolveTeacher(session);
   const teacher = await loadTeacherDetails(baseTeacher.teacher_id);
 
@@ -155,7 +165,6 @@ async function init() {
     return;
   }
 
-  const previewTeacherId = qs.get('preview_teacher') || '';
   await setProfileImage({role:'teacher',personId:teacher.teacher_id,img:$('teacherPortalProfileImage')});
   await mountDocumentsPanel({
     container:$('teacherPortalDocuments'),
@@ -164,16 +173,6 @@ async function init() {
     editable:!previewTeacherId,
     canDelete:false,
     title:'My Documents'
-  });
-
-  $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html'; });
-  $('signOut').addEventListener('click', async () => {
-    if (previewTeacherId) {
-      location.href = 'dashboard.html#settings';
-      return;
-    }
-    await supabase.auth.signOut();
-    location.replace('./');
   });
 
   $('teacherCodeBadge').textContent = teacher.teacher_code || '—';
