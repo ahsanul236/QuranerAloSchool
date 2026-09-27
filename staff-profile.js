@@ -52,8 +52,10 @@ function fill(){
   setWhatsAppLink(row.phone);
 }
 
+async function loadTeacherGroups(){if(type!=='teacher'||!$('assignedGroupsList'))return;const{data:gs,error}=await supabase.from('qa_study_groups').select('group_id,group_name,active').eq('teacher_id',id).order('group_name');if(error)throw error;const gids=(gs||[]).map(g=>g.group_id);let ms=[];if(gids.length){const r=await supabase.from('qa_group_memberships').select('group_id,student_id').in('group_id',gids).is('left_at',null);if(r.error)throw r.error;ms=r.data||[]}$('assignedGroupsList').innerHTML=(gs||[]).map(g=>'<div class="staff-assignment-row"><div><strong>'+esc(g.group_name)+'</strong><small>'+(g.active?'Active':'Inactive')+' · '+ms.filter(m=>m.group_id===g.group_id).length+' students</small></div></div>').join('')||'<div class="portal-empty">কোনো Group assigned নেই।</div>';}
 async function loadTeacherAssignments(){
   if(type!=='teacher')return;
+  $('teacherGroupsCard')?.classList.remove('hidden');
   if(!canManage())return;
   $('teacherStudentsCard')?.classList.remove('hidden');
   const {data:students,error}=await supabase.from('qa_students').select('student_id,student_code,full_name,phone,status,teacher_id').order('full_name',{ascending:true});
@@ -175,7 +177,7 @@ async function load(){
   fill();
   syncMode();
   await renderStaffDocuments();
-  if(type==='teacher') await loadTeacherAssignments();
+  if(type==='teacher'){ await loadTeacherAssignments(); await loadTeacherGroups(); }
 }
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
 $('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();startEditTracking();};
