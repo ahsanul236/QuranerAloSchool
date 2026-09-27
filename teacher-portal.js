@@ -161,7 +161,7 @@ async function renderGroups(groupData,mode=false,date='',readOnly=false){
       const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';
       const digits=String(s.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');const waDigits=digits?(digits.startsWith('0')?'88'+digits:digits):'';
       const wa=waDigits?'<a class="whatsapp-btn group-whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="muted">ফোন নেই</span>';
-      rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-message-cell">'+wa+'</td></tr>');
+      rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td><span class="group-student-number">'+(i+1)+'.</span> '+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-message-cell">'+wa+'</td></tr>');
     });
   }
   $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="4">কোনো active Group assigned নেই।</td></tr>';
