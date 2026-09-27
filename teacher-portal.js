@@ -89,46 +89,91 @@ async function loadTeacherDetails(teacherId) {
 }
 
 
-async function loadAssignedStudents(previewTeacherId = ''){
-  const {data,error}=await supabase.functions.invoke('portal-teacher-student',{
-    body:{action:'teacher', ...(previewTeacherId ? {previewTeacherId} : {})}
-  });
-  if(error)throw error;
-  if(!data?.ok)throw new Error(data?.error||'ASSIGNED_STUDENTS_LOAD_FAILED');
-  const students=data.students||[];
-  $('assignedStudentRows').innerHTML=students.map((student)=> {
-    const digits=String(student.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');
-    const waDigits=digits ? (digits.startsWith('0')?'88'+digits:digits) : '';
-    const wa=waDigits
-      ? '<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>'
-      : '<span class="muted">ফোন নেই</span>';
-    return '<tr><td><div class="assigned-person-inline"><img id="teacherAssignedStudentPhoto-'+esc(student.student_id)+'" class="portal-relationship-avatar small hidden" alt="Student profile"><div><strong>'+esc(student.full_name||student.student_code||'Student')+'</strong><br><span class="muted">'+esc(student.student_code||'—')+'</span></div></div></td><td>'+esc(student.phone||'—')+'</td><td><span class="active-badge '+statusClass(student.status)+'">'+esc(student.status||'—')+'</span></td><td>'+wa+'</td></tr>';
-  }).join('') || '<tr><td colspan="4">এখনো কোনো Student assigned নেই।</td></tr>';
-  await Promise.all(students.map((student) => setProfileImage({
-    role:'student',
-    personId:student.student_id,
-    img:$('teacherAssignedStudentPhoto-'+student.student_id)
-  })));
-  return students;
+async function attendanceSummaryMap(students){
+  const ids=[...new Set(students.map(s=>s.student_id))]; if(!ids.length)return {};
+  const {data,error}=await supabase.from('qa_attendance').select('student_id,status').in('student_id',ids).in('status',['present','absent']);
+  if(error)throw error; const map={};
+  ids.forEach(id=>map[id]={present:0,total:0});
+  (data||[]).forEach(a=>{if(!map[a.student_id])map[a.student_id]={present:0,total:0};map[a.student_id].total++;if(a.status==='present')map[a.student_id].present++});
+  return map;
 }
-
+function summaryText(summary){
+  const total=summary?.total||0,present=summary?.present||0,pct=total?Math.round((present/total)*100):0;
+  return pct+'% · '+present+' days out of '+total+' days';
+}
+function attendanceChoices(studentId,current){
+  return '<div class="attendance-choices" data-attendance-student="'+esc(studentId)+'">'
+    +'<label><input type="radio" name="att-'+esc(studentId)+'" value="present" '+(current==='present'?'checked':'')+'> Present</label>'
+    +'<label><input type="radio" name="att-'+esc(studentId)+'" value="absent" '+(current==='absent'?'checked':'')+'> Absent</label>'
+    +'<label><input type="radio" name="att-'+esc(studentId)+'" value="" '+(!current?'checked':'')+'> Not Recorded</label></div>';
+}
+async function attendanceForDate(students,date){
+  const ids=[...new Set(students.map(s=>s.student_id))]; if(!ids.length)return {};
+  const {data,error}=await supabase.from('qa_attendance').select('attendance_id,student_id,status').eq('attendance_date',date).is('session_id',null).in('student_id',ids);
+  if(error)throw error; return Object.fromEntries((data||[]).map(a=>[a.student_id,a]));
+}
+async function saveAttendanceRows(teacher,students,date,containerId){
+  const today=new Date().toISOString().slice(0,10); if(!date||date>today)throw new Error('Future date save করা যাবে না।');
+  const existing=await attendanceForDate(students,date); let changed=0;
+  for(const student of students){
+    const choice=document.querySelector('#'+containerId+' [data-attendance-student="'+CSS.escape(student.student_id)+'"] input:checked');
+    const status=choice?.value??''; const old=existing[student.student_id];
+    if(!status){
+      if(old){const r=await supabase.from('qa_attendance').delete().eq('attendance_id',old.attendance_id);if(r.error)throw r.error;changed++}
+      continue;
+    }
+    if(old?.status===status)continue;
+    const payload={teacher_id:teacher.teacher_id,student_id:student.student_id,attendance_date:date,session_id:null,status,remarks:'',updated_at:new Date().toISOString()};
+    const r=old?await supabase.from('qa_attendance').update(payload).eq('attendance_id',old.attendance_id):await supabase.from('qa_attendance').insert(payload);
+    if(r.error)throw r.error;changed++;
+  }
+  return changed;
+}
+async function renderAssignedStudents(students,mode=false,date='',readOnly=false){
+  const summaries=await attendanceSummaryMap(students); const daily=mode?await attendanceForDate(students,date):{};
+  $('assignedStudentRows').innerHTML=students.map(student=>{
+    const digits=String(student.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');const waDigits=digits?(digits.startsWith('0')?'88'+digits:digits):'';
+    const wa=waDigits?'<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="muted">ফোন নেই</span>';
+    const attendance=mode&&!readOnly?attendanceChoices(student.student_id,daily[student.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[student.student_id]))+'</span>';
+    return '<tr><td><div class="assigned-person-inline"><img id="teacherAssignedStudentPhoto-'+esc(student.student_id)+'" class="portal-relationship-avatar small hidden" alt="Student profile"><div><strong>'+esc(student.full_name||student.student_code||'Student')+'</strong><br><span class="muted">'+esc(student.student_code||'—')+'</span></div></div></td><td>'+esc(student.phone||'—')+'</td><td><span class="active-badge '+statusClass(student.status)+'">'+esc(student.status||'—')+'</span></td><td>'+attendance+'</td><td>'+wa+'</td></tr>';
+  }).join('')||'<tr><td colspan="5">এখনো কোনো individually assigned Student নেই।</td></tr>';
+  await Promise.all(students.map(student=>setProfileImage({role:'student',personId:student.student_id,img:$('teacherAssignedStudentPhoto-'+student.student_id)})));
+}
+async function loadAssignedStudents(previewTeacherId=''){
+  const {data,error}=await supabase.functions.invoke('portal-teacher-student',{body:{action:'teacher',...(previewTeacherId?{previewTeacherId}:{})}});
+  if(error)throw error;if(!data?.ok)throw new Error(data?.error||'ASSIGNED_STUDENTS_LOAD_FAILED');return data.students||[];
+}
 async function loadTeachingGroups(teacherId){
   const {data:groups,error}=await supabase.from('qa_study_groups').select('group_id,group_name,active').eq('teacher_id',teacherId).eq('active',true).order('group_name');
-  if(error)throw error; const gids=(groups||[]).map(g=>g.group_id); let memberships=[];
+  if(error)throw error;const gids=(groups||[]).map(g=>g.group_id);let memberships=[];
   if(gids.length){const r=await supabase.from('qa_group_memberships').select('group_id,student_id').in('group_id',gids).is('left_at',null);if(r.error)throw r.error;memberships=r.data||[]}
   const ids=[...new Set(memberships.map(m=>m.student_id))];let sm={};
   if(ids.length){const r=await supabase.from('qa_students').select('student_id,student_code,full_name,phone,status').in('student_id',ids);if(r.error)throw r.error;sm=Object.fromEntries((r.data||[]).map(s=>[s.student_id,s]))}
-  $('groupRows').innerHTML=(groups||[]).map(g=>{const list=memberships.filter(m=>m.group_id===g.group_id).map(m=>sm[m.student_id]).filter(Boolean);return '<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>'+list.map(s=>esc((s.student_code||'')+' · '+(s.full_name||'Student'))).join('<br>')+'</td><td>'+list.length+'</td></tr>'}).join('')||'<tr><td colspan="3">কোনো active Group assigned নেই।</td></tr>';
-  return ids.map(id=>sm[id]).filter(Boolean);
+  return {groups:groups||[],memberships,students:ids.map(id=>sm[id]).filter(Boolean),studentMap:sm};
 }
-async function loadDailyAttendance(teacher,students,readOnly){
-  const input=$('portalAttendanceDate'); if(!input)return; const today=new Date().toISOString().slice(0,10); input.max=today;if(!input.value)input.value=today;
-  const date=input.value; const ids=[...new Set(students.map(s=>s.student_id))];let existing={};
-  if(ids.length){const r=await supabase.from('qa_attendance').select('attendance_id,student_id,status,remarks').eq('attendance_date',date).is('session_id',null).in('student_id',ids);if(r.error)throw r.error;existing=Object.fromEntries((r.data||[]).map(x=>[x.student_id,x]))}
-  $('portalAttendanceRows').innerHTML=students.map(s=>{const a=existing[s.student_id]||{};return '<tr data-id="'+esc(s.student_id)+'"><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td><select data-status '+(readOnly?'disabled':'')+'><option value="" '+(!a.status?'selected':'')+'>Not Recorded</option><option value="present" '+(a.status==='present'?'selected':'')+'>Present</option><option value="absent" '+(a.status==='absent'?'selected':'')+'>Absent</option></select></td><td><input data-remarks value="'+esc(a.remarks||'')+'" '+(readOnly?'disabled':'')+'></td></tr>'}).join('')||'<tr><td colspan="3">Assigned student নেই।</td></tr>';
-  $('savePortalAttendance').classList.toggle('hidden',readOnly);
-  $('savePortalAttendance').onclick=async()=>{if(input.value>today){$('portalAttendanceMessage').textContent='Future date save করা যাবে না।';return}let saved=0;for(const row of document.querySelectorAll('#portalAttendanceRows tr[data-id]')){const status=row.querySelector('[data-status]').value;if(!status)continue;const remarks=row.querySelector('[data-remarks]').value.trim();const old=existing[row.dataset.id];const payload={teacher_id:teacher.teacher_id,student_id:row.dataset.id,attendance_date:input.value,session_id:null,status,remarks,updated_at:new Date().toISOString()};const r=old?await supabase.from('qa_attendance').update(payload).eq('attendance_id',old.attendance_id):await supabase.from('qa_attendance').insert(payload);if(r.error)throw r.error;saved++}$('portalAttendanceMessage').textContent=saved+'টি attendance record save হয়েছে।';await loadDailyAttendance(teacher,students,readOnly)};
-  input.onchange=()=>loadDailyAttendance(teacher,students,readOnly).catch(console.error);
+async function renderGroups(groupData,mode=false,date='',readOnly=false){
+  const summaries=await attendanceSummaryMap(groupData.students);const daily=mode?await attendanceForDate(groupData.students,date):{};
+  const rows=[];
+  for(const g of groupData.groups){
+    const list=groupData.memberships.filter(m=>m.group_id===g.group_id).map(m=>groupData.studentMap[m.student_id]).filter(Boolean);
+    if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td>—</td><td>0</td></tr>');continue}
+    list.forEach((s,i)=>{const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td>'+attendance+'</td><td>'+(i===0?list.length:'')+'</td></tr>')});
+  }
+  $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="4">কোনো active Group assigned নেই।</td></tr>';
+}
+function setupAttendanceSection({teacher,students,getGroupData,buttonId,dateId,dateWrapId,messageId,containerId,render,readOnly}){
+  const button=$(buttonId),input=$(dateId),wrap=$(dateWrapId),message=$(messageId);const today=new Date().toISOString().slice(0,10);input.max=today;input.value=today;
+  if(readOnly){button.classList.add('hidden');return}
+  let mode=false,busy=false;
+  const redraw=async()=>{if(getGroupData)await render(getGroupData(),mode,input.value,readOnly);else await render(students,mode,input.value,readOnly)};
+  input.onchange=()=>{if(input.value>today)input.value=today;redraw().catch(e=>{message.textContent=e.message||'Attendance load করা যায়নি।';message.className='portal-message error'})};
+  button.onclick=async()=>{if(busy)return;message.textContent='';
+    if(!mode){mode=true;wrap.classList.remove('hidden');button.textContent='Save Attendance';await redraw();return}
+    busy=true;button.disabled=true;
+    try{const targetStudents=getGroupData?getGroupData().students:students;const changed=await saveAttendanceRows(teacher,targetStudents,input.value,containerId);mode=false;wrap.classList.add('hidden');button.textContent='Take Attendance';await redraw();message.textContent=changed+'টি attendance পরিবর্তন save হয়েছে।';message.className='portal-message success'}
+    catch(e){message.textContent=e.message||'Attendance save করা যায়নি।';message.className='portal-message error'}
+    finally{busy=false;button.disabled=false}
+  };
 }
 async function loadPayroll(previewTeacherId = '') {
   const { data, error } = await supabase.functions.invoke('portal-self-payroll', {
@@ -193,7 +238,7 @@ async function init() {
   $('address').textContent = teacher.address || '—';
   $('specialization').textContent = teacher.specialization || '—';
 
-  const [{ data: enrollmentData, error: enrollmentError }, payroll, assignedStudents, groupStudents] = await Promise.all([
+  const [{ data: enrollmentData, error: enrollmentError }, payroll, assignedStudents, groupData] = await Promise.all([
     supabase.from('qa_enrollments')
       .select('student_id,course_code,start_date,end_date,status')
       .eq('teacher_user_id', teacher.user_id)
@@ -205,8 +250,11 @@ async function init() {
   ]);
 
   if (enrollmentError) throw enrollmentError;
-  const attendanceStudents=[...new Map([...assignedStudents,...groupStudents].map(s=>[s.student_id,s])).values()];
-  await loadDailyAttendance(teacher,attendanceStudents,Boolean(previewTeacherId));
+  await renderAssignedStudents(assignedStudents,false,'',Boolean(previewTeacherId));
+  await renderGroups(groupData,false,'',Boolean(previewTeacherId));
+  setupAttendanceSection({teacher,students:assignedStudents,buttonId:'singleAttendanceToggle',dateId:'singleAttendanceDate',dateWrapId:'singleAttendanceDateWrap',messageId:'singleAttendanceMessage',containerId:'assignedStudentRows',render:renderAssignedStudents,readOnly:Boolean(previewTeacherId)});
+  setupAttendanceSection({teacher,getGroupData:()=>groupData,buttonId:'groupAttendanceToggle',dateId:'groupAttendanceDate',dateWrapId:'groupAttendanceDateWrap',messageId:'groupAttendanceMessage',containerId:'groupRows',render:renderGroups,readOnly:Boolean(previewTeacherId)});
+  const attendanceStudents=[...new Map([...assignedStudents,...groupData.students].map(s=>[s.student_id,s])).values()];
 
   const enrollments = enrollmentData || [];
   $('studentCount').textContent = String(attendanceStudents.length);
