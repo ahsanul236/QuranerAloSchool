@@ -2,6 +2,7 @@
   const items = [
     ['Overview', 'dashboard.html#overview', 'overview', '⌂'],
     ['Students', 'students.html', 'students', '♙'],
+    ['Groups', 'groups.html', 'groups', '▦'],
     ['Teachers', 'staff.html#teachers', 'teachers', '♙'],
     ['Helpers', 'staff.html#helpers', 'helpers', '♟'],
     ['Fees', 'fees.html', 'fees', '৳'],
@@ -26,6 +27,7 @@
     if (path === 'school-profile.html') return 'settings';
     return ({
       'students.html': 'students',
+      'groups.html': 'groups',
       'student-profile.html': 'students',
       'fees.html': 'fees',
       'attendance.html': 'attendance',
