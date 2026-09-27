@@ -491,6 +491,7 @@ $('studentForm').addEventListener('submit', async (event) => {
         phone: String(form.get('phone') || '').trim(),
         admission_date: form.get('admission_date') || new Date().toISOString().slice(0, 10),
         status: String(form.get('status') || 'active'),
+        monthly_fee: Number(form.get('monthly_fee') || 0),
         notes: String(form.get('notes') || '').trim(),
         father_name: String(form.get('father_name') || '').trim(),
         father_nid: String(form.get('father_nid') || '').trim(),
