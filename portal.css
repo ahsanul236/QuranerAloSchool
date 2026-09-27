@@ -171,3 +171,15 @@ body.portal-page{background:#f3f8f6}
  .portal-summary-grid{grid-template-columns:1fr 1fr}
  .portal-hero-meta{grid-template-columns:1fr}
 }
+
+/* Integrated attendance controls */
+.attendance-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);background:#fbfdfc}
+.attendance-section-head h2{flex:1;border-bottom:0;background:transparent}
+.attendance-section-actions{display:flex;align-items:center;gap:10px;padding:8px 14px}
+.attendance-section-actions label{display:flex;align-items:center;gap:6px;white-space:nowrap;color:var(--muted);font-size:13px}
+.attendance-section-actions input[type="date"]{min-height:40px;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}
+.attendance-section-actions .primary-btn{width:auto;min-width:150px;min-height:42px;padding:9px 16px}
+.attendance-choices{display:flex;align-items:center;gap:10px;flex-wrap:wrap;white-space:nowrap}
+.attendance-choices label{display:inline-flex;align-items:center;gap:4px;font-size:13px;cursor:pointer}
+.attendance-summary{white-space:nowrap;font-weight:600;color:var(--navy2)}
+@media(max-width:720px){.attendance-section-head{align-items:stretch;flex-direction:column}.attendance-section-head h2{width:100%}.attendance-section-actions{padding:0 13px 12px;flex-wrap:wrap}.attendance-section-actions label{flex:1}.attendance-section-actions .primary-btn{flex:1}.attendance-choices{gap:7px}}
