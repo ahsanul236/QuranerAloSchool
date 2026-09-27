@@ -79,7 +79,18 @@
         <div id="assignedTeacher" class="portal-empty">আপনার জন্য এখনো কোনো শিক্ষক নির্ধারণ করা হয়নি।</div>
       </div>
     </section>
-<section class="portal-panel">
+<section class="portal-panel portal-wide">
+      <h2>My Attendance</h2>
+      <div class="portal-body">
+        <div class="portal-summary-grid">
+          <div class="portal-stat"><small>Present</small><strong id="attendancePresent">0</strong></div>
+          <div class="portal-stat"><small>Absent</small><strong id="attendanceAbsent">0</strong></div>
+          <div class="portal-stat"><small>Recorded</small><strong id="attendanceRecorded">0</strong></div>
+        </div>
+        <div class="portal-table-wrap" style="margin-top:12px"><table class="portal-table"><thead><tr><th>Date</th><th>Status</th><th>Remarks</th></tr></thead><tbody id="attendanceRows"></tbody></table></div>
+      </div>
+    </section>
+    <section class="portal-panel">
       <h2>Guardian / Family</h2>
       <div class="portal-body"><div id="guardians" class="portal-grid"></div></div>
     </section>
