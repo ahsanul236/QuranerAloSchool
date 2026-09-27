@@ -93,6 +93,7 @@
 <div class="profile-field"><label>ফোন নম্বর</label><input id="studentPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="01XXXXXXXXX"></div>
 <div class="profile-field"><label>জন্ম নিবন্ধন নম্বর</label><input id="birthRegistrationNo" inputmode="numeric"></div>
 <div class="profile-field"><label>অবস্থা</label><select id="status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="graduated">Graduated</option><option value="suspended">Suspended</option><option value="withdrawn">Withdrawn</option></select></div>
+<div class="profile-field"><label>মাসিক ফি (৳)</label><input id="monthlyFee" type="number" min="0" step="0.01"><small class="muted">পরিবর্তন শুধু ভবিষ্যতে generate হওয়া fee-তে প্রযোজ্য হবে।</small></div>
 <div class="profile-field"><label>পিতার নাম</label><input id="fatherName"></div>
 <div class="profile-field"><label>পিতার NID নম্বর</label><input id="fatherNid" inputmode="numeric"></div>
 <div class="profile-field"><label>মাতার নাম</label><input id="motherName"></div>
@@ -139,7 +140,7 @@
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="student-profile.js?v=20260925-2"></script>
+<script type="module" src="student-profile.js?v=20260927-1"></script>
 <script src="management-nav.js?v=20260918-4"></script>
 </body>
 </html>
