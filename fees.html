@@ -3,12 +3,25 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b2342">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co;">
-<title>Fees & Receipts | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260927-2">
+<title>Fees & Receipts | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260927-3">
 </head>
 <body><main class="dashboard-shell"><section class="card dashboard-card">
 <div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>Fees & Receipt Management</span></div></div><div class="top-actions"><a class="quick-link" href="dashboard.html">← Dashboard</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div>
 <div id="loading" class="notice-box">Fees module load হচ্ছে…</div><div id="app" class="hidden">
 <div class="page-head"><div><p class="eyebrow">ফি</p><h1>ফি ব্যবস্থাপনা</h1><p class="muted">শিক্ষার্থীর ফি চার্জ, পেমেন্ট ও রিসিট এখান থেকে পরিচালনা করুন।</p></div></div>
+<div class="panel student-dues-panel">
+  <div class="panel-head">
+    <div><h2>Student Dues</h2><span class="muted">শিক্ষার্থী অনুযায়ী বর্তমান বকেয়া দেখুন</span></div>
+    <label class="dues-student-filter">Student<select id="duesStudentSelect"><option value="">সব শিক্ষার্থী</option></select></label>
+  </div>
+  <div class="dues-summary-grid">
+    <div class="dues-summary-card"><span>Total Due</span><strong>৳ <span id="duesTotal">0.00</span></strong></div>
+    <div class="dues-summary-card"><span>Open / Partial</span><strong id="duesOpenCount">0</strong></div>
+    <div class="dues-summary-card"><span>Students with Due</span><strong id="duesStudentCount">0</strong></div>
+  </div>
+  <div class="table-wrap"><table class="user-table attendance-table dues-table"><thead><tr><th>Month</th><th>Student</th><th>Payable</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody id="duesRows"></tbody></table></div>
+  <div id="duesEmpty" class="dues-empty hidden">কোনো outstanding fee due নেই।</div>
+</div>
 <div class="panel fee-action-panel">
   <div class="fee-action-tabs" role="tablist" aria-label="Fee actions">
     <button id="paymentTab" class="fee-action-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="paymentPane">Receive Fee Payment</button>
@@ -36,19 +49,6 @@
       <div class="span-2 page-actions"><strong>Total Payable: ৳ <span id="currentPayable">0.00</span></strong><button class="primary-btn" style="width:auto" type="submit">Generate Fee Payment</button></div>
     </form><div id="chargeMessage" class="message-inline"></div>
   </div>
-</div>
-<div class="panel student-dues-panel">
-  <div class="panel-head">
-    <div><h2>Student Dues</h2><span class="muted">শিক্ষার্থী অনুযায়ী বর্তমান বকেয়া দেখুন</span></div>
-    <label class="dues-student-filter">Student<select id="duesStudentSelect"><option value="">সব শিক্ষার্থী</option></select></label>
-  </div>
-  <div class="dues-summary-grid">
-    <div class="dues-summary-card"><span>Total Due</span><strong>৳ <span id="duesTotal">0.00</span></strong></div>
-    <div class="dues-summary-card"><span>Open / Partial</span><strong id="duesOpenCount">0</strong></div>
-    <div class="dues-summary-card"><span>Students with Due</span><strong id="duesStudentCount">0</strong></div>
-  </div>
-  <div class="table-wrap"><table class="user-table attendance-table dues-table"><thead><tr><th>Month</th><th>Student</th><th>Payable</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody id="duesRows"></tbody></table></div>
-  <div id="duesEmpty" class="dues-empty hidden">কোনো outstanding fee due নেই।</div>
 </div>
 <div class="panel"><div class="panel-head"><h2>Recent Receipts</h2><span id="receiptCount" class="eyebrow">0 receipts</span></div><div class="table-wrap"><table class="user-table attendance-table"><thead><tr><th>Receipt No.</th><th>Date</th><th>Student</th><th>Amount</th><th>Method</th><th>Reference</th><th>Print</th></tr></thead><tbody id="receiptRows"></tbody></table></div></div>
 <p class="footer-note">RLS enforced · Receipt numbers are generated server-side · Payments are never stored in browser local storage.</p>
