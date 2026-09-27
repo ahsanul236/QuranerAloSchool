@@ -42,6 +42,7 @@ async function loadTransactions(){
 }
 function voucherPrintHref(v){
   if(v.source_type==='fee_payment' || v.record_type==='fee_receipt')return 'receipt.html?type=fee&id='+encodeURIComponent(v.source_id);
+  if(v.source_type==='payroll_payment')return 'receipt.html?type=payroll&id='+encodeURIComponent(v.source_id);
   return 'receipt.html?type=voucher&id='+encodeURIComponent(v.voucher_id);
 }
 async function loadVouchers(){
