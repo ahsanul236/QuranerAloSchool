@@ -54,9 +54,9 @@ async function getViewerProfile(session) {
 
 async function resolveHelper(session) {
   const previewId = qs.get('preview_helper');
-  const viewer = await getViewerProfile(session);
 
   if (previewId) {
+    const viewer = await getViewerProfile(session);
     if (!viewer || !viewer.active || viewer.role !== 'owner') throw new Error('PREVIEW_NOT_ALLOWED');
     const { data, error } = await supabase.functions.invoke(portalPreviewFunction, {
       body: { entityType: 'helper', entityId: previewId }
