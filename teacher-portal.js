@@ -156,15 +156,15 @@ async function renderGroups(groupData,mode=false,date='',readOnly=false){
   const rows=[];
   for(const g of groupData.groups){
     const list=groupData.memberships.filter(m=>m.group_id===g.group_id).map(m=>groupData.studentMap[m.student_id]).filter(Boolean);
-    if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td class="group-attendance-cell">—</td><td>0</td><td>—</td></tr>');continue}
+    if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td class="group-attendance-cell">—</td><td>—</td></tr>');continue}
     list.forEach((s,i)=>{
       const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';
       const digits=String(s.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');const waDigits=digits?(digits.startsWith('0')?'88'+digits:digits):'';
       const wa=waDigits?'<a class="whatsapp-btn group-whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="muted">ফোন নেই</span>';
-      rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-total-cell">'+(i===0?list.length:'')+'</td><td class="group-message-cell">'+wa+'</td></tr>');
+      rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td>'+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-message-cell">'+wa+'</td></tr>');
     });
   }
-  $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="5">কোনো active Group assigned নেই।</td></tr>';
+  $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="4">কোনো active Group assigned নেই।</td></tr>';
 }
 function setupAttendanceSection({teacher,students,getGroupData,buttonId,dateId,dateWrapId,messageId,containerId,render,readOnly}){
   const button=$(buttonId),input=$(dateId),wrap=$(dateWrapId),message=$(messageId);const today=new Date().toISOString().slice(0,10);input.max=today;input.value=today;
