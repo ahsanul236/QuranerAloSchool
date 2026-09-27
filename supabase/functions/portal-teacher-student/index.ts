@@ -74,12 +74,37 @@ Deno.serve(async (req) => {
       if (!student) return json({ error: 'STUDENT_PROFILE_NOT_FOUND' }, 404);
 
       let teacher: Record<string, unknown> | null = null;
+      let group: Record<string, unknown> | null = null;
+      let resolvedTeacherId = student.teacher_id || null;
 
-      if (student.teacher_id) {
+      if (!resolvedTeacherId) {
+        const { data: membership, error: membershipError } = await admin
+          .from('qa_group_memberships')
+          .select('group_id')
+          .eq('student_id', student.student_id)
+          .is('left_at', null)
+          .maybeSingle();
+        if (membershipError) throw membershipError;
+        if (membership?.group_id) {
+          const { data: groupRow, error: groupError } = await admin
+            .from('qa_study_groups')
+            .select('group_id,group_name,teacher_id,active')
+            .eq('group_id', membership.group_id)
+            .eq('active', true)
+            .maybeSingle();
+          if (groupError) throw groupError;
+          if (groupRow) {
+            group = { group_id: groupRow.group_id, group_name: groupRow.group_name };
+            resolvedTeacherId = groupRow.teacher_id || null;
+          }
+        }
+      }
+
+      if (resolvedTeacherId) {
         const { data: teacherRow, error: teacherError } = await admin
           .from('qa_teachers')
           .select('teacher_id,teacher_code,full_name,full_name_bn,phone,specialization,active')
-          .eq('teacher_id', student.teacher_id)
+          .eq('teacher_id', resolvedTeacherId)
           .maybeSingle();
 
         if (teacherError) throw teacherError;
@@ -106,6 +131,7 @@ Deno.serve(async (req) => {
           status: student.status,
         },
         teacher,
+        group,
       });
     }
 
