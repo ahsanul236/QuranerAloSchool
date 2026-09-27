@@ -91,10 +91,10 @@ async function loadTeacherDetails(teacherId) {
 
 async function attendanceSummaryMap(students){
   const ids=[...new Set(students.map(s=>s.student_id))]; if(!ids.length)return {};
-  const {data,error}=await supabase.from('qa_attendance').select('student_id,status').in('student_id',ids).in('status',['present','absent']);
+  const {data,error}=await supabase.from('qa_attendance').select('student_id,status,attendance_date').in('student_id',ids).in('status',['present','absent']);
   if(error)throw error; const map={};
   ids.forEach(id=>map[id]={present:0,total:0});
-  (data||[]).forEach(a=>{if(!map[a.student_id])map[a.student_id]={present:0,total:0};map[a.student_id].total++;if(a.status==='present')map[a.student_id].present++});
+  const byDay=new Map();(data||[]).forEach(a=>{const key=a.student_id+'|'+a.attendance_date;const prev=byDay.get(key);if(!prev||a.status==='present')byDay.set(key,a)});byDay.forEach(a=>{if(!map[a.student_id])map[a.student_id]={present:0,total:0};map[a.student_id].total++;if(a.status==='present')map[a.student_id].present++});
   return map;
 }
 function summaryText(summary){
