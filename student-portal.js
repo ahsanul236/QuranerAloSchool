@@ -144,6 +144,15 @@ async function loadAssignedTeacher(studentId, previewStudentId = ''){
   return teacher;
 }
 
+async function loadAttendanceHistory(studentId){
+  const {data,error}=await supabase.from('qa_attendance').select('attendance_date,status,remarks').eq('student_id',studentId).order('attendance_date',{ascending:false}).limit(60);
+  if(error)throw error;const rows=data||[];
+  $('attendancePresent').textContent=String(rows.filter(x=>x.status==='present').length);
+  $('attendanceAbsent').textContent=String(rows.filter(x=>x.status==='absent').length);
+  $('attendanceRecorded').textContent=String(rows.length);
+  $('attendanceRows').innerHTML=rows.map(x=>'<tr><td>'+esc(formatDate(x.attendance_date))+'</td><td><span class="active-badge '+statusClass(x.status)+'">'+esc(x.status||'—')+'</span></td><td>'+esc(x.remarks||'—')+'</td></tr>').join('')||'<tr><td colspan="3">এখনো attendance record নেই।</td></tr>';
+}
+
 async function init() {
   const { data: { session } } = await supabase.auth.getSession();
   if (!session) {
@@ -188,6 +197,7 @@ async function init() {
   $('birthRegistrationNo').textContent = student.birth_registration_no || '—';
 
   const assignedTeacher = await loadAssignedTeacher(student.student_id, previewStudentId);
+  await loadAttendanceHistory(student.student_id);
   await setProfileImage({ role:'student', personId:student.student_id, img:$('studentPortalProfileImage') });
   await mountDocumentsPanel({
     container:$('studentPortalDocuments'),
