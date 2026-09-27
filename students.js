@@ -12,6 +12,7 @@ let currentStudents = [];
 let canManage = false;
 let canManagePortal = false;
 let teacherMap = new Map();
+let groupTeacherByStudent = new Map();
 let page = 1;
 let pageSize = 10;
 let totalRows = 0;
@@ -187,6 +188,33 @@ async function fetchStudentRows(from, to, includeCount = false) {
   return query;
 }
 
+async function groupTeacherMapForStudents(ids) {
+  const map = new Map();
+  if (!ids.length) return map;
+  const { data: memberships, error } = await supabase.from('qa_group_memberships')
+    .select('student_id,group_id').is('left_at', null).in('student_id', ids);
+  if (error) {
+    console.warn('Group teacher labels unavailable', error);
+    return map;
+  }
+  const groupIds = [...new Set((memberships || []).map((row) => row.group_id).filter(Boolean))];
+  if (!groupIds.length) return map;
+  const { data: groups, error: groupError } = await supabase.from('qa_study_groups')
+    .select('group_id,teacher_id').eq('active', true).in('group_id', groupIds);
+  if (groupError) {
+    console.warn('Group teacher labels unavailable', groupError);
+    return map;
+  }
+  const teacherByGroup = new Map((groups || []).map((group) => [group.group_id, group.teacher_id]));
+  (memberships || []).forEach((membership) => {
+    const teacherId = teacherByGroup.get(membership.group_id);
+    if (!teacherId) return;
+    const teacher = teacherMap.get(teacherId);
+    if (teacher) map.set(membership.student_id, `Group Teacher · ${teacher}`);
+  });
+  return map;
+}
+
 async function courseMapForStudents(ids) {
   const map = new Map();
   if (!ids.length) return map;
@@ -209,7 +237,7 @@ function renderStudents(list, courseMap = new Map()) {
   $('countLabel').textContent = `${totalRows} জন শিক্ষার্থী`;
   $('studentRows').innerHTML = list.map((s) => {
     const courses = (courseMap.get(s.student_id) || []).join(', ') || '—';
-    const teacher = s.teacher_id ? (teacherMap.get(s.teacher_id) || 'Assigned') : 'Unassigned';
+    const teacher = s.teacher_id ? (teacherMap.get(s.teacher_id) || 'Assigned') : (groupTeacherByStudent.get(s.student_id) || 'Unassigned');
     return `
     <tr>
       <td class="student-code"><a class="student-id-link" href="student-profile.html?id=${encodeURIComponent(s.student_id)}">${escapeHtml(s.student_code)}</a></td>
@@ -244,7 +272,9 @@ async function loadStudents() {
   }
 
   currentStudents = data || [];
-  const courseMap = await courseMapForStudents(currentStudents.map((row) => row.student_id));
+  const ids = currentStudents.map((row) => row.student_id);
+  const [courseMap, groupMap] = await Promise.all([courseMapForStudents(ids), groupTeacherMapForStudents(ids)]);
+  groupTeacherByStudent = groupMap;
   renderStudents(currentStudents, courseMap);
   refreshFilterChips();
 }
@@ -261,12 +291,13 @@ async function exportStudents(format, actionButton) {
       const { data, error } = await fetchStudentRows(from, from + size - 1, false);
       if (error) throw error;
       const batch = data || [];
-      const courseMap = await courseMapForStudents(batch.map((row) => row.student_id));
+      const ids = batch.map((row) => row.student_id);
+      const [courseMap, groupMap] = await Promise.all([courseMapForStudents(ids), groupTeacherMapForStudents(ids)]);
       batch.forEach((row) => {
         exported.push({
           ...row,
           courses:(courseMap.get(row.student_id) || []).join(', '),
-          teacher_name:row.teacher_id ? (teacherMap.get(row.teacher_id) || 'Assigned') : 'Unassigned'
+          teacher_name:row.teacher_id ? (teacherMap.get(row.teacher_id) || 'Assigned') : (groupMap.get(row.student_id) || 'Unassigned')
         });
       });
       if (batch.length < size) break;
