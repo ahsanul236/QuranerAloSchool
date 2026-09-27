@@ -19,21 +19,29 @@ create index if not exists qa_group_memberships_group_idx on public.qa_group_mem
 create index if not exists qa_group_memberships_student_idx on public.qa_group_memberships(student_id,left_at);
 alter table public.qa_study_groups enable row level security;
 alter table public.qa_group_memberships enable row level security;
+drop policy if exists qa_study_groups_select on public.qa_study_groups;
 create policy qa_study_groups_select on public.qa_study_groups for select to authenticated using (
  private.qa_has_permission('students.view') or private.qa_has_permission('students.manage')
  or exists(select 1 from public.qa_teachers t where t.teacher_id=qa_study_groups.teacher_id and t.user_id=(select auth.uid()))
  or exists(select 1 from public.qa_group_memberships gm join public.qa_students s on s.student_id=gm.student_id where gm.group_id=qa_study_groups.group_id and gm.left_at is null and s.user_id=(select auth.uid()))
 );
+drop policy if exists qa_study_groups_insert on public.qa_study_groups;
 create policy qa_study_groups_insert on public.qa_study_groups for insert to authenticated with check (private.qa_has_permission('students.manage'));
+drop policy if exists qa_study_groups_update on public.qa_study_groups;
 create policy qa_study_groups_update on public.qa_study_groups for update to authenticated using (private.qa_has_permission('students.manage')) with check (private.qa_has_permission('students.manage'));
+drop policy if exists qa_study_groups_delete on public.qa_study_groups;
 create policy qa_study_groups_delete on public.qa_study_groups for delete to authenticated using (private.qa_has_permission('students.manage'));
+drop policy if exists qa_group_memberships_select on public.qa_group_memberships;
 create policy qa_group_memberships_select on public.qa_group_memberships for select to authenticated using (
  private.qa_has_permission('students.view') or private.qa_has_permission('students.manage')
  or exists(select 1 from public.qa_study_groups g join public.qa_teachers t on t.teacher_id=g.teacher_id where g.group_id=qa_group_memberships.group_id and t.user_id=(select auth.uid()))
  or exists(select 1 from public.qa_students s where s.student_id=qa_group_memberships.student_id and s.user_id=(select auth.uid()))
 );
+drop policy if exists qa_group_memberships_insert on public.qa_group_memberships;
 create policy qa_group_memberships_insert on public.qa_group_memberships for insert to authenticated with check (private.qa_has_permission('students.manage'));
+drop policy if exists qa_group_memberships_update on public.qa_group_memberships;
 create policy qa_group_memberships_update on public.qa_group_memberships for update to authenticated using (private.qa_has_permission('students.manage')) with check (private.qa_has_permission('students.manage'));
+drop policy if exists qa_group_memberships_delete on public.qa_group_memberships;
 create policy qa_group_memberships_delete on public.qa_group_memberships for delete to authenticated using (private.qa_has_permission('students.manage'));
 create or replace function private.qa_teacher_owns_student(p_student_id uuid,p_teacher_id uuid) returns boolean language sql stable security definer set search_path=public,pg_temp as $$
  select exists(select 1 from public.qa_teachers t where t.teacher_id=p_teacher_id and t.user_id=auth.uid() and t.active=true and (
