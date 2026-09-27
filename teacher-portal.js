@@ -243,47 +243,22 @@ async function init() {
   $('address').textContent = teacher.address || '—';
   $('specialization').textContent = teacher.specialization || '—';
 
-  const [{ data: enrollmentData, error: enrollmentError }, payroll, assignedStudents, groupData] = await Promise.all([
-    supabase.from('qa_enrollments')
-      .select('student_id,course_code,start_date,end_date,status')
-      .eq('teacher_user_id', teacher.user_id)
-      .order('start_date', { ascending: false })
-      .limit(100),
+  const [payroll, assignedStudents, groupData] = await Promise.all([
     loadPayroll(previewTeacherId),
     loadAssignedStudents(previewTeacherId),
     loadTeachingGroups(teacher.teacher_id)
   ]);
 
-  if (enrollmentError) throw enrollmentError;
   const groupStudentIds=new Set(groupData.students.map(s=>s.student_id));
   const singleStudents=assignedStudents.filter(s=>!groupStudentIds.has(s.student_id));
-  await renderAssignedStudents(singleStudents,false,'',Boolean(previewTeacherId));
-  await renderGroups(groupData,false,'',Boolean(previewTeacherId));
+  await Promise.all([
+    renderAssignedStudents(singleStudents,false,'',Boolean(previewTeacherId)),
+    renderGroups(groupData,false,'',Boolean(previewTeacherId))
+  ]);
   setupAttendanceSection({teacher,students:singleStudents,buttonId:'singleAttendanceToggle',dateId:'singleAttendanceDate',dateWrapId:'singleAttendanceDateWrap',messageId:'singleAttendanceMessage',containerId:'assignedStudentRows',render:renderAssignedStudents,readOnly:Boolean(previewTeacherId)});
   setupAttendanceSection({teacher,getGroupData:()=>groupData,buttonId:'groupAttendanceToggle',dateId:'groupAttendanceDate',dateWrapId:'groupAttendanceDateWrap',messageId:'groupAttendanceMessage',containerId:'groupRows',render:renderGroups,readOnly:Boolean(previewTeacherId)});
   const attendanceStudents=[...new Map([...singleStudents,...groupData.students].map(s=>[s.student_id,s])).values()];
-
-  const enrollments = enrollmentData || [];
   $('studentCount').textContent = String(attendanceStudents.length);
-  const studentIds = [...new Set(enrollments.map((item) => item.student_id).filter(Boolean))];
-  let studentNames = {};
-  if (studentIds.length) {
-    const { data: students, error } = await supabase.from('qa_students')
-      .select('student_id,student_code,full_name').in('student_id', studentIds);
-    if (error) throw error;
-    studentNames = Object.fromEntries((students || []).map((student) => [
-      student.student_id, `${student.student_code} · ${student.full_name}`
-    ]));
-  }
-
-  $('studentRows').innerHTML = enrollments.map((item) => `
-    <tr>
-      <td>${esc(studentNames[item.student_id] || item.student_id)}</td>
-      <td>${esc(item.course_code)}</td>
-      <td>${esc(formatDate(item.start_date))}</td>
-      <td><span class="active-badge ${statusClass(item.status)}">${esc(item.status)}</span></td>
-    </tr>
-  `).join('') || '<tr><td colspan="4">No assigned students.</td></tr>';
 
   const payrollRows = payroll.payrolls || [];
   $('latestPaidAmount').textContent = money(payroll.summary?.latestPaidAmount || 0);
