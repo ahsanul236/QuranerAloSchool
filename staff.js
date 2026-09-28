@@ -53,6 +53,8 @@ function genderLabel(value) {
   return 'নির্ধারিত নয়';
 }
 
+function maritalLabel(value) { if(value==='married')return 'Married'; if(value==='unmarried')return 'Unmarried'; return '—'; }
+
 function yearLabel(date) {
   return date ? String(date).slice(0,4) : '—';
 }
@@ -107,6 +109,7 @@ function filterItems() {
     { key:'year', label:'Joining', value:$('yearFilter').value, text:selectedText('yearFilter') },
     { key:'gender', label:'লিঙ্গ', value:$('genderFilter').value, text:selectedText('genderFilter') },
     { key:'status', label:'Status', value:$('statusFilter').value, text:selectedText('statusFilter') },
+    { key:'marital', label:'Marital Status', value:$('maritalFilter').value, text:selectedText('maritalFilter') },
     { key:'portal', label:'Portal', value:$('portalFilter').value, text:selectedText('portalFilter') },
     { key:'phone', label:'Phone', value:$('phoneFilter').value, text:selectedText('phoneFilter') }
   ];
@@ -124,7 +127,7 @@ function refreshFilterChips() {
       $('search').value = '';
     } else {
       const map = {
-        year:'yearFilter', gender:'genderFilter', status:'statusFilter',
+        year:'yearFilter', gender:'genderFilter', status:'statusFilter', marital:'maritalFilter',
         specialization:'specializationFilter', portal:'portalFilter', phone:'phoneFilter'
       };
       if (map[key]) $(map[key]).value = '';
@@ -136,7 +139,7 @@ function refreshFilterChips() {
 
 function resetListFilters(loadNow = true) {
   $('search').value = '';
-  ['yearFilter','genderFilter','statusFilter','specializationFilter','portalFilter','phoneFilter']
+  ['yearFilter','genderFilter','statusFilter','maritalFilter','specializationFilter','portalFilter','phoneFilter']
     .forEach((id) => { $(id).value = ''; });
   page = 1;
   refreshFilterChips();
@@ -175,6 +178,9 @@ function applyStaffFilters(query) {
   const gender = $('genderFilter').value;
   if (gender) query = query.eq('gender', gender);
 
+  const marital = $('maritalFilter').value;
+  if (marital) query = query.eq('marital_status', marital);
+
   const status = $('statusFilter').value;
   if (status === 'active') query = query.eq('active', true);
   if (status === 'inactive') query = query.eq('active', false);
@@ -198,8 +204,8 @@ function applyStaffFilters(query) {
 
 function staffFields() {
   return mode === 'teacher'
-    ? 'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,joining_date,active,user_id,created_at'
-    : 'staff_id,staff_code,full_name,full_name_bn,gender,phone,email,joining_date,active,user_id,staff_type,created_at';
+    ? 'teacher_id,teacher_code,full_name,full_name_bn,gender,marital_status,phone,email,specialization,joining_date,active,user_id,created_at'
+    : 'staff_id,staff_code,full_name,full_name_bn,gender,marital_status,phone,email,joining_date,active,user_id,staff_type,created_at';
 }
 
 async function fetchRows(from, to, includeCount = false) {
@@ -221,7 +227,7 @@ function renderRows(list) {
       <td><a class="staff-id-link" href="staff-profile.html?type=${mode}&id=${encodeURIComponent(id)}"><strong>${esc(code)}</strong></a></td>
       <td>${esc(r.full_name)}${subtitle}</td>
       <td data-col="gender">${esc(genderLabel(r.gender))}</td>
-      <td data-col="joining">${esc(yearLabel(r.joining_date))}</td>
+      <td data-col="joining">${esc(yearLabel(r.joining_date))}</td>\n      <td data-col="marital">${esc(maritalLabel(r.marital_status))}</td>
       <td data-col="detail">${esc(detail)}</td>
       <td data-col="phone">${esc(r.phone || '—')}</td>
       <td data-col="email">${esc(r.email || '—')}</td>
@@ -229,7 +235,7 @@ function renderRows(list) {
       <td data-col="portal">${activationBadge(r.user_id)}</td>
       <td data-col="access">${portalAction(r)}</td>
     </tr>`;
-  }).join('') || `<tr><td colspan="10">এই filter অনুযায়ী কোনো ${teacher ? 'teacher' : 'helper'} পাওয়া যায়নি।</td></tr>`;
+  }).join('') || `<tr><td colspan="11">এই filter অনুযায়ী কোনো ${teacher ? 'teacher' : 'helper'} পাওয়া যায়নি।</td></tr>`;
   bindPortalActions();
   syncColumns();
 }
@@ -238,7 +244,7 @@ async function load() {
   const permission = mode === 'teacher' ? 'teachers' : 'staff';
   if (!access?.can(`${permission}.view`) && !access?.can(`${permission}.manage`)) {
     msg(`এই ${mode === 'teacher' ? 'Teacher' : 'Helper'} module-এর permission আপনার account-এ নেই।`, 'error');
-    $('staffRows').innerHTML = '<tr><td colspan="10">No permission.</td></tr>';
+    $('staffRows').innerHTML = '<tr><td colspan="11">No permission.</td></tr>';
     $('newRecord').classList.add('hidden');
     return;
   }
@@ -290,7 +296,8 @@ async function exportRows(format, actionButton) {
       { label:'English Name', key:'full_name' },
       { label:'বাংলা নাম', key:'full_name_bn' },
       { label:'Gender', column:'gender', value:(row) => genderLabel(row.gender) },
-      { label:'Joining Year', column:'joining', value:(row) => yearLabel(row.joining_date) }
+      { label:'Joining Year', column:'joining', value:(row) => yearLabel(row.joining_date) },
+      { label:'Marital Status', column:'marital', value:(row) => maritalLabel(row.marital_status) }
     ];
     if (teacher) columns.push({ label:'Specialization', column:'detail', key:'specialization' });
     columns.push(
@@ -406,7 +413,7 @@ const debouncedSearch = debounce(() => {
 }, 350);
 $('search').addEventListener('input', debouncedSearch);
 
-['yearFilter','genderFilter','statusFilter','specializationFilter','portalFilter','phoneFilter'].forEach((id) => {
+['yearFilter','genderFilter','statusFilter','maritalFilter','specializationFilter','portalFilter','phoneFilter'].forEach((id) => {
   $(id).addEventListener('change', () => {
     page = 1;
     load().catch((error) => {
