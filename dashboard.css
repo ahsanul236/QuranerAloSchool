@@ -1150,3 +1150,24 @@
   .management-layout .student-group-tabs.mobile-header-tabs{position:sticky;top:88px;z-index:1100;transition:transform .22s ease,opacity .22s ease}
   .management-layout .student-group-tabs.mobile-header-tabs.is-mobile-hidden{transform:translateY(-180px);opacity:0;pointer-events:none}
 }
+
+/* Canonical mobile dimensions for Students/Groups and Teachers/Helpers tabs. */
+@media(max-width:620px){
+  .management-layout .student-group-tabs,
+  .management-layout .student-group-tabs.staff-type-tabs{
+    height:50px!important;
+    min-height:50px!important;
+    padding:0!important;
+    margin:0 0 10px!important;
+    border-radius:12px 12px 0 0!important;
+  }
+  .management-layout .student-group-tabs .student-group-tab,
+  .management-layout .staff-type-tabs .student-group-tab{
+    height:49px!important;
+    min-height:49px!important;
+    padding:10px 8px!important;
+    font-size:12.5px!important;
+    line-height:1.2!important;
+    border-radius:0!important;
+  }
+}
