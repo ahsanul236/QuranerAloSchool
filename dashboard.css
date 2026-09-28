@@ -1171,3 +1171,13 @@
     border-radius:0!important;
   }
 }
+
+/* Mobile shell renders cleanly before JS enhancement; slide summaries are the triggers. */
+@media(max-width:620px){
+  .dashboard-card>.topbar .top-actions{display:none!important}
+  .mobile-slide-summary-trigger{cursor:pointer;position:relative;padding-right:42px!important;-webkit-tap-highlight-color:transparent}
+  .mobile-slide-summary-trigger .settings-toggle-btn{display:none!important}
+  .mobile-slide-summary-trigger::after{content:'›';position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:28px;line-height:1;color:#6f8780;font-weight:400;pointer-events:none}
+  .mobile-slide-summary-trigger:active{background:#f3faf7}
+  .mobile-slide-summary-trigger:focus-visible{outline:3px solid rgba(7,132,103,.18);outline-offset:-3px}
+}
