@@ -79,12 +79,14 @@ function resetForm() {
 
 function updatePageContext() {
   const teacher = mode === 'teacher';
-  $('brandSubtitle').textContent = teacher ? 'শিক্ষক ব্যবস্থাপনা' : 'হেল্পার ব্যবস্থাপনা';
-  $('pageEyebrow').textContent = teacher ? 'শিক্ষক' : 'হেল্পার';
-  $('pageTitle').textContent = teacher ? 'শিক্ষক ব্যবস্থাপনা' : 'হেল্পার ব্যবস্থাপনা';
-  $('pageSubtitle').textContent = teacher
-    ? 'Teacher profile, portal access এবং নতুন teacher যোগ করার ব্যবস্থাপনা।'
-    : 'Helper profile, portal access এবং নতুন helper যোগ করার ব্যবস্থাপনা।';
+  $('brandSubtitle').textContent = 'Staff Management';
+  $('pageEyebrow').textContent = 'স্টাফ';
+  $('pageTitle').textContent = 'স্টাফ ব্যবস্থাপনা';
+  $('pageSubtitle').textContent = 'শিক্ষক ও হেল্পারের প্রোফাইল, পোর্টাল এবং তথ্য এখান থেকে পরিচালনা করুন।';
+  $('teacherListTab').classList.toggle('is-active', teacher);
+  $('helperListTab').classList.toggle('is-active', !teacher);
+  $('teacherListTab').setAttribute('aria-selected', String(teacher));
+  $('helperListTab').setAttribute('aria-selected', String(!teacher));
   $('newRecord').textContent = teacher ? '+ নতুন Teacher' : '+ নতুন Helper';
   $('formTitle').textContent = teacher ? 'নতুন Teacher তথ্য' : 'নতুন Helper তথ্য';
   $('saveRecord').textContent = teacher ? 'Save Teacher' : 'Save Helper';
@@ -101,7 +103,6 @@ function updatePageContext() {
   formMsg('');
   syncColumns();
 }
-
 function filterItems() {
   const q = $('search').value.trim();
   const items = [
@@ -387,6 +388,16 @@ function bindPortalActions() {
     }
   }));
 }
+
+async function switchStaffMode(nextMode){
+  if(nextMode===mode)return;
+  mode=nextMode;page=1;resetListFilters(false);updatePageContext();
+  const target=mode==='helper'?'#helpers':'#teachers';
+  if(location.hash!==target)history.replaceState(null,'',target);
+  try{await loadFilterOptions();await load();}catch(error){console.error(error);msg('Data load করা যায়নি।','error');}
+}
+$('teacherListTab').addEventListener('click',()=>switchStaffMode('teacher'));
+$('helperListTab').addEventListener('click',()=>switchStaffMode('helper'));
 
 $('newRecord').addEventListener('click', () => {
   if (!canManage) return;
