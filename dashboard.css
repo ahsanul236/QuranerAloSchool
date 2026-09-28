@@ -1144,3 +1144,9 @@
 
 /* Technical permission capabilities stay enforced but are not user-facing UI. */
 .settings-status-badge{display:none!important}
+
+/* Mobile list tabs behave as part of the auto-hiding app header. */
+@media(max-width:620px){
+  .management-layout .student-group-tabs.mobile-header-tabs{position:sticky;top:88px;z-index:1100;transition:transform .22s ease,opacity .22s ease}
+  .management-layout .student-group-tabs.mobile-header-tabs.is-mobile-hidden{transform:translateY(-190%);opacity:0;pointer-events:none}
+}
