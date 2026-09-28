@@ -100,12 +100,12 @@
 
     const moreSheet=document.createElement('div');
     moreSheet.className='management-more-sheet';
-    moreSheet.innerHTML=`<div class="management-more-handle"></div><div class="management-more-head"><strong>More</strong><button type="button" aria-label="Close more menu">×</button></div><a href="staff.html#teachers"><span>♟</span><strong>Staff</strong><small>Teacher & Helper</small></a><a href="payroll.html"><span>▣</span><strong>Expense</strong><small>Salary & Other Expense</small></a><a href="dashboard.html#settings"><span>⚙</span><strong>Settings</strong><small>Storage, Portal & Settings</small></a>`;
+    moreSheet.innerHTML=`<div class="management-more-handle"></div><div class="management-more-head"><strong>More</strong><button type="button" aria-label="Close more menu">×</button></div><a href="staff.html#teachers"><span>♟</span><strong>Staff</strong><small>Teacher & Helper</small></a><a href="payroll.html"><span>▣</span><strong>Expense</strong><small>Salary & Other Expense</small></a><a href="dashboard.html#settings"><span>⚙</span><strong>Settings</strong><small>Storage, Portal & Settings</small></a><button type="button" class="management-more-signout"><span>↪</span><strong>Sign out</strong><small>Securely leave management</small></button>`;
     document.body.appendChild(moreSheet);
     const moreBackdrop=document.createElement('div');moreBackdrop.className='management-more-backdrop';document.body.appendChild(moreBackdrop);
     const closeMore=()=>{moreSheet.classList.remove('is-open');moreBackdrop.classList.remove('is-visible');mobileBar.querySelector('.bottom-nav-more')?.setAttribute('aria-expanded','false')};
     mobileBar.querySelector('.bottom-nav-more').addEventListener('click',()=>{const open=!moreSheet.classList.contains('is-open');moreSheet.classList.toggle('is-open',open);moreBackdrop.classList.toggle('is-visible',open);mobileBar.querySelector('.bottom-nav-more').setAttribute('aria-expanded',String(open));});
-    moreSheet.querySelector('button').addEventListener('click',closeMore);moreBackdrop.addEventListener('click',closeMore);moreSheet.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMore));
+    moreSheet.querySelector('.management-more-head button').addEventListener('click',closeMore);moreBackdrop.addEventListener('click',closeMore);moreSheet.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMore));moreSheet.querySelector('.management-more-signout').addEventListener('click',()=>{const existing=document.getElementById('signOut');if(existing){closeMore();existing.click();}});
 
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
