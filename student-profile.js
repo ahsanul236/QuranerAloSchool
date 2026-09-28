@@ -6,7 +6,7 @@ const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 const studentId=new URLSearchParams(location.search).get('id');
-let access=null,student=null,guardians=[],teachers=[],editing=false,editBaseline='',allowNavigation=false;
+let access=null,student=null,guardians=[],teachers=[],groupAssignment=null,editing=false,editBaseline='',allowNavigation=false;
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[x]));
 const login=()=>location.replace('./');
@@ -50,6 +50,17 @@ async function loadTeachers(){
   teachers=data||[];
   renderTeacherAssignment();
 }
+async function loadGroupAssignment(){
+  groupAssignment=null;
+  const {data:membership,error}=await supabase.from('qa_group_memberships')
+    .select('group_id').eq('student_id',studentId).is('left_at',null).maybeSingle();
+  if(error)throw error;
+  if(!membership?.group_id)return;
+  const {data:group,error:groupError}=await supabase.from('qa_study_groups')
+    .select('group_id,group_name,teacher_id,active').eq('group_id',membership.group_id).eq('active',true).maybeSingle();
+  if(groupError)throw groupError;
+  if(group?.teacher_id)groupAssignment=group;
+}
 function renderTeacherAssignment(){
   const select=$('assignedTeacher');
   const saveBtn=$('saveTeacherBtn');
@@ -58,12 +69,17 @@ function renderTeacherAssignment(){
   if(!select||!view||!editor)return;
   const canManage=access?.can('students.manage');
   const currentId=student?.teacher_id||'';
-  const currentTeacher=teachers.find(t=>t.teacher_id===currentId);
+  const directTeacher=teachers.find(t=>t.teacher_id===currentId);
+  const groupTeacher=!directTeacher&&groupAssignment?.teacher_id
+    ? teachers.find(t=>t.teacher_id===groupAssignment.teacher_id)
+    : null;
+  const currentTeacher=directTeacher||groupTeacher;
+  const isGroupTeacher=Boolean(!directTeacher&&groupTeacher);
   const currentName=currentTeacher
     ? (currentTeacher.full_name_bn||currentTeacher.full_name||currentTeacher.teacher_code)
     : 'কোনো শিক্ষক নির্ধারিত নেই';
   const currentMeta=currentTeacher
-    ? [currentTeacher.teacher_code,currentTeacher.specialization,currentTeacher.active===false?'Inactive':'Active'].filter(Boolean).join(' · ')
+    ? [isGroupTeacher?'Group Teacher':'Assigned Teacher',currentTeacher.teacher_code,isGroupTeacher&&groupAssignment?.group_name?groupAssignment.group_name:'',currentTeacher.specialization,currentTeacher.active===false?'Inactive':'Active'].filter(Boolean).join(' · ')
     : 'Edit Profile খুলে শিক্ষক নির্বাচন করা যাবে।';
   view.innerHTML=currentTeacher
     ? '<div class="relationship-person"><img id="assignedTeacherProfileImage" class="profile-photo-small" src="assets/quraner-alo-logo.jpg" alt="" aria-hidden="true"><div class="relationship-person-copy"><strong>'+esc(currentName)+'</strong><small style="display:block;margin-top:4px;color:var(--muted)">'+esc(currentMeta)+'</small></div></div>'
@@ -172,7 +188,7 @@ async function load(){
     const map=Object.fromEntries((gs||[]).map(x=>[x.guardian_id,x]));
     guardians=links.map(x=>({...map[x.guardian_id],is_primary:x.is_primary})).filter(x=>x.guardian_id).sort((a,b)=>Number(b.is_primary)-Number(a.is_primary));
   }
-  fillStudent();mode();await loadTeachers();
+  fillStudent();await Promise.all([loadTeachers(),loadGroupAssignment()]);renderTeacherAssignment();mode();
   await renderStudentDocuments();
 }
 
