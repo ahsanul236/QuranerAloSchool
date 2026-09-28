@@ -70,9 +70,10 @@ async function loadTeacherGroups(){
   }
   const current=allTeacherGroups.filter(g=>g.teacher_id===id);
   $('assignedGroupsList').innerHTML=current.map(g=>{
-    const names=memberRows.filter(m=>m.group_id===g.group_id).map(m=>studentMap.get(m.student_id)).filter(Boolean).map(st=>st.full_name||st.student_code||'Student');
+    const groupStudents=memberRows.filter(m=>m.group_id===g.group_id).map(m=>studentMap.get(m.student_id)).filter(Boolean);
+    const studentLines=groupStudents.map((st,index)=>'<span class="group-student-line">'+(index+1)+'. '+esc((st.student_code||'')+(st.student_code?' · ':'')+(st.full_name||'Student'))+'</span>').join('');
     const title=editing?'<a href="groups.html?group='+encodeURIComponent(g.group_id)+'"><strong>'+esc(g.group_name)+'</strong></a>':'<strong>'+esc(g.group_name)+'</strong>';
-    return '<div class="staff-assignment-row"><div>'+title+'<small>'+(names.length?esc(names.join(' · ')):'কোনো active Student নেই')+'</small></div></div>';
+    return '<div class="staff-assignment-row"><div>'+title+'<small class="group-student-list">'+(studentLines||'কোনো active Student নেই')+'</small></div></div>';
   }).join('')||'<div class="portal-empty">কোনো Group assigned নেই।</div>';
   const canEditGroups=Boolean(canManage()&&access?.can('students.manage')&&editing);
   $('teacherGroupEditor')?.classList.toggle('hidden',!canEditGroups);
