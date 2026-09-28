@@ -4,7 +4,7 @@ const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabase
 const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],allTeacherGroups=[],editBaseline='',allowNavigation=false;
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
 function profileEditState(){
-  const ids=['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'];
+  const ids=['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','maritalStatus','spouseName','nidNumber','address'];
   return JSON.stringify(Object.fromEntries(ids.filter(x=>$(x)).map(x=>[x,$(x).value??''])));
 }
 function startEditTracking(){editBaseline=profileEditState();allowNavigation=false;}
