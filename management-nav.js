@@ -171,8 +171,15 @@
             if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
             if(event.target.closest('a,input,select,textarea,label')&&!event.target.closest('.settings-toggle-btn'))return;
             event.preventDefault();event.stopImmediatePropagation();
-            if(innerWidth<=620){if(item.trigger.getAttribute('aria-expanded')!=='true')openMobileSlide(item);}
-            else item.trigger.click();
+            if(innerWidth<=620){
+              if(item.trigger.getAttribute('aria-expanded')!=='true')openMobileSlide(item);
+            }else{
+              const opening=item.trigger.getAttribute('aria-expanded')!=='true';
+              item.body.classList.toggle('hidden',!opening);
+              item.trigger.setAttribute('aria-expanded',String(opening));
+              const caret=item.trigger.querySelector('[aria-hidden="true"]');
+              if(caret)caret.textContent=opening?'⌃':'⌄';
+            }
           };
           summary.addEventListener('click',activate,true);
           summary.addEventListener('keydown',activate,true);
