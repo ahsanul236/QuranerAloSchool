@@ -1141,3 +1141,6 @@
   .management-layout .settings-accordion.mobile-slide-open .page-actions button{width:100%!important;min-height:48px}
   @keyframes mobileSlideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
 }
+
+/* Technical permission capabilities stay enforced but are not user-facing UI. */
+.settings-status-badge{display:none!important}
