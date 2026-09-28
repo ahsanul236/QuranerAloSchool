@@ -168,11 +168,11 @@
           summary.setAttribute('role','button');
           summary.setAttribute('tabindex','0');
           const activate=(event)=>{
-            if(innerWidth>620)return;
             if(event.type==='keydown'&&!['Enter',' '].includes(event.key))return;
             if(event.target.closest('a,input,select,textarea,label')&&!event.target.closest('.settings-toggle-btn'))return;
             event.preventDefault();event.stopImmediatePropagation();
-            if(item.trigger.getAttribute('aria-expanded')!=='true')openMobileSlide(item);
+            if(innerWidth<=620){if(item.trigger.getAttribute('aria-expanded')!=='true')openMobileSlide(item);}
+            else item.trigger.click();
           };
           summary.addEventListener('click',activate,true);
           summary.addEventListener('keydown',activate,true);
