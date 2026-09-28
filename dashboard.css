@@ -1181,3 +1181,34 @@
   .mobile-slide-summary-trigger:active{background:#f3faf7}
   .mobile-slide-summary-trigger:focus-visible{outline:3px solid rgba(7,132,103,.18);outline-offset:-3px}
 }
+
+/* Unified accordion launcher: the section itself is the control on every viewport. */
+.management-layout .mobile-slide-summary-trigger,
+.mobile-slide-summary-trigger{
+  cursor:pointer;
+  position:relative;
+  min-height:76px;
+  padding:16px 46px!important;
+  justify-content:center!important;
+  text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.mobile-slide-summary-trigger .settings-accordion-title{
+  flex:0 1 auto!important;
+  justify-content:center!important;
+  align-items:center!important;
+  text-align:center;
+}
+.mobile-slide-summary-trigger .settings-accordion-title>div{text-align:center}
+.mobile-slide-summary-trigger .settings-accordion-title h2,
+.mobile-slide-summary-trigger .settings-accordion-title p{margin-left:auto!important;margin-right:auto!important;text-align:center}
+.mobile-slide-summary-trigger .settings-accordion-icon{flex:0 0 auto}
+.mobile-slide-summary-trigger .settings-accordion-controls{position:absolute;inset:0;pointer-events:none}
+.mobile-slide-summary-trigger .settings-toggle-btn{display:none!important}
+.mobile-slide-summary-trigger::after{
+  content:'›';position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  font-size:28px;line-height:1;color:#6f8780;font-weight:400;pointer-events:none
+}
+.mobile-slide-summary-trigger:hover{background:#f8fcfa}
+.mobile-slide-summary-trigger:active{background:#f3faf7}
+.mobile-slide-summary-trigger:focus-visible{outline:3px solid rgba(7,132,103,.18);outline-offset:-3px}
