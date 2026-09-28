@@ -87,7 +87,7 @@ function updatePageContext() {
   $('helperListTab').classList.toggle('is-active', !teacher);
   $('teacherListTab').setAttribute('aria-selected', String(teacher));
   $('helperListTab').setAttribute('aria-selected', String(!teacher));
-  $('newRecord').textContent = teacher ? '+ নতুন Teacher' : '+ নতুন Helper';
+  $('newRecord').textContent = teacher ? '+ নতুন শিক্ষক' : '+ নতুন হেল্পার';
   $('formTitle').textContent = teacher ? 'নতুন Teacher তথ্য' : 'নতুন Helper তথ্য';
   $('saveRecord').textContent = teacher ? 'Save Teacher' : 'Save Helper';
   $('listTitle').textContent = teacher ? 'Teacher List' : 'Helper List';
