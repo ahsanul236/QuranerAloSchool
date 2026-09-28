@@ -27,18 +27,15 @@ async function findVoucher(sourceId){const {data,error}=await supabase.from('qa_
 function voucherLink(v){return v?'<a class="quick-link" target="_blank" rel="noopener" href="receipt.html?type=voucher&id='+encodeURIComponent(v.voucher_id)+'">'+esc(v.voucher_no)+'</a>':'—';}
 function sourceLabel(v){if(v.source_type==='finance_transaction')return v.voucher_type==='income'?'Income':'Expense';if(v.source_type==='fee_payment')return 'Fee';if(v.source_type==='payroll_payment')return 'Payroll';return 'Manual';}
 async function loadTransactions(){
-  if(!canFinanceView){$('incomeRows').innerHTML='<tr><td colspan="6">No permission.</td></tr>';$('expenseRows').innerHTML='<tr><td colspan="6">No permission.</td></tr>';return;}
+  if(!canFinanceView){$('incomeRows').innerHTML='<tr><td colspan="5">No permission.</td></tr>';$('expenseRows').innerHTML='<tr><td colspan="6">No permission.</td></tr>';return;}
   const {data,error}=await supabase.from('qa_finance_transactions').select('transaction_id,transaction_date,direction,category,amount,account_name,reference,description,created_by').order('transaction_date',{ascending:false}).order('created_at',{ascending:false}).limit(300);
   if(error)throw error;
-  const txs=data||[],ids=txs.map(x=>x.transaction_id);
-  let voucherRows=[];
-  if(ids.length){const {data:v,error:ve}=await supabase.from('qa_vouchers').select('voucher_id,voucher_no,voucher_type,source_type,source_id').eq('source_type','finance_transaction').in('source_id',ids);if(ve)throw ve;voucherRows=v||[];}
-  const vouchers=Object.fromEntries(voucherRows.map(v=>[v.source_id,v]));
+  const txs=data||[];
   const income=txs.filter(x=>x.direction==='income'),expense=txs.filter(x=>x.direction==='expense');
   $('incomeCount').textContent=income.length+' records';$('expenseCount').textContent=expense.length+' records';
-  const renderRows=rows=>rows.map(x=>'<tr><td>'+esc(x.transaction_date)+'</td><td>'+esc(x.category)+'</td><td>৳'+money(x.amount)+'</td><td>'+esc(x.account_name)+'</td><td>'+esc(x.reference||'—')+'</td><td>'+voucherLink(vouchers[x.transaction_id])+'</td></tr>').join('');
-  $('incomeRows').innerHTML=renderRows(income)||'<tr><td colspan="6">কোনো Income record পাওয়া যায়নি।</td></tr>';
-  $('expenseRows').innerHTML=renderRows(expense)||'<tr><td colspan="6">কোনো Expense record পাওয়া যায়নি।</td></tr>';
+  const renderRows=rows=>rows.map(x=>'<tr><td>'+esc(x.transaction_date)+'</td><td>'+esc(x.category)+'</td><td>৳'+money(x.amount)+'</td><td>'+esc(x.account_name)+'</td><td>'+esc(x.reference||'—')+'</td></tr>').join('');
+  $('incomeRows').innerHTML=renderRows(income)||'<tr><td colspan="5">কোনো Income record পাওয়া যায়নি।</td></tr>';
+  $('expenseRows').innerHTML=renderRows(expense)||'<tr><td colspan="5">কোনো Expense record পাওয়া যায়নি।</td></tr>';
 }
 function voucherPrintHref(v){
   if(v.source_type==='fee_payment' || v.record_type==='fee_receipt')return 'receipt.html?type=fee&id='+encodeURIComponent(v.source_id);
