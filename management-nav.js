@@ -2,7 +2,6 @@
   const items = [
     ['Overview', 'dashboard.html#overview', 'overview', '⌂'],
     ['Students', 'students.html', 'students', '♙'],
-    ['Groups', 'groups.html', 'groups', '▦'],
     ['Teachers', 'staff.html#teachers', 'teachers', '♙'],
     ['Helpers', 'staff.html#helpers', 'helpers', '♟'],
     ['Fees', 'fees.html', 'fees', '৳'],
