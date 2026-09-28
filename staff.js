@@ -65,8 +65,14 @@ function setFormEnabled(enabled) {
   $('staffForm').querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el => { el.disabled = !enabled; });
 }
 
+function syncSpouseField(){
+  const married=$('maritalStatus')?.value==='married';
+  $('spouseNameWrap')?.classList.toggle('hidden',!married);
+  if(!married&&$('spouseName'))$('spouseName').value='';
+}
 function resetForm() {
   $('staffForm').reset();
+  syncSpouseField();
 }
 
 function updatePageContext() {
@@ -388,6 +394,9 @@ $('cancelRecord').addEventListener('click', () => {
   formMsg('');
 });
 
+$('maritalStatus')?.addEventListener('change',syncSpouseField);
+syncSpouseField();
+
 const debouncedSearch = debounce(() => {
   page = 1;
   load().catch((error) => {
@@ -443,6 +452,8 @@ $('staffForm').addEventListener('submit', async event => {
         specialization: String(form.get('specialization') || '').trim() || null,
         father_name: String(form.get('father_name') || '').trim(),
         mother_name: String(form.get('mother_name') || '').trim(),
+        marital_status: ['married','unmarried'].includes(String(form.get('marital_status')||'')) ? String(form.get('marital_status')) : null,
+        spouse_name: String(form.get('marital_status')||'')==='married' ? String(form.get('spouse_name')||'').trim() : '',
         nid_number: String(form.get('nid_number') || '').trim(),
         address: String(form.get('address') || '').trim(),
         joining_date: form.get('joining_date') || null,
@@ -459,6 +470,8 @@ $('staffForm').addEventListener('submit', async event => {
         email: String(form.get('email') || '').trim(),
         father_name: String(form.get('father_name') || '').trim(),
         mother_name: String(form.get('mother_name') || '').trim(),
+        marital_status: ['married','unmarried'].includes(String(form.get('marital_status')||'')) ? String(form.get('marital_status')) : null,
+        spouse_name: String(form.get('marital_status')||'')==='married' ? String(form.get('spouse_name')||'').trim() : '',
         nid_number: String(form.get('nid_number') || '').trim(),
         address: String(form.get('address') || '').trim(),
         joining_date: form.get('joining_date') || null,
