@@ -4,10 +4,12 @@
     ['Students', 'students.html', 'students', '♙'],
     ['Teachers', 'staff.html#teachers', 'teachers', '♙'],
     ['Helpers', 'staff.html#helpers', 'helpers', '♟'],
-    ['Fees', 'fees.html', 'fees', '৳'],
-    ['Payroll', 'payroll.html', 'payroll', '▣'],
-    ['Income', 'finance.html#income', 'income', '↗'],
-    ['Expense', 'finance.html#expense', 'expense', '↘'],
+    ['Income', 'fees.html', 'income', '↗'],
+    ['  Student Fees', 'fees.html', 'income', '•'],
+    ['  Other Income', 'finance.html#income', 'income', '•'],
+    ['Expense', 'payroll.html', 'expense', '↘'],
+    ['  Monthly Salary', 'payroll.html', 'expense', '•'],
+    ['  Other Expense', 'finance.html#expense', 'expense', '•'],
     ['Vouchers', 'finance.html#vouchers', 'vouchers', '▤'],
     ['Settings', 'dashboard.html#settings', 'settings', '⚙']
   ];
@@ -28,10 +30,10 @@
       'students.html': 'students',
       'groups.html': 'groups',
       'student-profile.html': 'students',
-      'fees.html': 'fees',
+      'fees.html': 'income',
       'attendance.html': 'attendance',
       'quran.html': 'quran',
-      'payroll.html': 'payroll',
+      'payroll.html': 'expense',
       'class-sessions.html': 'attendance',
       'enrollments.html': 'students'
     })[path] || 'overview';
