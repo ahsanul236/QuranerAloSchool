@@ -125,23 +125,43 @@
       return map;
     };
     let activeSlide=null;
-    const closeMobileSlide=()=>{if(!activeSlide)return;activeSlide.panel.classList.remove('mobile-slide-open');document.body.classList.remove('mobile-slide-active');activeSlide.back.remove();activeSlide=null;};
+    const restoreMobileSlideOrigin=(slide)=>{
+      if(!slide)return;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:slide.scrollY,left:0,behavior:'instant'})));
+    };
+    const closeMobileSlide=(restore=true)=>{
+      if(!activeSlide)return;
+      const slide=activeSlide;activeSlide=null;
+      slide.panel.classList.remove('mobile-slide-open');
+      document.body.classList.remove('mobile-slide-active');
+      slide.back.remove();
+      slide.item.body.classList.add('hidden');
+      slide.item.trigger.setAttribute('aria-expanded','false');
+      if(restore)restoreMobileSlideOrigin(slide);
+    };
     const openMobileSlide=(item)=>{
       if(innerWidth>620)return false;
       const panel=item.body.closest('.settings-accordion')||item.body.parentElement;
       if(!panel)return false;
-      closeMobileSlide();
+      if(activeSlide)closeMobileSlide(false);
+      const scrollY=window.scrollY;
       item.body.classList.remove('hidden');
       item.trigger.setAttribute('aria-expanded','true');
       panel.classList.add('mobile-slide-open');
       const back=document.createElement('button');back.type='button';back.className='mobile-slide-back';back.innerHTML='<span aria-hidden="true">‹</span><span>Back</span><strong>'+item.title+'</strong>';
-      panel.prepend(back);back.addEventListener('click',()=>{item.body.classList.add('hidden');item.trigger.setAttribute('aria-expanded','false');closeMobileSlide();});
-      document.body.classList.add('mobile-slide-active');activeSlide={panel,back,item};window.scrollTo({top:0,behavior:'instant'});return true;
+      panel.prepend(back);
+      document.body.classList.add('mobile-slide-active');
+      history.pushState({...(history.state||{}),qaMobileSlide:true},'',location.href);
+      activeSlide={panel,back,item,scrollY};
+      back.addEventListener('click',()=>history.back());
+      window.scrollTo({top:0,left:0,behavior:'instant'});
+      return true;
     };
+    window.addEventListener('popstate',()=>{if(activeSlide)closeMobileSlide(true);});
     const bindMobileSlides=()=>{
       mobileSlideTargets().forEach(item=>{if(item.trigger.dataset.mobileSlideBound)return;item.trigger.dataset.mobileSlideBound='1';item.trigger.addEventListener('click',(event)=>{if(innerWidth>620)return;const opening=item.trigger.getAttribute('aria-expanded')!=='true';if(opening){event.preventDefault();event.stopImmediatePropagation();openMobileSlide(item);}},true);});
     };
-    bindMobileSlides();window.addEventListener('hashchange',()=>{closeMobileSlide();setTimeout(bindMobileSlides,0)});
+    bindMobileSlides();window.addEventListener('hashchange',()=>{if(activeSlide)closeMobileSlide(false);setTimeout(bindMobileSlides,0)});
 
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
