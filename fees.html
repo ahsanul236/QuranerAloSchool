@@ -6,9 +6,13 @@
 <title>Income Management | QURANER ALO</title><link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css?v=20260919-1"><link rel="stylesheet" href="dashboard.css?v=20260928-sectiontrigger2">
 </head>
 <body><main class="dashboard-shell"><section class="card dashboard-card">
-<div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>Income Management</span></div></div><div class="top-actions"><a class="quick-link" href="dashboard.html">← Dashboard</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div>
+<div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span>Income Management</span></div></div><div class="top-actions"><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div>
 <div id="loading" class="notice-box">Fees module load হচ্ছে…</div><div id="app" class="hidden">
-<div class="page-head"><div><p class="eyebrow">আয়</p><h1>আয় ব্যবস্থাপনা</h1><p class="muted">Student fee এবং অন্যান্য আয় একই জায়গা থেকে পরিচালনা করুন।</p></div></div>
+<div class="panel finance-entry-card settings-accordion">
+  <div class="settings-accordion-summary"><div class="settings-accordion-title"><span class="settings-accordion-icon" aria-hidden="true">＋</span><div><h2>নতুন Income</h2><p>Fee-এর বাইরে নতুন আয় যোগ করুন। Voucher স্বয়ংক্রিয়ভাবে central Voucher List-এ থাকবে।</p></div></div><div class="settings-accordion-controls"><span class="settings-status-badge">INCOME.MANAGE</span><button id="toggleIncomeEntry" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="incomeEntryBody">Open New Income <span aria-hidden="true">⌄</span></button></div></div>
+  <div id="incomeEntryBody" class="settings-accordion-body hidden"><form id="incomeForm" class="form-grid" style="padding:18px"><label>Date<input id="incomeDate" type="date" required></label><label>Category<input id="incomeCategory" required placeholder="Donation, Service, Other..."></label><label>Amount (৳)<input id="incomeAmount" type="number" min="0.01" step="0.01" required></label><label>Account<select id="incomeAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label><label>Reference<input id="incomeReference" placeholder="Optional reference"></label><label class="span-2">Description<textarea id="incomeDescription"></textarea></label><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Income</button></div></form><div id="incomeMessage" class="message-inline" style="padding:0 18px 18px"></div></div>
+</div>
+
 <div class="panel student-dues-panel">
   <div class="panel-head">
     <div><h2>Student Dues</h2><span class="muted">শিক্ষার্থী অনুযায়ী বর্তমান বকেয়া দেখুন</span></div>
@@ -49,10 +53,6 @@
       <div class="span-2 page-actions"><strong>Total Payable: ৳ <span id="currentPayable">0.00</span></strong><button class="primary-btn" style="width:auto" type="submit">Generate Fee Payment</button></div>
     </form><div id="chargeMessage" class="message-inline"></div>
   </div>
-</div>
-<div class="panel finance-entry-card settings-accordion">
-  <div class="settings-accordion-summary"><div class="settings-accordion-title"><span class="settings-accordion-icon" aria-hidden="true">＋</span><div><h2>নতুন Income</h2><p>Fee-এর বাইরে নতুন আয় যোগ করুন। Voucher স্বয়ংক্রিয়ভাবে central Voucher List-এ থাকবে।</p></div></div><div class="settings-accordion-controls"><span class="settings-status-badge">INCOME.MANAGE</span><button id="toggleIncomeEntry" class="settings-toggle-btn" type="button" aria-expanded="false" aria-controls="incomeEntryBody">Open New Income <span aria-hidden="true">⌄</span></button></div></div>
-  <div id="incomeEntryBody" class="settings-accordion-body hidden"><form id="incomeForm" class="form-grid" style="padding:18px"><label>Date<input id="incomeDate" type="date" required></label><label>Category<input id="incomeCategory" required placeholder="Donation, Service, Other..."></label><label>Amount (৳)<input id="incomeAmount" type="number" min="0.01" step="0.01" required></label><label>Account<select id="incomeAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label><label>Reference<input id="incomeReference" placeholder="Optional reference"></label><label class="span-2">Description<textarea id="incomeDescription"></textarea></label><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Income</button></div></form><div id="incomeMessage" class="message-inline" style="padding:0 18px 18px"></div></div>
 </div>
 <p class="footer-note">RLS enforced · Receipt numbers are generated server-side · Payments are never stored in browser local storage.</p>
 </div></section></main><script src="supabase-config.js"></script><script type="module" src="fees.js?v=20260928-income1"></script><script src="management-nav.js?v=20260928-sectiontrigger3"></script></body></html>
