@@ -1055,3 +1055,10 @@
 .page-head>.tools #newStudent,.page-head>.tools #newGroupInline{width:304px;min-width:304px;min-height:64px;padding:12px 18px;justify-content:center}
 @media(max-width:700px){.page-head>.tools #newStudent,.page-head>.tools #newGroupInline{width:100%;min-width:0;min-height:46px}}
 @media(max-width:620px){.student-group-tabs{position:sticky;top:72px;z-index:50;max-width:none;margin:0 0 10px;padding:0;border-radius:12px 12px 0 0;box-shadow:0 4px 14px rgba(7,63,53,.06)}.student-group-tab{min-height:48px;padding:10px 8px;border-radius:0;font-size:12.5px}}
+
+/* Consolidated finance navigation */
+.management-nav-submenu{display:none;margin:2px 0 7px 40px;padding:3px 0 3px 10px;border-left:1px solid rgba(255,255,255,.22)}
+.management-nav-submenu.is-open{display:grid;gap:2px}
+.management-nav-submenu a{padding:7px 9px;border-radius:8px;color:#d8e7e3;text-decoration:none;font-size:13px;font-weight:600}
+.management-nav-submenu a:hover{background:rgba(255,255,255,.08);color:#fff}
+@media(max-width:620px){.management-nav-submenu{margin-left:35px}.management-nav-submenu a{min-height:38px;display:flex;align-items:center}}
