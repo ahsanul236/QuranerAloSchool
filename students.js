@@ -633,8 +633,7 @@ async function init() {
   canManagePortal = access.profile.role === 'owner';
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
-  $('newStudent').classList.toggle('hidden', !canManage);
-  $('newGroupInline').classList.toggle('hidden', !canManage);
+  switchStudentGroupTab('students');
 
   syncColumns = bindColumnMenu({
     button:$('columnsButton'), menu:$('columnMenu'), table:$('studentTable')
