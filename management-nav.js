@@ -109,6 +109,8 @@
 
     const topbar=document.querySelector('.topbar');
     if(topbar)topbar.classList.add('mobile-app-header');
+    const mobileTabs=document.querySelector('.student-group-tabs');
+    if(mobileTabs)mobileTabs.classList.add('mobile-header-tabs');
 
     const mobileSlideTargets=()=>{
       const map=[];
@@ -144,7 +146,7 @@
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
     let lastY=window.scrollY, hidden=false;
-    window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');topbar?.classList.remove('is-mobile-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')&&!activeSlide){mobileBar.classList.add('is-hidden');topbar?.classList.add('is-mobile-hidden');hidden=true}}lastY=y;},{passive:true});
+    window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');topbar?.classList.remove('is-mobile-hidden');mobileTabs?.classList.remove('is-mobile-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')&&!activeSlide){mobileBar.classList.add('is-hidden');topbar?.classList.add('is-mobile-hidden');mobileTabs?.classList.add('is-mobile-hidden');hidden=true}}lastY=y;},{passive:true});
 
   }
 
