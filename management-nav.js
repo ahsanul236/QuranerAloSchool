@@ -133,13 +133,13 @@
       item.trigger.setAttribute('aria-expanded','true');
       panel.classList.add('mobile-slide-open');
       const back=document.createElement('button');back.type='button';back.className='mobile-slide-back';back.innerHTML='<span aria-hidden="true">‹</span><span>Back</span><strong>'+item.title+'</strong>';
-      panel.prepend(back);back.addEventListener('click',()=>{item.trigger.click();setTimeout(closeMobileSlide,0)});
+      panel.prepend(back);back.addEventListener('click',()=>{item.body.classList.add('hidden');item.trigger.setAttribute('aria-expanded','false');closeMobileSlide();});
       document.body.classList.add('mobile-slide-active');activeSlide={panel,back,item};window.scrollTo({top:0,behavior:'instant'});return true;
     };
     const bindMobileSlides=()=>{
       mobileSlideTargets().forEach(item=>{if(item.trigger.dataset.mobileSlideBound)return;item.trigger.dataset.mobileSlideBound='1';item.trigger.addEventListener('click',(event)=>{if(innerWidth>620)return;const opening=item.trigger.getAttribute('aria-expanded')!=='true';if(opening){event.preventDefault();event.stopImmediatePropagation();openMobileSlide(item);}},true);});
     };
-    bindMobileSlides();window.addEventListener('hashchange',()=>setTimeout(bindMobileSlides,0));
+    bindMobileSlides();window.addEventListener('hashchange',()=>{closeMobileSlide();setTimeout(bindMobileSlides,0)});
 
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
