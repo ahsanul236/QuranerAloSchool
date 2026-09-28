@@ -1070,3 +1070,34 @@
 
 /* Staff Teacher/Helper tabs reuse Students/Groups tab pattern */
 .staff-type-tabs{margin-top:0}
+
+/* Mobile app navigation + richer mockup-inspired palette */
+.management-bottom-nav,.management-more-sheet,.management-more-backdrop{display:none}
+@media(max-width:620px){
+  .management-layout{--mobile-emerald:#078467;--mobile-emerald-dark:#056b55;--mobile-navy:#0b294b;--mobile-canvas:#f3faf7;--mobile-mint:#e9f8f1}
+  .management-sidebar,.management-mobile-toggle,.management-nav-backdrop{display:none!important}
+  .management-layout .dashboard-card{padding-bottom:94px;background:linear-gradient(180deg,#f8fcfa 0%,#eef8f4 100%)}
+  .management-layout .dashboard-card>.topbar{padding-left:12px;background:rgba(255,255,255,.97);border-bottom-color:#dceae5;box-shadow:0 4px 18px rgba(5,75,61,.07)}
+  .management-layout .panel,.management-layout .page-head,.management-layout .stat,.management-layout .module,.management-layout .overview-report-card,.management-layout .portal-summary-card,.management-layout .google-storage-card{border-color:#dce9e4;box-shadow:0 8px 24px rgba(5,75,61,.065)}
+  .management-layout .page-head{background:linear-gradient(135deg,#ffffff 0%,#f8fdfb 64%,#edf9f3 100%)}
+  .management-layout input:not([type="checkbox"]):not([type="radio"]),.management-layout select,.management-layout textarea{background:#fff;border-color:#cfdfd9}
+  .management-layout .primary-btn,.management-layout .save-btn{background:var(--mobile-navy);border-color:var(--mobile-navy)}
+  .management-layout .student-group-tab.is-active{background:#fff;color:#075c49;box-shadow:inset 0 -3px 0 var(--mobile-emerald)}
+  .management-layout .overview-card-symbol.income{background:#dcf6e9;color:#087a5e}.management-layout .overview-card-symbol.expense{background:#ffe8e8;color:#c83737}.management-layout .overview-card-symbol.people{background:#e8f1ff;color:#1e61b5}.management-layout .overview-card-symbol.balance{background:#eee9ff;color:#6648bd}
+  .management-layout .overview-financial-card{background:linear-gradient(145deg,#fff 0%,#f0fbf6 100%)}
+  .management-layout .overview-balance-card{background:linear-gradient(145deg,#fff 0%,#f4f1ff 100%)}
+  .management-bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:8px;right:8px;bottom:8px;z-index:3000;min-height:68px;padding:6px 4px calc(5px + env(safe-area-inset-bottom));border:1px solid rgba(8,80,64,.12);border-radius:20px;background:rgba(255,255,255,.97);box-shadow:0 12px 34px rgba(4,49,42,.18);backdrop-filter:blur(14px);transition:transform .22s ease,opacity .22s ease}
+  .management-bottom-nav.is-hidden{transform:translateY(calc(100% + 18px));opacity:0;pointer-events:none}
+  .management-bottom-nav a,.management-bottom-nav button{min-width:0;border:0;background:transparent;color:#667589;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px 2px;border-radius:14px;font:inherit;font-size:10.5px;font-weight:750;cursor:pointer}
+  .management-bottom-nav .bottom-nav-icon{width:31px;height:31px;display:grid;place-items:center;border-radius:11px;color:var(--mobile-navy);font-size:19px;font-weight:900;line-height:1}
+  .management-bottom-nav a.is-active,.management-bottom-nav button.is-active{color:#076b55}
+  .management-bottom-nav .is-active .bottom-nav-icon{background:linear-gradient(145deg,#07936f,#057458);color:#fff;box-shadow:0 5px 13px rgba(7,132,103,.25)}
+  .management-more-backdrop{position:fixed;inset:0;z-index:3001;background:rgba(5,27,35,.42);backdrop-filter:blur(2px)}
+  .management-more-backdrop.is-visible{display:block}
+  .management-more-sheet{position:fixed;display:grid;left:8px;right:8px;bottom:8px;z-index:3002;padding:8px 14px calc(16px + env(safe-area-inset-bottom));border:1px solid #dbe8e3;border-radius:24px;background:#fff;box-shadow:0 22px 60px rgba(4,40,34,.24);transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none;transition:transform .22s ease,opacity .22s ease}
+  .management-more-sheet.is-open{transform:translateY(0);opacity:1;pointer-events:auto}
+  .management-more-handle{width:38px;height:4px;border-radius:999px;background:#c7d5d0;margin:2px auto 10px}
+  .management-more-head{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 10px;color:var(--mobile-navy);font-size:18px}.management-more-head button{width:34px;height:34px;border:0;border-radius:50%;background:#f0f6f3;color:var(--mobile-navy);font-size:22px}
+  .management-more-sheet>a{display:grid;grid-template-columns:42px 1fr auto;grid-template-rows:auto auto;column-gap:11px;align-items:center;padding:11px 8px;border-top:1px solid #edf2f0;color:var(--mobile-navy);text-decoration:none}
+  .management-more-sheet>a>span{grid-row:1/3;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:#eaf7f1;color:#08785d;font-size:19px}.management-more-sheet>a strong{font-size:14px}.management-more-sheet>a small{grid-column:2;color:#788797;font-size:11px}.management-more-sheet>a::after{content:'›';grid-column:3;grid-row:1/3;color:#87949f;font-size:22px}
+}
