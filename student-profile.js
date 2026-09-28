@@ -1,6 +1,6 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
-import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260922-2';
+import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260928-1';
 
 const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
