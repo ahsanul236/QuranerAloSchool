@@ -1002,3 +1002,46 @@
  .dashboard-grid{grid-template-columns:1fr 1fr}
  .management-layout .top-actions .secondary-btn{font-size:11px;padding:6px 8px}
 }
+
+/* 2026 Students + Groups unified workspace */
+.student-group-tabs{display:grid;grid-template-columns:1fr 1fr;max-width:520px;margin:0 auto 14px;padding:5px;border:1px solid #dce8e4;border-radius:14px;background:#f2f8f6}
+.student-group-tab{min-height:44px;border:0;border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
+.student-group-tab.is-active{background:#08745a;color:#fff;box-shadow:0 4px 12px rgba(7,116,90,.16)}
+.group-filter-bar{display:grid;grid-template-columns:minmax(260px,1fr) 160px 230px;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:#fbfdfc;align-items:end}
+.group-filter-bar>label{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:700}
+.group-list-head,.embedded-group-summary{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(180px,1fr) minmax(300px,2.2fr) 100px;gap:14px;align-items:start}
+.group-list-head{padding:10px 16px;background:#f2f7f5;border-bottom:1px solid var(--line);color:#526579;font-size:12px;font-weight:800}
+.embedded-group-row{border-bottom:1px solid var(--line);background:#fff}
+.embedded-group-summary{width:100%;padding:14px 16px;border:0;background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.embedded-group-summary:hover{background:#f8fbfa}
+.embedded-group-row.is-open>.embedded-group-summary{background:#f2f9f6}
+.group-name-cell{display:grid;gap:3px;color:#075343}.group-name-cell strong{font-size:15px}.group-name-cell small{color:var(--muted);font-weight:500}
+.group-students-cell{display:flex;flex-direction:column;gap:4px;white-space:normal}
+.group-student-name{display:block;font-size:13px}.group-student-name a{color:var(--navy2);text-decoration:none}.group-student-name a:hover{text-decoration:underline}
+.embedded-group-editor{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.3fr);gap:18px;padding:18px;border-top:1px solid #d8ebe4;background:linear-gradient(135deg,#f0faf6,#fbfdfc)}
+.group-editor-details,.group-editor-members{display:grid;gap:10px;align-content:start}
+.embedded-group-editor h3{margin:0 0 3px;color:#075343;font-size:17px}
+.embedded-group-editor label{display:grid;gap:5px;color:var(--muted);font-size:12px;font-weight:700}
+.embedded-group-editor select[multiple]{min-height:190px}
+.group-current-members{display:grid;gap:5px}
+.group-current-members>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 9px;border:1px solid #dce8e4;border-radius:9px;background:#fff;font-size:13px}
+.group-editor-actions{grid-column:1/-1;display:flex;gap:9px;justify-content:flex-end;padding-top:3px}
+.group-editor-actions .primary-btn,.group-editor-actions .secondary-btn{width:auto}
+@media(max-width:900px){.group-filter-bar{grid-template-columns:1fr 1fr}.group-filter-bar .list-search-field{grid-column:1/-1}.group-list-head,.embedded-group-summary{grid-template-columns:minmax(130px,.8fr) minmax(150px,1fr) minmax(240px,1.6fr) 90px}}
+@media(max-width:620px){
+ .student-group-tabs{position:sticky;top:72px;z-index:50;max-width:none;margin:0 0 10px;border-radius:13px;box-shadow:0 4px 14px rgba(7,63,53,.06)}
+ .student-group-tab{min-height:42px;font-size:13px}
+ .group-workspace-panel>.panel-head{display:flex;flex-direction:row;align-items:center}
+ .group-workspace-panel>.panel-head .primary-btn{width:auto;min-height:40px;padding:8px 11px;font-size:12px}
+ .group-filter-bar{grid-template-columns:1fr;padding:11px}
+ .group-filter-bar .list-search-field{grid-column:auto}
+ .group-list-head{display:none}
+ .embedded-group-summary{grid-template-columns:minmax(0,1fr) auto;gap:7px 10px;padding:12px}
+ .embedded-group-summary>span:nth-child(2){grid-column:1;font-size:12px;color:var(--muted)}
+ .embedded-group-summary>span:nth-child(3){grid-column:1/-1;padding-top:5px;border-top:1px dashed #e0eae6}
+ .embedded-group-summary>span:nth-child(4){grid-column:2;grid-row:1}
+ .group-students-cell{gap:3px}
+ .embedded-group-editor{grid-template-columns:1fr;padding:13px;gap:14px}
+ .group-editor-actions{grid-column:auto;display:grid;grid-template-columns:1fr 1fr}
+ .group-editor-actions .primary-btn,.group-editor-actions .secondary-btn{width:100%}
+}
