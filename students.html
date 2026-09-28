@@ -48,7 +48,7 @@
 <div id="app" class="hidden">
 <div class="page-head">
 <div><p class="eyebrow">শিক্ষার্থী</p><h1>শিক্ষার্থী ব্যবস্থাপনা</h1><p class="muted">শিক্ষার্থীর প্রোফাইল, অভিভাবক তথ্য ও নতুন শিক্ষার্থী সংযোজন এখান থেকে পরিচালনা করুন।</p></div>
-<div class="tools"><button id="newStudent" class="primary-btn" type="button">+ নতুন শিক্ষার্থী</button></div>
+<div class="tools"><button id="newStudent" class="primary-btn" type="button">+ নতুন শিক্ষার্থী</button><button id="newGroupInline" class="primary-btn hidden" type="button">+ নতুন গ্রুপ</button></div>
 </div>
 
 <div class="student-group-tabs" role="tablist"><button id="studentListTab" class="student-group-tab is-active" type="button" role="tab" aria-selected="true">শিক্ষার্থী তালিকা</button><button id="groupListTab" class="student-group-tab" type="button" role="tab" aria-selected="false">গ্রুপ তালিকা</button></div>
@@ -174,7 +174,7 @@
 </div>
 <div id="groupView" class="hidden">
   <div class="panel group-workspace-panel">
-    <div class="panel-head"><div><h2>গ্রুপ তালিকা</h2><span id="groupCountLabel" class="eyebrow"></span></div><button id="newGroupInline" class="primary-btn" type="button">+ নতুন গ্রুপ</button></div>
+    <div class="panel-head"><div><h2>গ্রুপ তালিকা</h2><span id="groupCountLabel" class="eyebrow"></span></div></div>
     <div class="group-filter-bar"><label class="list-search-field"><span>গ্রুপ খুঁজুন</span><input id="groupSearch" type="search" autocomplete="off" placeholder="Group / Teacher / Student নাম বা ID…"></label><label>স্ট্যাটাস<select id="groupStatusFilter"><option value="">সব</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Teacher<select id="groupTeacherFilter"><option value="">সব Teacher</option></select></label></div>
     <div class="group-list-head"><span>Group</span><span>Teacher</span><span>Students</span><span>Status</span></div>
     <div id="embeddedGroupList" class="embedded-group-list"></div>
