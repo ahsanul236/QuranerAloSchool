@@ -2,8 +2,7 @@
   const items = [
     ['Overview', 'dashboard.html#overview', 'overview', '⌂'],
     ['Students', 'students.html', 'students', '♙'],
-    ['Teachers', 'staff.html#teachers', 'teachers', '♙'],
-    ['Helpers', 'staff.html#helpers', 'helpers', '♟'],
+    ['Staff', 'staff.html#teachers', 'staff', '♟'],
     ['Income', 'fees.html', 'income', '↗'],
     ['Expense', 'payroll.html', 'expense', '↘'],
     ['Vouchers', 'finance.html#vouchers', 'vouchers', '▤'],
@@ -15,9 +14,7 @@
     const hash = location.hash.replace('#', '');
     const hashView = location.hash.replace('#', '');
     if (path === 'dashboard.html' && hashView === 'settings') return 'settings';
-    if (path === 'staff.html' && hash === 'helpers') return 'helpers';
-    if (path === 'staff.html') return 'teachers';
-    if (path === 'staff-profile.html') return new URLSearchParams(location.search).get('type') === 'teacher' ? 'teachers' : 'helpers';
+    if (path === 'staff.html' || path === 'staff-profile.html') return 'staff';
     if (path === 'finance.html' && hash === 'expense') return 'expense';
     if (path === 'finance.html' && hash === 'vouchers') return 'vouchers';
     if (path === 'finance.html') return 'income';
