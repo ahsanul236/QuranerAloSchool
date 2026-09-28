@@ -60,10 +60,6 @@
         </nav>
       </div>
     `;
-    const incomeLink=sidebar.querySelector('[data-nav-key="income"]');
-    const expenseLink=sidebar.querySelector('[data-nav-key="expense"]');
-    if(incomeLink){incomeLink.insertAdjacentHTML('afterend','<div class="management-nav-submenu" data-submenu="income"><a href="fees.html">Student Fees</a><a href="finance.html#income">Other Income</a></div>');}
-    if(expenseLink){expenseLink.insertAdjacentHTML('afterend','<div class="management-nav-submenu" data-submenu="expense"><a href="payroll.html">Monthly Salary (Payroll)</a><a href="finance.html#expense">Other Expense</a></div>');}
     document.body.appendChild(sidebar);
 
     const toggle = document.createElement('button');
@@ -81,7 +77,6 @@
     const syncActive = () => {
       const key = currentKey();
       sidebar.querySelectorAll('[data-nav-key]').forEach((link) => link.classList.toggle('is-active', link.dataset.navKey === key));
-      sidebar.querySelectorAll('[data-submenu]').forEach((menu)=>menu.classList.toggle('is-open',menu.dataset.submenu===key));
     };
     syncActive();
     sidebar.querySelectorAll('[data-nav-key]').forEach((link) => link.addEventListener('click', () => closeMobile()));
