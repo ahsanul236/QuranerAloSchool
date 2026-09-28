@@ -107,10 +107,44 @@
     mobileBar.querySelector('.bottom-nav-more').addEventListener('click',()=>{const open=!moreSheet.classList.contains('is-open');moreSheet.classList.toggle('is-open',open);moreBackdrop.classList.toggle('is-visible',open);mobileBar.querySelector('.bottom-nav-more').setAttribute('aria-expanded',String(open));});
     moreSheet.querySelector('.management-more-head button').addEventListener('click',closeMore);moreBackdrop.addEventListener('click',closeMore);moreSheet.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMore));moreSheet.querySelector('.management-more-signout').addEventListener('click',()=>{const existing=document.getElementById('signOut');if(existing){closeMore();existing.click();}});
 
+    const topbar=document.querySelector('.topbar');
+    if(topbar)topbar.classList.add('mobile-app-header');
+
+    const mobileSlideTargets=()=>{
+      const map=[];
+      const add=(triggerId,bodyId,title)=>{const trigger=document.getElementById(triggerId),body=document.getElementById(bodyId);if(trigger&&body)map.push({trigger,body,title});};
+      add('toggleIncomeEntry','incomeEntryBody','নতুন Income');
+      add('toggleManualVoucher','manualVoucherBody','Manual Voucher');
+      add('togglePayrollEntry','payrollEntryBody','Monthly Salary Record');
+      add('toggleExpenseEntry','expenseEntryBody','নতুন Expense');
+      if(location.pathname.endsWith('dashboard.html')&&location.hash==='#settings'){
+        document.querySelectorAll('#settingsView .settings-accordion').forEach(panel=>{const trigger=panel.querySelector('.settings-toggle-btn'),body=panel.querySelector('.settings-accordion-body'),title=panel.querySelector('.settings-accordion-title h2')?.textContent?.trim();if(trigger&&body)map.push({trigger,body,title:title||'Settings'});});
+      }
+      return map;
+    };
+    let activeSlide=null;
+    const closeMobileSlide=()=>{if(!activeSlide)return;activeSlide.panel.classList.remove('mobile-slide-open');document.body.classList.remove('mobile-slide-active');activeSlide.back.remove();activeSlide=null;};
+    const openMobileSlide=(item)=>{
+      if(innerWidth>620)return false;
+      const panel=item.body.closest('.settings-accordion')||item.body.parentElement;
+      if(!panel)return false;
+      closeMobileSlide();
+      item.body.classList.remove('hidden');
+      item.trigger.setAttribute('aria-expanded','true');
+      panel.classList.add('mobile-slide-open');
+      const back=document.createElement('button');back.type='button';back.className='mobile-slide-back';back.innerHTML='<span aria-hidden="true">‹</span><span>Back</span><strong>'+item.title+'</strong>';
+      panel.prepend(back);back.addEventListener('click',()=>{item.trigger.click();setTimeout(closeMobileSlide,0)});
+      document.body.classList.add('mobile-slide-active');activeSlide={panel,back,item};window.scrollTo({top:0,behavior:'instant'});return true;
+    };
+    const bindMobileSlides=()=>{
+      mobileSlideTargets().forEach(item=>{if(item.trigger.dataset.mobileSlideBound)return;item.trigger.dataset.mobileSlideBound='1';item.trigger.addEventListener('click',(event)=>{if(innerWidth>620)return;const opening=item.trigger.getAttribute('aria-expanded')!=='true';if(opening){event.preventDefault();event.stopImmediatePropagation();openMobileSlide(item);}},true);});
+    };
+    bindMobileSlides();window.addEventListener('hashchange',()=>setTimeout(bindMobileSlides,0));
+
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
     let lastY=window.scrollY, hidden=false;
-    window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')){mobileBar.classList.add('is-hidden');hidden=true}}lastY=y;},{passive:true});
+    window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');topbar?.classList.remove('is-mobile-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')&&!activeSlide){mobileBar.classList.add('is-hidden');topbar?.classList.add('is-mobile-hidden');hidden=true}}lastY=y;},{passive:true});
 
   }
 
