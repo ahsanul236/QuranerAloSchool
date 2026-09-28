@@ -19,7 +19,8 @@ const canManage=()=>access?.can(type==='teacher'?'teachers.manage':'staff.manage
 async function loadProfileImageWithFallback(role,personId,img){if(!img)return false;img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');const loaded=await setProfileImage({role,personId,img});if(!loaded){img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');}return loaded;}
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
 function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
-function syncSpouseField(){const married=$('maritalStatus')?.value==='married';$('spouseNameWrap')?.classList.toggle('hidden',!married);if(!married&&editing&&$('spouseName'))$('spouseName').value='';}\nfunction setInputs(on){['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','maritalStatus','spouseName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
+function syncSpouseField(){const married=$('maritalStatus')?.value==='married';$('spouseNameWrap')?.classList.toggle('hidden',!married);if(!married&&editing&&$('spouseName'))$('spouseName').value='';}
+function setInputs(on){['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','maritalStatus','spouseName','nidNumber','address'].forEach(x=>{if($(x))$(x).disabled=!on})}
 function updateContext(){
   const teacher=type==='teacher';
   $('topBack').href=`staff.html#${teacher?'teachers':'helpers'}`;
@@ -233,8 +234,8 @@ async function load(){
   updateContext();
   const table=type==='teacher'?'qa_teachers':'qa_staff';
   const fields=type==='teacher'
-    ?'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id'
-    :'staff_id,staff_code,full_name,full_name_bn,gender,phone,email,father_name,mother_name,nid_number,address,joining_date,active,notes,user_id';
+    ?'teacher_id,teacher_code,full_name,full_name_bn,gender,phone,email,specialization,father_name,mother_name,marital_status,spouse_name,nid_number,address,joining_date,active,notes,user_id'
+    :'staff_id,staff_code,full_name,full_name_bn,gender,phone,email,father_name,mother_name,marital_status,spouse_name,nid_number,address,joining_date,active,notes,user_id';
   const{data,error}=await supabase.from(table).select(fields).eq(type==='teacher'?'teacher_id':'staff_id',id).maybeSingle();
   if(error)throw error;
   if(!data)throw Error('Profile পাওয়া যায়নি।');
