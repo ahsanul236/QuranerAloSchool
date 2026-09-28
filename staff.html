@@ -35,15 +35,15 @@
 <section class="card dashboard-card">
 <div class="topbar">
 <div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO logo"><div><strong>কোরআনের আলো</strong><span id="brandSubtitle">Staff Management</span></div></div>
-<div class="top-actions"><a class="secondary-btn" href="dashboard.html">Dashboard</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div>
+<div class="top-actions"><button id="signOut" class="secondary-btn" type="button">Sign out</button></div>
 </div>
 
 <div id="loading" class="notice-box">Teacher/Helper data load হচ্ছে…</div>
 
 <div id="app" class="hidden">
-<div class="page-head">
+<div class="page-head desktop-cleanup-heading">
 <div><p class="eyebrow" id="pageEyebrow">স্টাফ</p><h1 id="pageTitle">স্টাফ ব্যবস্থাপনা</h1><p id="pageSubtitle" class="muted">শিক্ষক ও হেল্পারের প্রোফাইল, পোর্টাল এবং তথ্য এখান থেকে পরিচালনা করুন।</p></div>
-<div class="tools"><button id="newRecord" class="primary-btn" type="button">+ নতুন Teacher</button></div>
+
 </div>
 
 <div class="student-group-tabs staff-type-tabs" role="tablist"><button id="teacherListTab" class="student-group-tab is-active" type="button" role="tab" aria-selected="true">শিক্ষক তালিকা</button><button id="helperListTab" class="student-group-tab" type="button" role="tab" aria-selected="false">হেল্পার তালিকা</button></div>
@@ -92,6 +92,7 @@
         <label><input type="checkbox" data-column="access" checked> Portal Access</label>
       </div>
     </div>
+    <button id="newRecord" class="primary-btn list-action-btn" type="button">+ নতুন Teacher</button>
   </div>
 </div>
 
