@@ -13,6 +13,8 @@ let canManage = false;
 let canManagePortal = false;
 let teacherMap = new Map();
 let groupTeacherByStudent = new Map();
+let embeddedGroups = [], embeddedMembers = [], embeddedStudents = [], embeddedTeachers = [];
+let openGroupId = null;
 let page = 1;
 let pageSize = 10;
 let totalRows = 0;
@@ -24,6 +26,52 @@ function escapeHtml(value) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
   }[c]));
 }
+
+function groupSetMessage(text,type=''){const el=$('groupMessage');if(!el)return;el.textContent=text;el.style.color=type==='error'?'#b33b3b':'';}
+function teacherLabel(id){const t=embeddedTeachers.find(x=>x.teacher_id===id);return t?((t.teacher_code||'')+' · '+(t.full_name||'Teacher')):'Unassigned';}
+async function loadEmbeddedGroups(){
+ const [g,t,s,m]=await Promise.all([
+  supabase.from('qa_study_groups').select('*').order('group_name'),
+  supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name').eq('active',true).order('full_name'),
+  supabase.from('qa_students').select('student_id,student_code,full_name,status').eq('status','active').order('full_name'),
+  supabase.from('qa_group_memberships').select('membership_id,group_id,student_id,joined_at,left_at').is('left_at',null)
+ ]);
+ if(g.error||t.error||s.error||m.error)throw(g.error||t.error||s.error||m.error);
+ embeddedGroups=g.data||[];embeddedTeachers=t.data||[];embeddedStudents=s.data||[];embeddedMembers=m.data||[];
+ $('groupTeacherFilter').innerHTML='<option value="">সব Teacher</option><option value="__unassigned">Unassigned</option>'+embeddedTeachers.map(x=>'<option value="'+escapeHtml(x.teacher_id)+'">'+escapeHtml((x.teacher_code||'')+' · '+x.full_name)+'</option>').join('');
+ renderEmbeddedGroups();
+}
+function filteredGroups(){
+ const q=$('groupSearch').value.trim().toLowerCase(),status=$('groupStatusFilter').value,teacher=$('groupTeacherFilter').value;
+ return embeddedGroups.filter(g=>{
+  if(status&&String(g.active!==false)!==String(status==='active'))return false;
+  if(teacher==='__unassigned'&&g.teacher_id)return false;if(teacher&&teacher!=='__unassigned'&&g.teacher_id!==teacher)return false;
+  const ms=embeddedMembers.filter(m=>m.group_id===g.group_id);const names=ms.map(m=>{const s=embeddedStudents.find(x=>x.student_id===m.student_id);return s?((s.student_code||'')+' '+(s.full_name||'')):''}).join(' ');
+  return !q||[g.group_name,teacherLabel(g.teacher_id),names].join(' ').toLowerCase().includes(q);
+ });
+}
+function renderEmbeddedGroups(){
+ const list=filteredGroups();$('groupCountLabel').textContent=list.length+' টি group';
+ $('embeddedGroupList').innerHTML=list.map(g=>{
+  const ms=embeddedMembers.filter(m=>m.group_id===g.group_id),ss=ms.map(m=>embeddedStudents.find(s=>s.student_id===m.student_id)).filter(Boolean),open=openGroupId===g.group_id;
+  const studentNames=ss.length?ss.map((s,i)=>'<span class="group-student-name">'+(i+1)+'. <a href="student-profile.html?id='+encodeURIComponent(s.student_id)+'">'+escapeHtml(s.student_code||'')+' · '+escapeHtml(s.full_name||'Student')+'</a></span>').join(''):'<span class="muted">কোনো Student নেই</span>';
+  return '<section class="embedded-group-row '+(open?'is-open':'')+'" data-group-id="'+escapeHtml(g.group_id)+'"><button class="embedded-group-summary" type="button" data-open-group="'+escapeHtml(g.group_id)+'" aria-expanded="'+open+'"><span class="group-name-cell"><strong>'+escapeHtml(g.group_name)+'</strong><small>'+ms.length+' students</small></span><span>'+escapeHtml(teacherLabel(g.teacher_id))+'</span><span class="group-students-cell">'+studentNames+'</span><span><span class="active-badge '+(g.active!==false?'on':'off')+'">'+(g.active!==false?'Active':'Inactive')+'</span></span></button>'+(open?renderGroupEditor(g,ss):'')+'</section>';
+ }).join('')||'<div class="dues-empty">কোনো Group পাওয়া যায়নি।</div>';
+ document.querySelectorAll('[data-open-group]').forEach(b=>b.onclick=()=>{openGroupId=openGroupId===b.dataset.openGroup?null:b.dataset.openGroup;renderEmbeddedGroups()});
+ bindEmbeddedGroupEditor();
+}
+function renderGroupEditor(g,selectedStudents){
+ const selected=new Set(selectedStudents.map(s=>s.student_id)),occupied=new Set(embeddedMembers.filter(m=>m.group_id!==g.group_id).map(m=>m.student_id));
+ return '<form class="embedded-group-editor" data-group-form="'+escapeHtml(g.group_id)+'"><div class="group-editor-details"><h3>Group Details</h3><label>Group Name<input name="group_name" value="'+escapeHtml(g.group_name||'')+'" required></label><label>Teacher<select name="teacher_id"><option value="">— Unassigned —</option>'+embeddedTeachers.map(t=>'<option value="'+escapeHtml(t.teacher_id)+'" '+(g.teacher_id===t.teacher_id?'selected':'')+'>'+escapeHtml((t.teacher_code||'')+' · '+t.full_name)+'</option>').join('')+'</select></label><label>Status<select name="active"><option value="true" '+(g.active!==false?'selected':'')+'>Active</option><option value="false" '+(g.active===false?'selected':'')+'>Inactive</option></select></label><label>Notes<textarea name="notes" rows="2">'+escapeHtml(g.notes||'')+'</textarea></label></div><div class="group-editor-members"><h3>Students in this Group ('+selected.size+')</h3><label>Add / manage students<select name="students" multiple size="8">'+embeddedStudents.map(s=>'<option value="'+escapeHtml(s.student_id)+'" '+(selected.has(s.student_id)?'selected':'')+' '+(occupied.has(s.student_id)&&!selected.has(s.student_id)?'disabled':'')+'>'+escapeHtml((s.student_code||'')+' · '+s.full_name+(occupied.has(s.student_id)&&!selected.has(s.student_id)?' — অন্য Group-এ আছে':''))+'</option>').join('')+'</select></label><div class="group-current-members">'+selectedStudents.map(s=>'<div><span>'+escapeHtml(s.student_code||'')+' · '+escapeHtml(s.full_name)+'</span><button type="button" class="link-btn group-remove-student" data-remove-student="'+escapeHtml(s.student_id)+'">Remove</button></div>').join('')+'</div></div><div class="group-editor-actions"><button class="primary-btn" type="submit">Save Changes</button><button class="secondary-btn group-close-editor" type="button">Close</button></div></form>';
+}
+function bindEmbeddedGroupEditor(){
+ const form=document.querySelector('[data-group-form]');if(!form)return;const gid=form.dataset.groupForm;
+ form.querySelector('.group-close-editor').onclick=()=>{openGroupId=null;renderEmbeddedGroups()};
+ form.querySelectorAll('.group-remove-student').forEach(b=>b.onclick=async()=>{const m=embeddedMembers.find(x=>x.group_id===gid&&x.student_id===b.dataset.removeStudent);if(!m)return;b.disabled=true;try{const now=new Date();const{error}=await supabase.from('qa_group_memberships').update({left_at:now.toISOString().slice(0,10),updated_at:now.toISOString()}).eq('membership_id',m.membership_id);if(error)throw error;await loadEmbeddedGroups();groupSetMessage('Student Group থেকে remove হয়েছে। Membership history সংরক্ষিত আছে।')}catch(e){console.error(e);groupSetMessage(e.message||'Remove করা যায়নি।','error')}});
+ form.onsubmit=async e=>{e.preventDefault();groupSetMessage('Group save হচ্ছে…');const fd=new FormData(form),wanted=new Set([...form.elements.students.selectedOptions].map(o=>o.value));try{const{error}=await supabase.from('qa_study_groups').update({group_name:String(fd.get('group_name')||'').trim(),teacher_id:fd.get('teacher_id')||null,active:fd.get('active')==='true',notes:String(fd.get('notes')||'').trim(),updated_at:new Date().toISOString()}).eq('group_id',gid);if(error)throw error;const current=embeddedMembers.filter(m=>m.group_id===gid);for(const m of current.filter(m=>!wanted.has(m.student_id))){const now=new Date();const{error:er}=await supabase.from('qa_group_memberships').update({left_at:now.toISOString().slice(0,10),updated_at:now.toISOString()}).eq('membership_id',m.membership_id);if(er)throw er}for(const sid of wanted){if(current.some(m=>m.student_id===sid))continue;if(embeddedMembers.some(m=>m.student_id===sid&&m.group_id!==gid))throw Error('এই Student অন্য active Group-এ আছে।');const{error:er}=await supabase.from('qa_group_memberships').insert({group_id:gid,student_id:sid});if(er)throw er}await loadEmbeddedGroups();groupSetMessage('Group ও membership সংরক্ষিত হয়েছে।')}catch(err){console.error(err);groupSetMessage(err.message||'Group save করা যায়নি।','error')}};
+}
+async function createEmbeddedGroup(){if(!canManage)return;const name=prompt('নতুন Group-এর নাম লিখুন');if(!name?.trim())return;try{const{data,error}=await supabase.from('qa_study_groups').insert({group_name:name.trim(),active:true}).select('group_id').single();if(error)throw error;openGroupId=data.group_id;await loadEmbeddedGroups();groupSetMessage('নতুন Group তৈরি হয়েছে। এখন Teacher ও Students assign করুন।')}catch(e){console.error(e);groupSetMessage(e.message||'Group তৈরি করা যায়নি।','error')}}
+function switchStudentGroupTab(mode){const group=mode==='groups';$('studentView').classList.toggle('hidden',group);$('groupView').classList.toggle('hidden',!group);$('studentListTab').classList.toggle('is-active',!group);$('groupListTab').classList.toggle('is-active',group);$('studentListTab').setAttribute('aria-selected',String(!group));$('groupListTab').setAttribute('aria-selected',String(group));$('newStudent').classList.toggle('hidden',group||!canManage);if(group&&!embeddedGroups.length)loadEmbeddedGroups().catch(e=>{console.error(e);groupSetMessage('Group list load করা যায়নি।','error')})}
 
 function redirectToLogin() { window.location.replace('./'); }
 
@@ -435,6 +483,13 @@ function bindPortalActions() {
   }));
 }
 
+$('studentListTab').addEventListener('click',()=>switchStudentGroupTab('students'));
+$('groupListTab').addEventListener('click',()=>switchStudentGroupTab('groups'));
+$('groupSearch').addEventListener('input',debounce(renderEmbeddedGroups,250));
+$('groupStatusFilter').addEventListener('change',renderEmbeddedGroups);
+$('groupTeacherFilter').addEventListener('change',renderEmbeddedGroups);
+$('newGroupInline').addEventListener('click',createEmbeddedGroup);
+
 $('newStudent').addEventListener('click', () => {
   if (canManage) {
     $('studentFormPanel').classList.toggle('hidden');
@@ -579,6 +634,7 @@ async function init() {
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
   $('newStudent').classList.toggle('hidden', !canManage);
+  $('newGroupInline').classList.toggle('hidden', !canManage);
 
   syncColumns = bindColumnMenu({
     button:$('columnsButton'), menu:$('columnMenu'), table:$('studentTable')
