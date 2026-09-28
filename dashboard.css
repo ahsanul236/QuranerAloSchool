@@ -360,7 +360,7 @@
 .document-manager-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px;background:linear-gradient(180deg,#f7fafe,#f0f6fc);border-bottom:1px solid var(--line)}
 .document-manager-head h3{margin:0;color:var(--navy);font-size:18px}
 .document-manager-note{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
-.document-manager-badge{padding:5px 9px;border-radius:999px;background:#f3f5f8;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}
+.document-manager-badge{padding:5px 9px;border-radius:999px;background:#f3f5f8;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}.document-manager-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.document-add-btn{width:auto;min-height:42px;padding:9px 14px;white-space:nowrap}
 .document-manager-upload{display:grid;grid-template-columns:1fr 1.3fr auto;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:end}
 .document-upload-field{display:grid;gap:6px;color:var(--ink);font-weight:600;font-size:13px}
 .document-upload-field select,.document-upload-field input[type="file"]{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;box-sizing:border-box}
