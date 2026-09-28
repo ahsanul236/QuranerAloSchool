@@ -943,3 +943,62 @@
 .dues-status-open{background:#fff7e6;color:#8a5a00}.dues-status-partial{background:#eef6ff;color:#235a91}
 .dues-empty{padding:20px;text-align:center;color:var(--muted)}
 @media(max-width:700px){.student-dues-panel .panel-head{align-items:stretch}.dues-student-filter{min-width:0;width:100%}.dues-summary-grid{grid-template-columns:1fr}.dues-summary-card{grid-template-columns:1fr auto;align-items:center}.dues-summary-card strong{font-size:18px}}
+
+/* 2026 mobile app shell v1 — presentation only */
+@media(max-width:620px){
+ :root{--qa-mobile-nav-h:0px}
+ html{background:#eef6f3}
+ body.management-layout{overscroll-behavior-y:none}
+ .management-layout .dashboard-card{padding:76px 8px 24px;background:linear-gradient(180deg,#edf7f3 0,#f6f9f8 180px,#f6f9f8 100%)}
+ .management-layout .dashboard-card>.topbar{height:64px;padding:7px 9px 7px 54px;border-bottom-color:#dce9e4;box-shadow:0 4px 18px rgba(7,63,53,.08);backdrop-filter:blur(12px);background:rgba(255,255,255,.96)}
+ .management-mobile-toggle{top:12px;left:9px;width:40px;height:40px;border-radius:12px;background:#e8f6f1;color:#075343;box-shadow:0 2px 8px rgba(7,63,53,.08)}
+ .management-sidebar{width:min(86vw,310px);padding:74px 10px 22px;background:linear-gradient(180deg,#064b3f 0%,#073b35 100%);box-shadow:18px 0 45px rgba(4,37,32,.25)}
+ .sidebar-title{padding-left:13px;color:#b8d8cf}
+ .management-nav-link{min-height:46px;border-radius:13px;padding:10px 12px}
+ .management-nav-link.is-active{background:#d9f7ed;color:#064b3f;box-shadow:none}
+ .management-nav-link.is-active .nav-icon{color:#064b3f}
+ .management-layout .brand-mini{gap:8px}
+ .management-layout .brand-mini img{width:38px;height:38px;border-radius:10px}
+ .management-layout .brand-mini strong{font-size:15px;line-height:1.1}
+ .management-layout .brand-mini span{font-size:10px}
+ .management-layout .top-actions{gap:6px}
+ .management-layout .top-actions .secondary-btn{min-height:38px;border-radius:11px;padding:7px 9px}
+ .page-head{padding:14px 13px;border:1px solid #dce9e4;border-radius:16px;background:rgba(255,255,255,.94);box-shadow:0 5px 18px rgba(7,63,53,.045)}
+ .page-head h1{font-size:22px;line-height:1.15}
+ .panel,.settings-accordion,.google-storage-card{border-radius:16px;border-color:#dce9e4;box-shadow:0 5px 18px rgba(7,63,53,.04)}
+ .panel-head{padding:13px}
+ .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .dashboard-grid .stat{padding:13px;border-radius:15px;min-height:96px;background:#fff}
+ .dashboard-grid .stat strong{font-size:22px}
+ .module-grid{grid-template-columns:1fr;gap:9px}
+ .module{padding:15px;border-radius:15px}
+ .overview-report-grid{grid-template-columns:1fr!important}
+ .overview-report-card{min-height:0}
+ .form-grid{grid-template-columns:1fr!important}
+ .form-grid .span-2{grid-column:auto}
+ .form-grid label{gap:5px}
+ .form-grid input,.form-grid select,.form-grid textarea,
+ .list-search-field input,.list-filter-grid select{min-height:46px;font-size:16px;border-radius:12px}
+ .page-actions,.settings-form-actions{display:grid;grid-template-columns:1fr;gap:8px}
+ .page-actions>*{width:100%!important}
+ .list-filter-shell{padding:12px;background:#fff}
+ .list-search-row,.list-filter-grid{gap:9px}
+ .list-filter-grid{grid-template-columns:1fr 1fr}
+ .list-filter-footer{margin-top:9px}
+ .list-data-table thead th,.user-table thead th{background:#edf6f2}
+ .table-wrap{scrollbar-width:thin;overscroll-behavior-x:contain}
+ .user-table th,.user-table td{padding:11px 12px}
+ .finance-summary-grid,.finance-summary.dashboard-grid{grid-template-columns:1fr 1fr}
+ .finance-card,.finance-summary .stat{border-radius:15px}
+ .document-manager{border-radius:15px!important;overflow:hidden}
+ .document-manager-head{padding:13px!important}
+ .document-manager-head h3{font-size:18px}
+ .document-add-btn{min-height:40px!important;border-radius:11px!important}
+ .footer-note{padding-bottom:8px}
+}
+@media(max-width:390px){
+ .management-layout .brand-mini span{display:none}
+ .list-filter-grid{grid-template-columns:1fr}
+ .dashboard-grid{grid-template-columns:1fr 1fr}
+ .management-layout .top-actions .secondary-btn{font-size:11px;padding:6px 8px}
+}
