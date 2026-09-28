@@ -1,7 +1,7 @@
 import {
   listDocuments, uploadDocument, deleteDocument, openDocument,
   fetchDocumentBlob, validateDocumentFileContent, fileSizeLabel, categoryLabel, getProfileImage, documentErrorMessage
-} from './documents-client.js?v=20260921-6';
+} from './documents-client.js?v=20260928-vaultrestore1';
 
 function esc(v) {
   return String(v ?? '').replace(/[&<>"']/g, (ch) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[ch]));
