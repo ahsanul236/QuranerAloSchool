@@ -11,11 +11,11 @@ function today(){return new Date().toISOString().slice(0,10)}
 function setFormEnabled(formId,enabled){const form=$(formId);if(!form)return;form.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el=>el.disabled=!enabled)}
 let access=null,canFinanceView=false,canFinanceManage=false,canVoucherView=false,canVoucherManage=false,currentView='income',voucherRecords=[];
 function setAccordion(buttonId,bodyId,openLabel,closeLabel,open){const button=$(buttonId),body=$(bodyId);if(!button||!body)return;body.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.innerHTML=(open?closeLabel:openLabel)+' <span aria-hidden="true">'+(open?'⌃':'⌄')+'</span>';}
-function viewFromHash(){const hash=location.hash.replace('#','');return hash==='expense'?'expense':hash==='vouchers'?'vouchers':'income';}
+function viewFromHash(){return 'vouchers';}
 function updateView(){
-  currentView=viewFromHash();
+  const requested=location.hash.replace('#','');if(requested==='income'){location.replace('fees.html');return;}if(requested==='expense'){location.replace('payroll.html');return;}currentView='vouchers';
   document.querySelectorAll('.finance-view').forEach(el=>el.classList.remove('is-active'));
-  const target=currentView==='income'?'incomeView':currentView==='expense'?'expenseView':'vouchersView';
+  const target='vouchersView';
   $(target)?.classList.add('is-active');
   $('brandSubtitle').textContent=currentView==='income'?'আয় ব্যবস্থাপনা':currentView==='expense'?'ব্যয় ব্যবস্থাপনা':'ভাউচার ব্যবস্থাপনা';
   setFormEnabled('financeForm',currentView==='income'&&canFinanceManage);
@@ -121,7 +121,7 @@ function renderVoucherRows(){
 
   $('voucherRows').innerHTML=filtered.map(v=>'<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td>'+esc(v.voucher_type)+'</td><td>৳'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td><span class="voucher-source">'+esc(sourceLabel(v))+'</span></td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+voucherPrintHref(v)+'">Print</a></td></tr>').join('')||'<tr><td colspan="8">এই filter অনুযায়ী কোনো Voucher পাওয়া যায়নি।</td></tr>';
 }
-async function refresh(){await Promise.all([loadTransactions(),loadVouchers()]);updateView();}
+async function refresh(){await loadVouchers();updateView();}
 $('financeForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!canFinanceManage){msg('financeMessage','Income manage permission নেই।','error');return;}msg('financeMessage','Income saving হচ্ছে…');
   const row={transaction_date:$('transactionDate').value,direction:'income',category:$('category').value.trim(),amount:+$('amount').value,account_name:$('accountName').value,reference:$('reference').value.trim()||null,description:$('description').value.trim()};
