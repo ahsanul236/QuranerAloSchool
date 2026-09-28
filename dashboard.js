@@ -461,10 +461,10 @@
 
       <section class="overview-report-card overview-financial-card overview-income-card">
         <div class="overview-card-title"><span class="overview-card-symbol income">↗</span><strong>Income</strong></div>
-        <div class="overview-financial-main">
+        <a class="overview-financial-main overview-financial-link" href="finance.html#vouchers?scope=today-income" aria-label="Open today’s income vouchers">
           <span class="overview-financial-label">Today’s Income</span>
           <strong class="overview-financial-value income">${todayIncome === null ? '—' : money(todayIncome)}</strong>
-        </div>
+        </a>
         <div class="overview-financial-month">
           <span>This Month’s Total Income</span>
           <strong>${monthIncome === null ? '—' : money(monthIncome)}</strong>
@@ -473,10 +473,10 @@
 
       <section class="overview-report-card overview-financial-card overview-expense-card">
         <div class="overview-card-title"><span class="overview-card-symbol expense">↘</span><strong>Expense</strong></div>
-        <div class="overview-financial-main">
+        <a class="overview-financial-main overview-financial-link" href="finance.html#vouchers?scope=today-expense" aria-label="Open today’s expense vouchers">
           <span class="overview-financial-label">Today’s Expense</span>
           <strong class="overview-financial-value expense">${todayExpense === null ? '—' : money(todayExpense)}</strong>
-        </div>
+        </a>
         <div class="overview-financial-month">
           <span>This Month’s Total Expense</span>
           <strong>${monthExpense === null ? '—' : money(monthExpense)}</strong>
