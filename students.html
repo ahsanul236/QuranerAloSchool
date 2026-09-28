@@ -9,7 +9,7 @@
 <title>Students | QURANER ALO</title>
 <link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-2">
-<link rel="stylesheet" href="dashboard.css?v=20260928-mobile1">
+<link rel="stylesheet" href="dashboard.css?v=20260928-groups1">
 <style>
 
 .page-head h1{font-family:'Hind Siliguri',system-ui,sans-serif;font-size:32px;font-weight:700;letter-spacing:0}
@@ -51,6 +51,8 @@
 <div class="tools"><button id="newStudent" class="primary-btn" type="button">+ নতুন শিক্ষার্থী</button></div>
 </div>
 
+<div class="student-group-tabs" role="tablist"><button id="studentListTab" class="student-group-tab is-active" type="button" role="tab" aria-selected="true">শিক্ষার্থী তালিকা</button><button id="groupListTab" class="student-group-tab" type="button" role="tab" aria-selected="false">গ্রুপ তালিকা</button></div>
+<div id="studentView">
 <div id="studentFormPanel" class="panel hidden">
 <div class="panel-head"><h2>নতুন শিক্ষার্থী ও Guardian তথ্য</h2></div>
 <form id="studentForm" class="form-grid" style="padding:16px">
@@ -169,11 +171,21 @@
   </div>
 </div>
 </div>
+</div>
+<div id="groupView" class="hidden">
+  <div class="panel group-workspace-panel">
+    <div class="panel-head"><div><h2>গ্রুপ তালিকা</h2><span id="groupCountLabel" class="eyebrow"></span></div><button id="newGroupInline" class="primary-btn" type="button">+ নতুন গ্রুপ</button></div>
+    <div class="group-filter-bar"><label class="list-search-field"><span>গ্রুপ খুঁজুন</span><input id="groupSearch" type="search" autocomplete="off" placeholder="Group / Teacher / Student নাম বা ID…"></label><label>স্ট্যাটাস<select id="groupStatusFilter"><option value="">সব</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Teacher<select id="groupTeacherFilter"><option value="">সব Teacher</option></select></label></div>
+    <div class="group-list-head"><span>Group</span><span>Teacher</span><span>Students</span><span>Status</span></div>
+    <div id="embeddedGroupList" class="embedded-group-list"></div>
+  </div>
+  <p id="groupMessage" class="footer-note" aria-live="polite"></p>
+</div>
 <p id="message" class="footer-note" aria-live="polite"></p>
 </div>
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="students.js?v=20260927-2"></script>
+<script type="module" src="students.js?v=20260928-groups1"></script>
 <script src="management-nav.js?v=20260918-4"></script></body>
 </html>
