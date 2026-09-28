@@ -11,6 +11,7 @@ function today(){return new Date().toISOString().slice(0,10)}
 function setFormEnabled(formId,enabled){const form=$(formId);if(!form)return;form.querySelectorAll('input,select,textarea,button[type="submit"]').forEach(el=>el.disabled=!enabled)}
 let access=null,canFinanceView=false,canFinanceManage=false,canVoucherView=false,canVoucherManage=false,currentView='income',voucherRecords=[];
 function setAccordion(buttonId,bodyId,openLabel,closeLabel,open){const button=$(buttonId),body=$(bodyId);if(!button||!body)return;body.classList.toggle('hidden',!open);button.setAttribute('aria-expanded',String(open));button.innerHTML=(open?closeLabel:openLabel)+' <span aria-hidden="true">'+(open?'⌃':'⌄')+'</span>';}
+function voucherScope(){const raw=location.hash.slice(1);const q=raw.includes('?')?raw.slice(raw.indexOf('?')+1):'';return new URLSearchParams(q).get('scope')||'';}
 function viewFromHash(){return 'vouchers';}
 function updateView(){
   const requested=location.hash.replace('#','');if(requested==='income'){location.replace('fees.html');return;}if(requested==='expense'){location.replace('payroll.html');return;}currentView='vouchers';
@@ -99,6 +100,7 @@ function renderVoucherRows(){
   const dateFilter=$('voucherDateFilter')?.value||'';
   const sourceFilter=$('voucherSourceFilter')?.value||'all';
   const statusFilter=$('voucherStatusFilter')?.value||'all';
+  const scope=voucherScope();
 
   const filtered=voucherRecords.filter(v=>{
     if(typeFilter!=='all'&&v.voucher_type!==typeFilter)return false;
@@ -106,6 +108,8 @@ function renderVoucherRows(){
     if(statusFilter!=='all'&&v.status!==statusFilter)return false;
     const source=sourceLabel(v);
     if(sourceFilter!=='all'&&source!==sourceFilter)return false;
+    if(scope==='today-income'&&(v.voucher_date!==today()||!['Income','Fee'].includes(source)))return false;
+    if(scope==='today-expense'&&(v.voucher_date!==today()||!['Expense','Payroll'].includes(source)))return false;
     if(!search)return true;
     const haystack=[
       v.voucher_no,v.voucher_type,v.voucher_date,v.party_name,v.account_name,
@@ -115,9 +119,7 @@ function renderVoucherRows(){
   });
 
   $('voucherCount').textContent=filtered.length+' of '+voucherRecords.length+' vouchers';
-  $('voucherSearchSummary').textContent=filtered.length===voucherRecords.length
-    ? 'সব Voucher দেখানো হচ্ছে'
-    : filtered.length+'টি Voucher filter অনুযায়ী পাওয়া গেছে';
+  $('voucherSearchSummary').textContent=scope==='today-income' ? 'আজকের Fee + Other Income Voucher দেখানো হচ্ছে' : scope==='today-expense' ? 'আজকের Payroll + Other Expense Voucher দেখানো হচ্ছে' : filtered.length===voucherRecords.length ? 'সব Voucher দেখানো হচ্ছে' : filtered.length+'টি Voucher filter অনুযায়ী পাওয়া গেছে';
 
   $('voucherRows').innerHTML=filtered.map(v=>'<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td>'+esc(v.voucher_type)+'</td><td>৳'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td><span class="voucher-source">'+esc(sourceLabel(v))+'</span></td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+voucherPrintHref(v)+'">Print</a></td></tr>').join('')||'<tr><td colspan="8">এই filter অনুযায়ী কোনো Voucher পাওয়া যায়নি।</td></tr>';
 }
@@ -162,7 +164,7 @@ $('clearVoucherSearch')?.addEventListener('click',()=>{
   renderVoucherRows();
 });
 $('signOut').addEventListener('click',async()=>{await supabase.auth.signOut();location.replace('./')});
-window.addEventListener('hashchange',updateView);
+window.addEventListener('hashchange',()=>{updateView();renderVoucherRows();});
 async function init(){
   access=await getAccess(supabase);if(!access){await supabase.auth.signOut();location.replace('./');return;}
   canFinanceView=access.can('finance.view')||access.can('finance.manage');canFinanceManage=access.can('finance.manage');canVoucherView=access.can('vouchers.view')||access.can('vouchers.manage');canVoucherManage=access.can('vouchers.manage');
