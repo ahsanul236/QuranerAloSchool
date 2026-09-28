@@ -85,6 +85,33 @@
       toggle.setAttribute('aria-expanded', String(open));
     });
     backdrop.addEventListener('click', closeMobile);
+
+    const mobileBar = document.createElement('nav');
+    mobileBar.className = 'management-bottom-nav';
+    mobileBar.setAttribute('aria-label','Mobile management navigation');
+    mobileBar.innerHTML = `
+      <a href="students.html" data-mobile-key="students"><span class="bottom-nav-icon">♟</span><span>Students</span></a>
+      <a href="fees.html" data-mobile-key="income"><span class="bottom-nav-icon">▥</span><span>Income</span></a>
+      <a href="dashboard.html#overview" data-mobile-key="overview"><span class="bottom-nav-icon">⌂</span><span>Overview</span></a>
+      <a href="finance.html#vouchers" data-mobile-key="vouchers"><span class="bottom-nav-icon">▤</span><span>Vouchers</span></a>
+      <button type="button" class="bottom-nav-more" data-mobile-key="more" aria-expanded="false"><span class="bottom-nav-icon">•••</span><span>More</span></button>
+    `;
+    document.body.appendChild(mobileBar);
+
+    const moreSheet=document.createElement('div');
+    moreSheet.className='management-more-sheet';
+    moreSheet.innerHTML=`<div class="management-more-handle"></div><div class="management-more-head"><strong>More</strong><button type="button" aria-label="Close more menu">×</button></div><a href="staff.html#teachers"><span>♟</span><strong>Staff</strong><small>Teacher & Helper</small></a><a href="payroll.html"><span>▣</span><strong>Expense</strong><small>Salary & Other Expense</small></a><a href="dashboard.html#settings"><span>⚙</span><strong>Settings</strong><small>Storage, Portal & Settings</small></a>`;
+    document.body.appendChild(moreSheet);
+    const moreBackdrop=document.createElement('div');moreBackdrop.className='management-more-backdrop';document.body.appendChild(moreBackdrop);
+    const closeMore=()=>{moreSheet.classList.remove('is-open');moreBackdrop.classList.remove('is-visible');mobileBar.querySelector('.bottom-nav-more')?.setAttribute('aria-expanded','false')};
+    mobileBar.querySelector('.bottom-nav-more').addEventListener('click',()=>{const open=!moreSheet.classList.contains('is-open');moreSheet.classList.toggle('is-open',open);moreBackdrop.classList.toggle('is-visible',open);mobileBar.querySelector('.bottom-nav-more').setAttribute('aria-expanded',String(open));});
+    moreSheet.querySelector('button').addEventListener('click',closeMore);moreBackdrop.addEventListener('click',closeMore);moreSheet.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMore));
+
+    const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
+    syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
+    let lastY=window.scrollY, hidden=false;
+    window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')){mobileBar.classList.add('is-hidden');hidden=true}}lastY=y;},{passive:true});
+
   }
 
   if (document.readyState === 'loading') {
