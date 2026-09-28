@@ -56,7 +56,7 @@
 .document-manager-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:14px 16px;background:linear-gradient(180deg,#f7fafe,#f0f6fc);border-bottom:1px solid var(--line)}
 .document-manager-head h3{margin:0;color:var(--navy);font-size:18px}
 .document-manager-note{margin:5px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
-.document-manager-badge{padding:5px 9px;border-radius:999px;background:#f3f5f8;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}
+.document-manager-badge{padding:5px 9px;border-radius:999px;background:#f3f5f8;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}.document-manager-head-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.document-add-btn{width:auto;min-height:42px;padding:9px 14px;white-space:nowrap}
 .document-manager-upload{display:grid;grid-template-columns:1fr 1.3fr auto;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:end}
 .document-upload-field{display:grid;gap:6px;color:var(--ink);font-weight:600;font-size:13px}
 .document-upload-field select,.document-upload-field input[type="file"]{width:100%;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font:inherit;box-sizing:border-box}
@@ -185,3 +185,4 @@ body.portal-page{background:#f3f8f6}
 @media(max-width:720px){.attendance-section-head{align-items:stretch;flex-direction:column}.attendance-section-head h2{width:100%}.attendance-section-actions{padding:0 13px 12px;flex-wrap:wrap}.attendance-section-actions label{flex:1}.attendance-section-actions .primary-btn{flex:1}.attendance-choices{gap:7px}}
 
 .group-attendance-cell{vertical-align:middle}.group-attendance-cell .attendance-summary{display:inline-flex;align-items:center;min-height:36px}.group-attendance-cell .attendance-choices{min-height:36px}.group-total-cell{text-align:center;vertical-align:middle;font-weight:600}.group-message-cell{vertical-align:middle}.group-whatsapp-btn{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+\n@media(max-width:620px){.document-manager-head{align-items:center}.document-manager-head-actions{flex:none}.document-manager-badge{display:none}.document-add-btn{min-height:40px;padding:8px 11px;font-size:12px}}\n
