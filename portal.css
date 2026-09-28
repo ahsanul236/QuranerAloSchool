@@ -185,4 +185,46 @@ body.portal-page{background:#f3f8f6}
 @media(max-width:720px){.attendance-section-head{align-items:stretch;flex-direction:column}.attendance-section-head h2{width:100%}.attendance-section-actions{padding:0 13px 12px;flex-wrap:wrap}.attendance-section-actions label{flex:1}.attendance-section-actions .primary-btn{flex:1}.attendance-choices{gap:7px}}
 
 .group-attendance-cell{vertical-align:middle}.group-attendance-cell .attendance-summary{display:inline-flex;align-items:center;min-height:36px}.group-attendance-cell .attendance-choices{min-height:36px}.group-total-cell{text-align:center;vertical-align:middle;font-weight:600}.group-message-cell{vertical-align:middle}.group-whatsapp-btn{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
-\n@media(max-width:620px){.document-manager-head{align-items:center}.document-manager-head-actions{flex:none}.document-manager-badge{display:none}.document-add-btn{min-height:40px;padding:8px 11px;font-size:12px}}\n
+@media(max-width:620px){.document-manager-head{align-items:center}.document-manager-head-actions{flex:none}.document-manager-badge{display:none}.document-add-btn{min-height:40px;padding:8px 11px;font-size:12px}}
+
+/* 2026 mobile portal app shell v1 */
+@media(max-width:620px){
+ html{background:#edf7f3}
+ body.portal-page{padding:0 0 18px;background:linear-gradient(180deg,#e9f6f1 0,#f4f8f7 190px,#f4f8f7 100%);overscroll-behavior-y:none}
+ .portal-card{padding:0 8px 14px;background:transparent}
+ .portal-head{margin:0 -8px 10px;padding:8px 9px;min-height:62px;border-bottom:1px solid #dbe9e4;background:rgba(255,255,255,.96);box-shadow:0 4px 18px rgba(7,63,53,.08);backdrop-filter:blur(12px)}
+ .portal-brand{gap:8px}
+ .portal-brand img{width:38px;height:38px;border-radius:10px}
+ .portal-brand strong{font-size:15px;line-height:1.1}
+ .portal-actions{gap:5px}
+ .portal-actions .whatsapp-btn,.portal-actions .secondary-btn{min-height:38px;border-radius:11px;padding:7px 9px}
+ .portal-hero{padding:13px;border-radius:16px;background:linear-gradient(135deg,#e9f8f2 0%,#fff 66%,#fff8e8 100%);box-shadow:0 6px 20px rgba(7,63,53,.055)}
+ .portal-identity .eyebrow{font-size:10px;letter-spacing:.1em}
+ .portal-hero h1{font-size:21px}
+ .portal-summary-grid{gap:8px}
+ .portal-stat{min-height:80px;padding:11px;border-radius:14px}
+ .portal-stat strong{font-size:19px}
+ .portal-panel{margin-top:9px;border-radius:15px;background:#fff;box-shadow:0 5px 18px rgba(7,63,53,.04)}
+ .portal-panel h2{padding:12px;font-size:16px;background:#f8fbfa}
+ .portal-body{padding:11px 12px}
+ .portal-info-grid{gap:8px}
+ .portal-info-item{min-height:56px;padding:9px 10px;border-radius:11px}
+ .portal-info-item span{font-size:11px}
+ .portal-table-wrap{margin:0 -12px;padding:0 12px}
+ .portal-table th,.portal-table td{padding:10px 11px;font-size:13px}
+ .portal-table thead th{background:#edf6f2}
+ .attendance-section-actions{padding:0 12px 11px;gap:8px}
+ .attendance-section-actions .primary-btn{min-height:42px;border-radius:11px}
+ .document-manager{border-radius:15px!important;overflow:hidden}
+ .document-manager-head{padding:12px!important}
+ .document-manager-head h3{font-size:17px}
+ .document-add-btn{border-radius:11px!important}
+ .footer-note{font-size:11px;line-height:1.55;margin-top:14px}
+}
+@media(max-width:390px){
+ .portal-actions .whatsapp-btn{font-size:0;width:40px;padding:0}
+ .portal-actions .whatsapp-btn::before{content:'WA';font-size:11px;font-weight:800}
+ .portal-actions .secondary-btn{font-size:11px}
+ .portal-hero{grid-template-columns:52px minmax(0,1fr)}
+ .portal-avatar{width:52px;height:52px}
+}
