@@ -20,8 +20,8 @@ function buildMarkup(role, editable, title) {
   const options = '<option value="">Document type নির্বাচন করুন</option>' +
     categoriesForRole(role).map(([v,l]) => '<option value="'+v+'">'+l+'</option>').join('');
   return '' +
-    '<div class="document-manager-head"><div><h3>'+esc(title || 'Documents')+'</h3><p class="document-manager-note">শুধু JPG, JPEG, PNG · সর্বোচ্চ 250 KB · Other Document একাধিক upload করা যাবে</p></div><span class="document-manager-badge">Private</span></div>' +
-    (editable ? '<div class="document-manager-upload"><label class="document-upload-field">Document type<select data-document-category>'+options+'</select></label><label class="document-upload-field">File<input data-document-file type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png"></label><div class="document-upload-actions"><button data-document-upload class="primary-btn" type="button">Upload</button><span data-document-message class="message-inline"></span></div></div>' : '') +
+    '<div class="document-manager-head"><div><h3>'+esc(title || 'Documents')+'</h3><p class="document-manager-note">শুধু JPG, JPEG, PNG · সর্বোচ্চ 250 KB · Other Document একাধিক upload করা যাবে</p></div><div class="document-manager-head-actions"><span class="document-manager-badge">Private</span>'+(editable?'<button data-document-add class="primary-btn document-add-btn" type="button" aria-expanded="false">Add Documents</button>':'')+'</div></div>' +
+    (editable ? '<div class="document-manager-upload hidden" data-document-upload-panel><label class="document-upload-field">Document type<select data-document-category>'+options+'</select></label><label class="document-upload-field">File<input data-document-file type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png"></label><div class="document-upload-actions"><button data-document-upload class="primary-btn" type="button">Upload</button><span data-document-message class="message-inline"></span></div></div>' : '') +
     '<div data-document-profile class="document-profile-box hidden"><div class="document-profile-thumb"><img data-document-profile-img alt="Profile"></div><div><strong>Current Profile Picture</strong><span data-document-profile-meta class="muted">—</span></div></div>' +
     '<div data-document-list class="document-list"></div>';
 }
@@ -35,6 +35,8 @@ function setMessage(node, text, type) {
 export async function mountDocumentsPanel({ container, role, personId, editable=false, canDelete=false, title='Documents' } = {}) {
   if (!container) throw new Error('Document container পাওয়া যায়নি।');
   container.innerHTML = buildMarkup(role, editable, title);
+  const addBtn = container.querySelector('[data-document-add]');
+  const uploadPanel = container.querySelector('[data-document-upload-panel]');
   const categorySelect = container.querySelector('[data-document-category]');
   const fileInput = container.querySelector('[data-document-file]');
   const uploadBtn = container.querySelector('[data-document-upload]');
@@ -43,6 +45,19 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
   const profileBox = container.querySelector('[data-document-profile]');
   const profileImg = container.querySelector('[data-document-profile-img]');
   const profileMeta = container.querySelector('[data-document-profile-meta]');
+
+  function setUploaderOpen(open) {
+    if (!uploadPanel || !addBtn) return;
+    uploadPanel.classList.toggle('hidden', !open);
+    addBtn.setAttribute('aria-expanded', String(open));
+    addBtn.textContent = open ? 'Cancel' : 'Add Documents';
+    if (!open) {
+      if (categorySelect) categorySelect.value = '';
+      if (fileInput) fileInput.value = '';
+      setMessage(messageNode, '');
+    }
+  }
+  addBtn?.addEventListener('click', () => setUploaderOpen(uploadPanel?.classList.contains('hidden')));
 
   async function render() {
     let files = [];
@@ -123,6 +138,7 @@ export async function mountDocumentsPanel({ container, role, personId, editable=
       fileInput.value = '';
       setMessage(messageNode, replaceExisting ? 'Document update হয়েছে।' : 'Document সফলভাবে upload হয়েছে।', 'success');
       await render();
+      setUploaderOpen(false);
     } catch (error) {
       console.error('document upload error', error);
       setMessage(messageNode, documentErrorMessage(error), 'error');
