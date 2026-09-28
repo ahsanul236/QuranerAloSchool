@@ -1,7 +1,7 @@
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
 import{mountDocumentsPanel,setProfileImage}from'./documents-ui.js?v=20260922-2';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
-const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],editBaseline='',allowNavigation=false;
+const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],allTeacherGroups=[],editBaseline='',allowNavigation=false;
 const msg=(t,k='')=>{$('message').textContent=t;$('message').className=`message-inline ${k}`.trim()};
 function profileEditState(){
   const ids=['fullName','fullNameBn','gender','phone','email','specialization','joiningDate','active','notes','fatherName','motherName','nidNumber','address'];
@@ -52,7 +52,66 @@ function fill(){
   setWhatsAppLink(row.phone);
 }
 
-async function loadTeacherGroups(){if(type!=='teacher'||!$('assignedGroupsList'))return;const{data:gs,error}=await supabase.from('qa_study_groups').select('group_id,group_name,active').eq('teacher_id',id).order('group_name');if(error)throw error;const gids=(gs||[]).map(g=>g.group_id);let ms=[];if(gids.length){const r=await supabase.from('qa_group_memberships').select('group_id,student_id').in('group_id',gids).is('left_at',null);if(r.error)throw r.error;ms=r.data||[]}$('assignedGroupsList').innerHTML=(gs||[]).map(g=>'<div class="staff-assignment-row"><div><strong>'+esc(g.group_name)+'</strong><small>'+(g.active?'Active':'Inactive')+' · '+ms.filter(m=>m.group_id===g.group_id).length+' students</small></div></div>').join('')||'<div class="portal-empty">কোনো Group assigned নেই।</div>';}
+async function loadTeacherGroups(){
+  if(type!=='teacher'||!$('assignedGroupsList'))return;
+  const [{data:gs,error:ge},{data:memberships,error:me}]=await Promise.all([
+    supabase.from('qa_study_groups').select('group_id,group_name,teacher_id,active').order('group_name'),
+    supabase.from('qa_group_memberships').select('group_id,student_id').is('left_at',null)
+  ]);
+  if(ge||me)throw(ge||me);
+  allTeacherGroups=gs||[];
+  const memberRows=memberships||[];
+  const studentIds=[...new Set(memberRows.map(m=>m.student_id).filter(Boolean))];
+  let studentMap=new Map();
+  if(studentIds.length){
+    const {data:ss,error:se}=await supabase.from('qa_students').select('student_id,student_code,full_name,status').in('student_id',studentIds);
+    if(se)throw se;
+    studentMap=new Map((ss||[]).map(st=>[st.student_id,st]));
+  }
+  const current=allTeacherGroups.filter(g=>g.teacher_id===id);
+  $('assignedGroupsList').innerHTML=current.map(g=>{
+    const names=memberRows.filter(m=>m.group_id===g.group_id).map(m=>studentMap.get(m.student_id)).filter(Boolean).map(st=>st.full_name||st.student_code||'Student');
+    const title=editing?'<a href="groups.html?group='+encodeURIComponent(g.group_id)+'"><strong>'+esc(g.group_name)+'</strong></a>':'<strong>'+esc(g.group_name)+'</strong>';
+    return '<div class="staff-assignment-row"><div>'+title+'<small>'+(names.length?esc(names.join(' · ')):'কোনো active Student নেই')+'</small></div></div>';
+  }).join('')||'<div class="portal-empty">কোনো Group assigned নেই।</div>';
+  const canEditGroups=Boolean(canManage()&&access?.can('students.manage')&&editing);
+  $('teacherGroupEditor')?.classList.toggle('hidden',!canEditGroups);
+  if($('groupPicker')){
+    $('groupPicker').disabled=!canEditGroups;
+    $('groupPicker').innerHTML=allTeacherGroups.map(g=>{
+      const selected=g.teacher_id===id?' selected':'';
+      const owner=g.teacher_id&&g.teacher_id!==id?' — অন্য Teacher-এর কাছে assigned':'';
+      const inactive=g.active===false?' — Inactive':'';
+      return '<option value="'+esc(g.group_id)+'"'+selected+'>'+esc(g.group_name+owner+inactive)+'</option>';
+    }).join('')||'<option disabled>কোনো Group পাওয়া যায়নি</option>';
+  }
+  $('saveGroupAssignmentsBtn')?.classList.toggle('hidden',!canEditGroups);
+  if($('teacherGroupsBadge'))$('teacherGroupsBadge').textContent=canManage()?(editing?(canEditGroups?'Edit mode':'Group manage permission নেই'):'Edit Profile থেকে পরিবর্তন'):'View only';
+}
+async function saveTeacherGroupAssignments(){
+  if(type!=='teacher'||!canManage()||!access?.can('students.manage'))throw new Error('Group assignment পরিবর্তনের permission নেই।');
+  const selectedIds=[...($('groupPicker')?.selectedOptions||[])].map(o=>o.value).filter(Boolean);
+  const selectedSet=new Set(selectedIds);
+  const current=allTeacherGroups.filter(g=>g.teacher_id===id);
+  const conflicts=allTeacherGroups.filter(g=>selectedSet.has(g.group_id)&&g.teacher_id&&g.teacher_id!==id);
+  if(conflicts.length){
+    const names=conflicts.slice(0,5).map(g=>g.group_name).join(', ');
+    const suffix=conflicts.length>5?' এবং আরও '+(conflicts.length-5)+'টি':'';
+    if(!window.confirm(names+suffix+' বর্তমানে অন্য Teacher-এর কাছে assigned।\n\nSelected করলে Group assignment এই Teacher-এর কাছে চলে আসবে।\n\nচালিয়ে যেতে OK চাপুন।'))return;
+  }
+  const removeIds=current.filter(g=>!selectedSet.has(g.group_id)).map(g=>g.group_id);
+  if(removeIds.length){
+    const {error}=await supabase.from('qa_study_groups').update({teacher_id:null,updated_at:new Date().toISOString()}).in('group_id',removeIds);
+    if(error)throw error;
+  }
+  if(selectedIds.length){
+    const {error}=await supabase.from('qa_study_groups').update({teacher_id:id,updated_at:new Date().toISOString()}).in('group_id',selectedIds);
+    if(error)throw error;
+  }
+  $('groupAssignmentMessage').textContent='Group assignment updated.';
+  $('groupAssignmentMessage').className='message-inline success';
+  await loadTeacherGroups();
+}
 async function loadTeacherAssignments(){
   if(type!=='teacher')return;
   $('teacherGroupsCard')?.classList.remove('hidden');
@@ -150,6 +209,8 @@ function syncMode(){
   if($('studentPicker'))$('studentPicker').disabled=!canEditAssignment;
   if($('saveStudentAssignmentsBtn'))$('saveStudentAssignmentsBtn').classList.toggle('hidden',!canEditAssignment);
   if(type==='teacher'&&$('teacherStudentsBadge'))$('teacherStudentsBadge').textContent=canManage()?(editing?'Edit mode':'Edit Profile থেকে পরিবর্তন'):'View only';
+  if(type==='teacher'&&$('teacherGroupsBadge'))$('teacherGroupsBadge').textContent=canManage()?(editing?(access?.can('students.manage')?'Edit mode':'Group manage permission নেই'):'Edit Profile থেকে পরিবর্তন'):'View only';
+  $('teacherGroupEditor')?.classList.toggle('hidden',!(type==='teacher'&&canManage()&&access?.can('students.manage')&&editing));
 }
 async function renderStaffDocuments(){
   if(!$('staffDocuments'))return;
@@ -179,8 +240,9 @@ async function load(){
   await renderStaffDocuments();
   if(type==='teacher'){ await loadTeacherAssignments(); await loadTeacherGroups(); }
 }
+$('saveGroupAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveGroupAssignmentsBtn');btn.disabled=true;$('groupAssignmentMessage').textContent='Saving…';$('groupAssignmentMessage').className='message-inline';try{await saveTeacherGroupAssignments();}catch(e){console.error(e);$('groupAssignmentMessage').textContent=e.message||'Group assignment save করা যায়নি।';$('groupAssignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher')await loadTeacherAssignments();startEditTracking();};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher'){await loadTeacherAssignments();await loadTeacherGroups();}startEditTracking();};
 $('cancelBtn').onclick=async()=>{editing=false;clearEditTracking();msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
