@@ -1488,330 +1488,89 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #settingsView.has-detail .settings-pane-active>.settings-accordion-summary{display:none!important}
 }
 
+/* 2026-09-29 RESPONSIVE PARITY MASTER
+   Student is the mobile visual reference. Desktop and mobile are intentionally isolated. */
 
-/* 2026-09-29 Student / Group tab visual parity.
-   Keep different functions, but use one control geometry on both sibling views. */
-#studentView .list-management-panel,
-#groupView .group-workspace-panel{
-  border-radius:0 0 16px 16px;
-  background:#fff;
-  overflow:visible;
-}
-#studentView .list-management-panel>.panel-head,
-#groupView .group-workspace-panel>.group-action-row{
-  margin:0!important;
-  background:#fff!important;
-}
-#studentView .list-management-panel>.list-filter-shell,
-#groupView .group-workspace-panel>.group-filter-shell{
-  margin:0!important;
-  border-left:1px solid #dce7f1!important;
-  border-right:1px solid #dce7f1!important;
-  border-top:1px solid #dce7f1!important;
-  border-bottom:1px solid #dce7f1!important;
-  border-radius:15px!important;
-  background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
-  box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
-}
-#studentView .list-head-actions,
-#groupView .group-action-row{
-  display:flex!important;
-  align-items:center!important;
-  gap:10px!important;
-}
-#studentView .list-head-actions .list-action-btn,
-#studentView .list-head-actions .list-reset-btn,
-#groupView .group-action-row .list-action-btn,
-#groupView .group-action-row .list-reset-btn{
-  height:42px!important;min-height:42px!important;min-width:132px!important;
-  padding:8px 16px!important;border-radius:10px!important;font-size:14px!important;
-  display:inline-flex!important;align-items:center!important;justify-content:center!important;
-}
-#studentView #newStudent,
-#groupView #newGroupInline{
-  background:#153f6d!important;border-color:#153f6d!important;color:#fff!important;
-}
-#studentView #newStudent:hover,#studentView #newStudent:focus-visible,
-#groupView #newGroupInline:hover,#groupView #newGroupInline:focus-visible{
-  background:#0f3158!important;border-color:#0f3158!important;color:#fff!important;
-}
-
+/* DESKTOP/TABLET ONLY: Group controls follow Student order: filters -> actions -> results. */
 @media (min-width:621px){
-  #studentView .list-management-panel>.list-filter-shell,
-  #groupView .group-workspace-panel>.group-filter-shell{
-    padding:14px 16px 10px!important;
-  }
-  #groupView .group-workspace-panel>.group-filter-shell{
-    display:grid!important;
-    grid-template-columns:minmax(220px,1.55fr) minmax(140px,.7fr) minmax(190px,1fr)!important;
-    gap:10px!important;align-items:end!important;
-  }
-  #groupView .group-filter-shell>.group-search-row,
-  #groupView .group-filter-shell>.group-filter-bar{display:contents!important}
-  #groupView .group-filter-shell .list-filter-toggle{display:none!important}
-  #studentView .list-management-panel>.panel-head,
-  #groupView .group-workspace-panel>.group-action-row{
-    padding:10px 16px!important;border-top:0!important;border-bottom:1px solid var(--line)!important;
-  }
-}
+  #groupView .group-workspace-panel{display:flex!important;flex-direction:column!important}
+  #groupView .group-workspace-panel>.list-filter-shell{order:1!important}
+  #groupView .group-workspace-panel>.panel-head{order:2!important}
+  #groupView .group-workspace-panel>.group-list-head{order:3!important}
+  #groupView .group-workspace-panel>.embedded-group-list{order:4!important}
 
-/* Phones: identical two-row control skeleton in both tabs:
-   row 1 = action buttons, row 2 = search + Filters. */
-@media (max-width:620px){
-  #studentView .list-management-panel>.panel-head,
-  #groupView .group-workspace-panel>.group-action-row{
-    padding:10px 12px!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;
-    border-bottom:1px solid var(--line)!important;
-  }
-  #studentView .list-management-panel>.panel-head>div:first-child{display:none!important}
-  #studentView .list-management-panel>.panel-head .list-head-actions{display:contents!important}
-  #studentView .list-head-actions>.list-export-wrap,
-  #studentView .list-head-actions>.list-column-wrap,
-  #groupView .group-action-row>.list-column-wrap{display:block!important;width:100%!important}
-  #studentView .list-head-actions .list-action-btn,
-  #studentView .list-head-actions .list-reset-btn,
-  #groupView .group-action-row .list-action-btn,
-  #groupView .group-action-row .list-reset-btn,
-  #studentView .list-head-actions>.list-export-wrap>.list-action-btn,
-  #studentView .list-head-actions>.list-column-wrap>.list-action-btn,
-  #groupView .group-action-row>.list-column-wrap>.list-action-btn{
-    width:100%!important;min-width:0!important;height:50px!important;min-height:50px!important;
-    font-size:13px!important;border-radius:12px!important;
-  }
-  #studentView .list-management-panel>.list-filter-shell,
-  #groupView .group-workspace-panel>.group-filter-shell{
-    margin:0 12px 10px!important;padding:12px!important;display:block!important;
-  }
-  #studentView .list-search-row,
-  #groupView .group-search-row{
-    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
-  }
-  #studentView .list-search-field input,
-  #groupView .list-search-field input{min-height:54px!important;border-radius:12px!important}
-  #studentView .list-filter-toggle,
-  #groupView .list-filter-toggle{
-    display:inline-flex!important;width:100%!important;height:50px!important;min-height:50px!important;
-    align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:16px!important;
-  }
-  #studentView .list-filter-grid,
-  #groupView .group-filter-bar{display:none!important;margin-top:10px!important;padding:0!important;gap:8px!important}
-  #studentView .list-filter-grid.is-open,
-  #groupView .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important}
-  #studentView .list-filter-footer{display:none!important}
-}
-
-
-/* 2026-09-29 canonical Group parity: Group now uses the exact Student/Staff list primitives.
-   Only the Group result renderer remains specialized. */
-#groupView .group-workspace-panel>.panel-head{order:2}
-#groupView .group-workspace-panel>.list-filter-shell{order:1}
-#groupView .group-workspace-panel>.group-list-head,
-#groupView .group-workspace-panel>.embedded-group-list{order:3}
-#groupView .group-workspace-panel>.embedded-group-list{order:4}
-#groupView .group-workspace-panel .list-filter-grid{--filter-count:2}
-@media (min-width:621px){
   #groupView .group-workspace-panel>.list-filter-shell{
-    display:grid!important;
-    grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr)!important;
-    gap:10px!important;align-items:end!important;
-    margin:0!important;padding:14px 16px 10px!important;
+    display:grid!important;grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr)!important;
+    gap:10px!important;align-items:end!important;margin:0!important;padding:14px 16px 10px!important;
     border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;
     background:#fbfdfc!important;box-shadow:none!important;
   }
-  #groupView .group-workspace-panel .group-search-row{display:block!important}
-  #groupView .group-workspace-panel .group-filter-bar{display:grid!important;grid-template-columns:repeat(2,minmax(92px,1fr))!important;gap:10px!important;margin:0!important;padding:0!important}
-  #groupView .group-workspace-panel>.panel-head{
-    display:flex!important;align-items:center!important;padding:10px 16px!important;border-bottom:1px solid var(--line)!important;
-  }
-  #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{width:100%!important;justify-content:flex-start!important}
-}
-@media (max-width:620px){
-  #groupView .group-workspace-panel>.panel-head{
-    display:block!important;padding:8px 10px!important;border-bottom:0!important;
-  }
-  #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{
-    display:flex!important;gap:8px!important;overflow-x:auto!important;scrollbar-width:none!important;padding-bottom:2px!important;
-  }
-  #groupView .group-workspace-panel>.panel-head .list-head-actions .list-action-btn{
-    flex:0 0 124px!important;width:auto!important;height:40px!important;min-height:40px!important;padding:7px 10px!important;font-size:12px!important;border-radius:10px!important;
-  }
-  #groupView .group-workspace-panel>.list-filter-shell{
-    display:block!important;overflow:visible!important;margin:0 16px 16px!important;padding:10px!important;
-    border:1px solid #dce7f1!important;border-radius:15px!important;background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
-  }
-  #groupView .group-workspace-panel .group-search-row{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-  #groupView .group-workspace-panel .group-filter-bar{display:none!important;margin-top:10px!important;padding:0!important}
-  #groupView .group-workspace-panel .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-  #groupView .group-workspace-panel .list-filter-footer{display:none!important}
-  #groupView .group-workspace-panel .list-filter-toggle{display:inline-flex!important;width:100%!important;align-items:center!important;justify-content:center!important}
-}
-
-
-/* 2026-09-29 final Student/Group geometry parity.
-   This block intentionally mirrors the Student/Staff mature list layout. */
-#groupView .group-workspace-panel>.panel-head{order:0!important}
-#groupView .group-workspace-panel>.list-filter-shell{order:0!important}
-#groupView .group-workspace-panel>.group-list-head{order:0!important}
-#groupView .group-workspace-panel>.embedded-group-list{order:0!important}
-
-@media (min-width:621px){
-  #groupView .group-workspace-panel{
-    display:block!important;
-  }
-  #groupView .group-workspace-panel>.list-filter-shell{
-    display:grid!important;
-    grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr)!important;
-    gap:10px!important;align-items:end!important;
-    margin:0!important;padding:14px 16px 10px!important;
-    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;
-    background:#fbfdfc!important;box-shadow:none!important;
-  }
-  #groupView .group-workspace-panel .group-search-row{display:block!important;min-width:0!important}
-  #groupView .group-workspace-panel .group-filter-bar{
+  #groupView .group-search-row{display:block!important;min-width:0!important}
+  #groupView .group-filter-bar{
     display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;min-width:0!important;margin:0!important;padding:0!important;
+    gap:10px!important;margin:0!important;padding:0!important;min-width:0!important;
   }
-  #groupView .group-workspace-panel .group-filter-bar>label,
-  #groupView .group-workspace-panel .list-search-field{min-width:0!important;width:100%!important}
+  #groupView .group-filter-bar>label,#groupView .list-search-field{width:100%!important;min-width:0!important}
+  #groupView .list-filter-toggle{display:none!important}
+  #groupView .list-filter-footer{display:none!important}
+
   #groupView .group-workspace-panel>.panel-head{
-    display:flex!important;align-items:center!important;margin:0!important;padding:10px 16px!important;
-    border-top:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
+    display:flex!important;margin:0!important;padding:10px 16px!important;
+    border:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
   }
   #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{
-    display:flex!important;width:auto!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;
-  }
-  #groupView .group-workspace-panel>.panel-head .list-action-btn,
-  #groupView .group-workspace-panel>.panel-head .list-reset-btn{
+  #groupView .list-head-actions{display:flex!important;align-items:center!important;gap:10px!important}
+  #groupView .list-head-actions .list-action-btn,#groupView .list-head-actions .list-reset-btn{
     width:auto!important;min-width:132px!important;height:42px!important;min-height:42px!important;
     padding:8px 16px!important;border-radius:10px!important;font-size:14px!important;
   }
 }
 
+/* MOBILE ONLY: Student, Group, Teacher and Helper share one exact control geometry. */
 @media (max-width:620px){
-  #groupView .group-workspace-panel{display:block!important}
-  #groupView .group-workspace-panel>.panel-head{
-    display:grid!important;grid-template-columns:1fr!important;margin:0!important;padding:10px 12px!important;
-    border-bottom:1px solid var(--line)!important;background:#fff!important;
-  }
-  #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{
-    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;width:100%!important;overflow:visible!important;padding:0!important;
-  }
-  #groupView .group-workspace-panel>.panel-head .list-column-wrap{display:block!important;width:100%!important}
-  #groupView .group-workspace-panel>.panel-head .list-action-btn,
-  #groupView .group-workspace-panel>.panel-head .list-reset-btn,
-  #groupView .group-workspace-panel>.panel-head .list-column-wrap>.list-action-btn{
-    width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;
-    height:50px!important;min-height:50px!important;padding:8px 12px!important;border-radius:12px!important;font-size:13px!important;
-  }
-  #groupView .group-workspace-panel>.list-filter-shell{
-    display:block!important;margin:0 12px 10px!important;padding:12px!important;
-    border:1px solid #dce7f1!important;border-radius:15px!important;
-    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
-  }
-  #groupView .group-workspace-panel .group-search-row{
-    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
-  }
-  #groupView .group-workspace-panel .list-search-field input{min-height:54px!important;border-radius:12px!important}
-  #groupView .group-workspace-panel .list-filter-toggle{
-    display:inline-flex!important;width:100%!important;height:50px!important;min-height:50px!important;
-    align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:16px!important;
-  }
-  #groupView .group-workspace-panel .group-filter-bar{display:none!important;margin-top:10px!important;padding:0!important}
-  #groupView .group-workspace-panel .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-  #groupView .group-workspace-panel .list-filter-footer{display:none!important}
-}
+  #studentView .list-management-panel,
+  #groupView .group-workspace-panel,
+  .staff-list-management-panel{display:flex!important;flex-direction:column!important}
 
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.panel-head,
+  .staff-list-management-panel>.panel-head{order:1!important}
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.list-filter-shell,
+  .staff-list-management-panel>.list-filter-shell{order:2!important}
+  #groupView .group-workspace-panel>.group-list-head{order:3!important}
+  #groupView .group-workspace-panel>.embedded-group-list{order:4!important}
 
-/* 2026-09-29 exact parity lock.
-   Group control DOM now follows Student: filters -> actions -> results.
-   These rules only remove legacy Group-specific geometry differences. */
-#groupView .group-workspace-panel{display:block!important}
-#groupView .group-workspace-panel>.list-filter-shell,
-#groupView .group-workspace-panel>.panel-head,
-#groupView .group-workspace-panel>.group-list-head,
-#groupView .group-workspace-panel>.embedded-group-list{order:initial!important}
-
-@media (min-width:621px){
-  #groupView .group-workspace-panel>.list-filter-shell{
-    margin:0!important;padding:14px 16px 10px!important;
-    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;
-    box-shadow:none!important;background:#fbfdfc!important;
-  }
-  #groupView .group-workspace-panel>.panel-head{
-    margin:0!important;padding:10px 16px!important;min-height:0!important;
-    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:#fff!important;
-  }
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{gap:10px!important}
-  #groupView .group-workspace-panel>.panel-head .list-action-btn,
-  #groupView .group-workspace-panel>.panel-head .list-reset-btn{
-    min-width:132px!important;height:42px!important;min-height:42px!important;padding:8px 16px!important;border-radius:10px!important;
-  }
-}
-
-@media (max-width:620px){
-  #groupView .group-workspace-panel>.panel-head{
-    margin:0!important;padding:10px 12px!important;border:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
-  }
-  #groupView .group-workspace-panel>.panel-head .list-head-actions{
-    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
-  }
-  #groupView .group-workspace-panel>.list-filter-shell{
-    margin:0 12px 10px!important;padding:12px!important;border:1px solid #dce7f1!important;border-radius:15px!important;
-    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
-  }
-  #groupView .group-workspace-panel .list-search-row{gap:10px!important}
-  #groupView .group-workspace-panel .list-search-field input{min-height:54px!important}
-  #groupView .group-workspace-panel .list-filter-toggle{height:50px!important;min-height:50px!important}
-}
-
-
-/* 2026-09-29 MOBILE MASTER: Student is the single visual reference.
-   Applies the same action geometry and filter-card rhythm to Student, Group and Staff. */
-@media (max-width:620px){
   #studentView .list-management-panel>.panel-head,
   #groupView .group-workspace-panel>.panel-head,
   .staff-list-management-panel>.panel-head{
     display:block!important;margin:0!important;padding:10px 12px!important;
-    border:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
+    min-height:0!important;border:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
   }
   #studentView .list-management-panel>.panel-head>div:first-child,
   #groupView .group-workspace-panel>.panel-head>div:first-child,
   .staff-list-management-panel>.panel-head>div:first-child{display:none!important}
 
-  #studentView .list-head-actions,
-  #groupView .list-head-actions,
-  .staff-list-management-panel .list-head-actions{
+  #studentView .list-head-actions,#groupView .list-head-actions,.staff-list-management-panel .list-head-actions{
     display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:10px!important;width:100%!important;overflow:visible!important;padding:0!important;
+    gap:10px!important;width:100%!important;margin:0!important;padding:0!important;overflow:visible!important;
   }
-  #studentView .list-head-actions>.list-export-wrap,
-  #studentView .list-head-actions>.list-column-wrap,
+  #studentView .list-head-actions>.list-export-wrap,#studentView .list-head-actions>.list-column-wrap,
   #groupView .list-head-actions>.list-column-wrap,
   .staff-list-management-panel .list-head-actions>.list-export-wrap,
   .staff-list-management-panel .list-head-actions>.list-column-wrap{
     display:block!important;width:100%!important;min-width:0!important;
   }
-  #studentView .list-head-actions .list-action-btn,
-  #studentView .list-head-actions .list-reset-btn,
-  #groupView .list-head-actions .list-action-btn,
-  #groupView .list-head-actions .list-reset-btn,
+  #studentView .list-head-actions .list-action-btn,#studentView .list-head-actions .list-reset-btn,
+  #groupView .list-head-actions .list-action-btn,#groupView .list-head-actions .list-reset-btn,
   .staff-list-management-panel .list-head-actions .list-action-btn,
   .staff-list-management-panel .list-head-actions .list-reset-btn{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
     width:100%!important;min-width:0!important;max-width:none!important;
     height:50px!important;min-height:50px!important;padding:8px 12px!important;
     border-radius:12px!important;font-size:13px!important;line-height:1.2!important;
-    display:inline-flex!important;align-items:center!important;justify-content:center!important;
   }
-  #studentView .list-head-actions .primary-btn,
-  #groupView .list-head-actions .primary-btn,
+  #studentView .list-head-actions .primary-btn,#groupView .list-head-actions .primary-btn,
   .staff-list-management-panel .list-head-actions .primary-btn{
     background:#153f6d!important;border-color:#153f6d!important;color:#fff!important;
   }
@@ -1824,31 +1583,19 @@ th.qa-sortable-th:hover{background:#eef8f4}
     background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
     box-shadow:0 5px 16px rgba(11,35,66,.035)!important;overflow:visible!important;
   }
-  #studentView .list-search-row,
-  #groupView .list-search-row,
-  .staff-list-management-panel .list-search-row{
+  #studentView .list-search-row,#groupView .list-search-row,.staff-list-management-panel .list-search-row{
     display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
   }
-  #studentView .list-search-field input,
-  #groupView .list-search-field input,
-  .staff-list-management-panel .list-search-field input{
-    min-height:54px!important;border-radius:12px!important;
+  #studentView .list-search-field input,#groupView .list-search-field input,
+  .staff-list-management-panel .list-search-field input{min-height:54px!important;border-radius:12px!important}
+  #studentView .list-filter-toggle,#groupView .list-filter-toggle,.staff-list-management-panel .list-filter-toggle{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    width:100%!important;height:50px!important;min-height:50px!important;border-radius:12px!important;font-size:16px!important;
   }
-  #studentView .list-filter-toggle,
-  #groupView .list-filter-toggle,
-  .staff-list-management-panel .list-filter-toggle{
-    display:inline-flex!important;width:100%!important;height:50px!important;min-height:50px!important;
-    align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:16px!important;
-  }
-  #studentView .list-filter-grid,
-  #groupView .list-filter-grid,
-  .staff-list-management-panel .list-filter-grid{
+  #studentView .list-filter-grid,#groupView .list-filter-grid,.staff-list-management-panel .list-filter-grid{
     display:none!important;margin-top:10px!important;padding:0!important;grid-template-columns:1fr!important;gap:8px!important;
   }
-  #studentView .list-filter-grid.is-open,
-  #groupView .list-filter-grid.is-open,
+  #studentView .list-filter-grid.is-open,#groupView .list-filter-grid.is-open,
   .staff-list-management-panel .list-filter-grid.is-open{display:grid!important}
-  #studentView .list-filter-footer,
-  #groupView .list-filter-footer,
-  .staff-list-management-panel .list-filter-footer{display:none!important}
+  #studentView .list-filter-footer,#groupView .list-filter-footer,.staff-list-management-panel .list-filter-footer{display:none!important}
 }
