@@ -770,6 +770,11 @@
   }
 
   let activeSettingsPane = null;
+  let settingsOriginScrollY = 0;
+
+  function isMobileSettingsView() {
+    return window.matchMedia('(max-width: 620px)').matches;
+  }
 
   function settingsPaneButton(id) {
     return document.querySelector(`#settingsDesktopNav [data-settings-pane="${id}"]`);
@@ -778,12 +783,26 @@
   function closeSettingsPane(fromHistory = false) {
     const view = $('settingsView');
     if (!view) return;
+
+    if (!fromHistory && history.state?.qaSettingsPane) {
+      history.back();
+      return;
+    }
+
     view.classList.remove('has-detail');
-    document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => el.classList.remove('settings-pane-active'));
+    document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => {
+      el.classList.remove('settings-pane-active', 'mobile-slide-open');
+    });
     document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
+    document.body.classList.remove('mobile-slide-active');
     activeSettingsPane = null;
     document.querySelectorAll('#settingsView [data-settings-detail]').forEach((el) => el.removeAttribute('data-settings-detail'));
-    if (!fromHistory && history.state?.qaSettingsPane) history.back();
+
+    if (isMobileSettingsView()) {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        window.scrollTo({ top: settingsOriginScrollY, left: 0, behavior: 'instant' });
+      }));
+    }
   }
 
   function ensureSettingsBackButton(panel) {
@@ -791,7 +810,7 @@
     if (button) return button;
     button = document.createElement('button');
     button.type = 'button';
-    button.className = 'settings-detail-back';
+    button.className = 'settings-detail-back mobile-slide-back';
     button.setAttribute('aria-label', 'Back to Settings');
     const navButton = settingsPaneButton(panel.id);
     const title = navButton?.querySelector('strong')?.textContent?.trim() || navButton?.textContent?.replace('›','').trim() || 'Settings';
@@ -818,6 +837,15 @@
     activeSettingsPane = id;
     panel.setAttribute('data-settings-detail', 'true');
     ensureSettingsBackButton(panel);
+
+    if (isMobileSettingsView()) {
+      settingsOriginScrollY = window.scrollY;
+      panel.classList.add('mobile-slide-open');
+      document.body.classList.add('mobile-slide-active');
+    } else {
+      panel.classList.remove('mobile-slide-open');
+      document.body.classList.remove('mobile-slide-active');
+    }
 
     if (id === 'settingsStoragePanel') {
       window.__qaStorageRequested = true;
