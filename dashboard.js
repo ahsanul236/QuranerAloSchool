@@ -826,6 +826,9 @@
     const button = settingsPaneButton(id);
     if (!view || !panel || !button || button.hidden || button.disabled) return;
 
+    const mobileSettings = isMobileSettingsView();
+    if (mobileSettings) settingsOriginScrollY = window.scrollY;
+
     document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => el.classList.remove('settings-pane-active'));
     document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
 
@@ -838,8 +841,7 @@
     panel.setAttribute('data-settings-detail', 'true');
     ensureSettingsBackButton(panel);
 
-    if (isMobileSettingsView()) {
-      settingsOriginScrollY = window.scrollY;
+    if (mobileSettings) {
       panel.classList.add('mobile-slide-open');
       document.body.classList.add('mobile-slide-active');
     } else {
