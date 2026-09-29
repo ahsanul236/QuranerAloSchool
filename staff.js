@@ -392,6 +392,7 @@ function bindPortalActions() {
 async function switchStaffMode(nextMode){
   if(nextMode===mode)return;
   mode=nextMode;page=1;resetListFilters(false);updatePageContext();
+  refreshCompactFilterCount();
   const target=mode==='helper'?'#helpers':'#teachers';
   if(location.hash!==target)history.replaceState(null,'',target);
   try{await loadFilterOptions();await load();}catch(error){console.error(error);msg('Data load করা যায়নি।','error');}
@@ -545,6 +546,7 @@ async function init() {
   }) || (() => {});
 
   updatePageContext();
+  refreshCompactFilterCount();
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
   canManagePortal = access.profile.role === 'owner';
@@ -565,6 +567,7 @@ window.addEventListener('hashchange', async () => {
   page = 1;
   resetListFilters(false);
   updatePageContext();
+  refreshCompactFilterCount();
   try {
     await loadFilterOptions();
     await load();
