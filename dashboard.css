@@ -1236,3 +1236,30 @@ th.qa-sortable-th::after{content:'↕';position:absolute;right:10px;top:50%;tran
 th.qa-sortable-th.qa-sort-asc::after{content:'▲';opacity:.8}
 th.qa-sortable-th.qa-sort-desc::after{content:'▼';opacity:.8}
 th.qa-sortable-th:hover{background:#eef8f4}
+
+
+/* Unified management list layout — desktop/tablet */
+@media (min-width:621px){
+  .compact-list-layout{display:flex;flex-direction:column}
+  .compact-list-layout>.panel-head{order:2;padding:10px 16px;border-top:0;border-bottom:1px solid var(--line)}
+  .compact-list-layout>.panel-head>div:first-child{display:none!important}
+  .compact-list-layout>.panel-head .list-head-actions{width:100%;justify-content:flex-start;gap:10px;display:flex;align-items:center;flex-wrap:nowrap}
+  .compact-list-layout>.list-filter-shell{order:1;border-bottom:1px solid var(--line);padding:14px 16px 10px;display:grid;grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr);gap:10px;align-items:end}
+  .compact-list-layout>.table-wrap{order:3}
+  .compact-list-layout>.list-pagination{order:4}
+  .compact-list-layout .list-search-row{display:block}
+  .compact-list-layout .list-search-field{width:100%}
+  .compact-list-layout .list-filter-toggle{display:none!important}
+  .compact-list-layout .list-filter-grid{display:grid!important;grid-template-columns:repeat(var(--filter-count,7),minmax(92px,1fr));gap:10px;align-items:end}
+  .compact-list-layout .list-filter-grid label,.compact-list-layout .list-search-field{min-width:0}
+  .compact-list-layout .list-filter-grid select,.compact-list-layout .list-search-field input{width:100%;min-width:0}
+  .compact-list-layout .list-filter-footer{display:none!important}
+  .compact-list-layout .list-head-actions .list-action-btn,.compact-list-layout .list-head-actions .list-reset-btn{height:42px!important;min-height:42px!important;min-width:132px!important;padding:8px 16px!important;border-radius:10px!important;font-size:14px!important;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+  .compact-list-layout .list-head-actions .list-export-wrap,.compact-list-layout .list-head-actions .list-column-wrap{display:flex}
+}
+@media (min-width:621px) and (max-width:1100px){
+  .compact-list-layout>.list-filter-shell{grid-template-columns:minmax(180px,1.35fr) minmax(0,5fr);gap:7px;padding-left:10px;padding-right:10px}
+  .compact-list-layout .list-filter-grid{gap:7px}
+  .compact-list-layout .list-filter-grid label,.compact-list-layout .list-search-field{font-size:11px}
+  .compact-list-layout .list-filter-grid select,.compact-list-layout .list-search-field input{padding-left:8px;padding-right:8px;font-size:12px}
+}
