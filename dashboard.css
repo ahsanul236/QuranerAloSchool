@@ -1728,3 +1728,46 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #groupView .group-workspace-panel .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
   #groupView .group-workspace-panel .list-filter-footer{display:none!important}
 }
+
+
+/* 2026-09-29 exact parity lock.
+   Group control DOM now follows Student: filters -> actions -> results.
+   These rules only remove legacy Group-specific geometry differences. */
+#groupView .group-workspace-panel{display:block!important}
+#groupView .group-workspace-panel>.list-filter-shell,
+#groupView .group-workspace-panel>.panel-head,
+#groupView .group-workspace-panel>.group-list-head,
+#groupView .group-workspace-panel>.embedded-group-list{order:initial!important}
+
+@media (min-width:621px){
+  #groupView .group-workspace-panel>.list-filter-shell{
+    margin:0!important;padding:14px 16px 10px!important;
+    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;
+    box-shadow:none!important;background:#fbfdfc!important;
+  }
+  #groupView .group-workspace-panel>.panel-head{
+    margin:0!important;padding:10px 16px!important;min-height:0!important;
+    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;background:#fff!important;
+  }
+  #groupView .group-workspace-panel>.panel-head .list-head-actions{gap:10px!important}
+  #groupView .group-workspace-panel>.panel-head .list-action-btn,
+  #groupView .group-workspace-panel>.panel-head .list-reset-btn{
+    min-width:132px!important;height:42px!important;min-height:42px!important;padding:8px 16px!important;border-radius:10px!important;
+  }
+}
+
+@media (max-width:620px){
+  #groupView .group-workspace-panel>.panel-head{
+    margin:0!important;padding:10px 12px!important;border:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
+  }
+  #groupView .group-workspace-panel>.panel-head .list-head-actions{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
+  }
+  #groupView .group-workspace-panel>.list-filter-shell{
+    margin:0 12px 10px!important;padding:12px!important;border:1px solid #dce7f1!important;border-radius:15px!important;
+    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+  }
+  #groupView .group-workspace-panel .list-search-row{gap:10px!important}
+  #groupView .group-workspace-panel .list-search-field input{min-height:54px!important}
+  #groupView .group-workspace-panel .list-filter-toggle{height:50px!important;min-height:50px!important}
+}
