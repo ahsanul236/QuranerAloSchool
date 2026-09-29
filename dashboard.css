@@ -1455,3 +1455,35 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #settingsView.has-detail .settings-pane-active>.settings-accordion-body{display:block!important;max-height:none!important;overflow:visible!important}
   #settingsView.has-detail .settings-pane-active>.settings-accordion-body.hidden{display:block!important}
 }
+
+
+/* 2026-09-29: canonical Group desktop row + Settings mobile navigation cleanup */
+@media (min-width:621px){
+  .group-filter-shell{
+    display:grid!important;
+    grid-template-columns:minmax(240px,1.6fr) minmax(140px,.7fr) minmax(190px,1fr)!important;
+    gap:10px!important;
+    align-items:end!important;
+  }
+  .group-filter-shell>.group-search-row,
+  .group-filter-shell>.group-filter-bar{
+    display:contents!important;
+  }
+  .group-filter-shell .list-filter-toggle{display:none!important}
+  .group-filter-shell .list-search-field,
+  .group-filter-shell .group-filter-bar>label{
+    width:100%!important;min-width:0!important;margin:0!important;
+  }
+}
+#groupView .group-action-row>#newGroupInline.primary-btn.list-action-btn{
+  background:#153f6d!important;border-color:#153f6d!important;color:#fff!important;
+  opacity:1!important;
+}
+#groupView .group-action-row>#newGroupInline.primary-btn.list-action-btn:hover,
+#groupView .group-action-row>#newGroupInline.primary-btn.list-action-btn:focus-visible{
+  background:#0f3158!important;border-color:#0f3158!important;color:#fff!important;
+}
+@media (max-width:620px){
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back{display:grid!important}
+  #settingsView.has-detail .settings-pane-active>.settings-accordion-summary{display:none!important}
+}
