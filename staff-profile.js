@@ -249,7 +249,7 @@ async function load(){
 $('maritalStatus')?.addEventListener('change',syncSpouseField);
 $('saveGroupAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveGroupAssignmentsBtn');btn.disabled=true;$('groupAssignmentMessage').textContent='Saving…';$('groupAssignmentMessage').className='message-inline';try{await saveTeacherGroupAssignments();}catch(e){console.error(e);$('groupAssignmentMessage').textContent=e.message||'Group assignment save করা যায়নি।';$('groupAssignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
 $('saveStudentAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveStudentAssignmentsBtn');btn.disabled=true;$('assignmentMessage').textContent='Saving…';$('assignmentMessage').className='message-inline';try{await saveTeacherAssignments();}catch(e){console.error(e);$('assignmentMessage').textContent=e.message||'Student assignment save করা যায়নি।';$('assignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
-$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();await renderStaffDocuments();if(type==='teacher'){await loadTeacherAssignments();await loadTeacherGroups();}startEditTracking();};
+$('editBtn').onclick=async()=>{editing=true;msg('');syncMode();const loads=[renderStaffDocuments()];if(type==='teacher')loads.push(loadTeacherAssignments(),loadTeacherGroups());await Promise.all(loads);startEditTracking();};
 $('cancelBtn').onclick=async()=>{editing=false;clearEditTracking();msg('');await load()};
 $('form').onsubmit=async e=>{
   e.preventDefault();
