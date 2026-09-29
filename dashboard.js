@@ -796,7 +796,7 @@
     const title = navButton?.querySelector('strong')?.textContent?.trim() || navButton?.textContent?.replace('›','').trim() || 'Settings';
     button.innerHTML = '<span aria-hidden="true">‹</span><span>Back</span><strong>' + escapeHtml(title) + '</strong>';
     button.addEventListener('click', () => closeSettingsPane(false));
-    panel.prepend(button);
+    panel.insertBefore(button, panel.firstChild);
     return button;
   }
 
