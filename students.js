@@ -14,6 +14,7 @@ let canManagePortal = false;
 let teacherMap = new Map();
 let groupTeacherByStudent = new Map();
 let embeddedGroups = [], embeddedMembers = [], embeddedStudents = [], embeddedTeachers = [];
+let embeddedStudentById = new Map(), embeddedTeacherById = new Map(), embeddedMembersByGroup = new Map();
 let openGroupId = null;
 let page = 1;
 let pageSize = 10;
@@ -28,7 +29,17 @@ function escapeHtml(value) {
 }
 
 function groupSetMessage(text,type=''){const el=$('groupMessage');if(!el)return;el.textContent=text;el.style.color=type==='error'?'#b33b3b':'';}
-function teacherLabel(id){const t=embeddedTeachers.find(x=>x.teacher_id===id);return t?((t.teacher_code||'')+' · '+(t.full_name||'Teacher')):'Unassigned';}
+function rebuildEmbeddedIndexes(){
+ embeddedStudentById=new Map(embeddedStudents.map(student=>[student.student_id,student]));
+ embeddedTeacherById=new Map(embeddedTeachers.map(teacher=>[teacher.teacher_id,teacher]));
+ embeddedMembersByGroup=new Map();
+ embeddedMembers.forEach(member=>{
+  if(!embeddedMembersByGroup.has(member.group_id))embeddedMembersByGroup.set(member.group_id,[]);
+  embeddedMembersByGroup.get(member.group_id).push(member);
+ });
+}
+function membersForGroup(groupId){return embeddedMembersByGroup.get(groupId)||[];}
+function teacherLabel(id){const t=embeddedTeacherById.get(id);return t?((t.teacher_code||'')+' · '+(t.full_name||'Teacher')):'Unassigned';}
 async function loadEmbeddedGroups(){
  const [g,t,s,m]=await Promise.all([
   supabase.from('qa_study_groups').select('*').order('group_name'),
@@ -38,6 +49,7 @@ async function loadEmbeddedGroups(){
  ]);
  if(g.error||t.error||s.error||m.error)throw(g.error||t.error||s.error||m.error);
  embeddedGroups=g.data||[];embeddedTeachers=t.data||[];embeddedStudents=s.data||[];embeddedMembers=m.data||[];
+ rebuildEmbeddedIndexes();
  $('groupTeacherFilter').innerHTML='<option value="">সব Teacher</option><option value="__unassigned">Unassigned</option>'+embeddedTeachers.map(x=>'<option value="'+escapeHtml(x.teacher_id)+'">'+escapeHtml((x.teacher_code||'')+' · '+x.full_name)+'</option>').join('');
  renderEmbeddedGroups();
 }
@@ -46,14 +58,14 @@ function filteredGroups(){
  return embeddedGroups.filter(g=>{
   if(status&&String(g.active!==false)!==String(status==='active'))return false;
   if(teacher==='__unassigned'&&g.teacher_id)return false;if(teacher&&teacher!=='__unassigned'&&g.teacher_id!==teacher)return false;
-  const ms=embeddedMembers.filter(m=>m.group_id===g.group_id);const names=ms.map(m=>{const s=embeddedStudents.find(x=>x.student_id===m.student_id);return s?((s.student_code||'')+' '+(s.full_name||'')):''}).join(' ');
+  const ms=membersForGroup(g.group_id);const names=ms.map(m=>{const s=embeddedStudentById.get(m.student_id);return s?((s.student_code||'')+' '+(s.full_name||'')):''}).join(' ');
   return !q||[g.group_name,teacherLabel(g.teacher_id),names].join(' ').toLowerCase().includes(q);
  });
 }
 function renderEmbeddedGroups(){
  const list=filteredGroups();$('groupCountLabel').textContent=list.length+' টি group';
  $('embeddedGroupList').innerHTML=list.map(g=>{
-  const ms=embeddedMembers.filter(m=>m.group_id===g.group_id),ss=ms.map(m=>embeddedStudents.find(s=>s.student_id===m.student_id)).filter(Boolean),open=openGroupId===g.group_id;
+  const ms=membersForGroup(g.group_id),ss=ms.map(m=>embeddedStudentById.get(m.student_id)).filter(Boolean),open=openGroupId===g.group_id;
   const studentNames=ss.length?ss.map((s,i)=>'<span class="group-student-name">'+(i+1)+'. <a href="student-profile.html?id='+encodeURIComponent(s.student_id)+'">'+escapeHtml(s.student_code||'')+' · '+escapeHtml(s.full_name||'Student')+'</a></span>').join(''):'<span class="muted">কোনো Student নেই</span>';
   return '<section class="embedded-group-row '+(open?'is-open':'')+'" data-group-id="'+escapeHtml(g.group_id)+'"><button class="embedded-group-summary" type="button" data-open-group="'+escapeHtml(g.group_id)+'" aria-expanded="'+open+'"><span class="group-name-cell"><strong>'+escapeHtml(g.group_name)+'</strong><small>'+ms.length+' students</small></span><span>'+escapeHtml(teacherLabel(g.teacher_id))+'</span><span class="group-students-cell">'+studentNames+'</span><span><span class="active-badge '+(g.active!==false?'on':'off')+'">'+(g.active!==false?'Active':'Inactive')+'</span></span></button>'+(open?renderGroupEditor(g,ss):'')+'</section>';
  }).join('')||'<div class="dues-empty">কোনো Group পাওয়া যায়নি।</div>';
@@ -75,7 +87,7 @@ function resetGroupFilters(){
   $('groupSearch').value=''; $('groupStatusFilter').value=''; $('groupTeacherFilter').value=''; renderEmbeddedGroups();
 }
 function exportGroupsCsv(){
-  const rows=filteredGroups().map(g=>{const ms=embeddedMembers.filter(m=>m.group_id===g.group_id),ss=ms.map(m=>embeddedStudents.find(s=>s.student_id===m.student_id)).filter(Boolean);return {group:g.group_name||'',teacher:teacherLabel(g.teacher_id),students:ss.map(s=>(s.student_code||'')+' · '+(s.full_name||'')).join('; '),status:g.active!==false?'Active':'Inactive'};});
+  const rows=filteredGroups().map(g=>{const ms=membersForGroup(g.group_id),ss=ms.map(m=>embeddedStudentById.get(m.student_id)).filter(Boolean);return {group:g.group_name||'',teacher:teacherLabel(g.teacher_id),students:ss.map(s=>(s.student_code||'')+' · '+(s.full_name||'')).join('; '),status:g.active!==false?'Active':'Inactive'};});
   downloadCsv('QuranerAlo_Groups_'+new Date().toISOString().slice(0,10)+'.csv',[{label:'Group',key:'group'},{label:'Teacher',key:'teacher'},{label:'Students',key:'students'},{label:'Status',key:'status'}],rows);
 }
 function bindGroupListTools(){
