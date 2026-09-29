@@ -188,8 +188,9 @@ async function load(){
     const map=Object.fromEntries((gs||[]).map(x=>[x.guardian_id,x]));
     guardians=links.map(x=>({...map[x.guardian_id],is_primary:x.is_primary})).filter(x=>x.guardian_id).sort((a,b)=>Number(b.is_primary)-Number(a.is_primary));
   }
-  fillStudent();await Promise.all([loadTeachers(),loadGroupAssignment()]);renderTeacherAssignment();mode();
-  await renderStudentDocuments();
+  fillStudent();
+  await Promise.all([loadTeachers(),loadGroupAssignment(),renderStudentDocuments()]);
+  renderTeacherAssignment();mode();
 }
 
 async function save(){
