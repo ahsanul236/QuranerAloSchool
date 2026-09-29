@@ -863,7 +863,8 @@
     };
 
     void optional(loadMetrics, null, 'Dashboard metrics');
-    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');\n    void optional(loadTodayVouchers, 'todayVoucherMessage', 'Today vouchers');
+    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+    void optional(loadTodayVouchers, 'todayVoucherMessage', 'Today vouchers');
     if (access.can('settings.manage')) {
       void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
       void optional(loadFinancialSettings, 'financialSettingsMessage', 'Financial Settings');
