@@ -318,6 +318,56 @@
     $('helperActivationHint').textContent = h ? (h - ha) + ' জন এখনো activate করেনি' : 'কোনো helper নেই';
   }
 
+  function overviewVoucherSource(v) {
+    if (v.source_type === 'finance_transaction') return v.voucher_type === 'income' ? 'Income' : 'Expense';
+    if (v.source_type === 'fee_payment' || v.record_type === 'fee_receipt') return 'Fee';
+    if (v.source_type === 'payroll_payment') return 'Payroll';
+    return 'Manual';
+  }
+
+  function overviewVoucherPrintHref(v) {
+    if (v.source_type === 'fee_payment' || v.record_type === 'fee_receipt') return 'receipt.html?type=fee&id=' + encodeURIComponent(v.source_id);
+    if (v.source_type === 'payroll_payment') return 'receipt.html?type=payroll&id=' + encodeURIComponent(v.source_id);
+    return 'receipt.html?type=voucher&id=' + encodeURIComponent(v.voucher_id);
+  }
+
+  async function loadTodayVouchers() {
+    const body = $('todayVoucherRows');
+    if (!body) return;
+    const canVouchers = access.can('vouchers.view') || access.can('vouchers.manage');
+    if (!canVouchers) {
+      body.innerHTML = '<tr><td colspan="8">Voucher view permission নেই।</td></tr>';
+      $('todayVoucherCount').textContent = '—';
+      return;
+    }
+    const today = localDateISO();
+    const canPayments = access.can('payments.view') || access.can('payments.manage');
+    const [voucherResult, feeResult] = await Promise.all([
+      client.from('qa_vouchers').select('voucher_id,voucher_no,voucher_type,voucher_date,amount,account_name,party_name,reference,description,status,source_type,source_id,created_at').eq('voucher_date', today).order('created_at',{ascending:false}),
+      canPayments ? client.from('qa_fee_payments').select('payment_id,receipt_no,student_id,paid_at,amount,payment_method,reference,notes').gte('paid_at', today + 'T00:00:00').lt('paid_at', localDateISO(new Date(Date.now()+86400000)) + 'T00:00:00').order('paid_at',{ascending:false}) : Promise.resolve({data:[],error:null})
+    ]);
+    if (voucherResult.error) throw voucherResult.error;
+    if (feeResult.error) throw feeResult.error;
+    const vouchers = voucherResult.data || [];
+    const feePayments = feeResult.data || [];
+    const existingFeeSources = new Set(vouchers.filter(v => v.source_type === 'fee_payment').map(v => v.source_id));
+    const studentIds = [...new Set(feePayments.map(p => p.student_id).filter(Boolean))];
+    let studentsById = {};
+    if (studentIds.length) {
+      const {data:students,error} = await client.from('qa_students').select('student_id,student_code,full_name').in('student_id',studentIds);
+      if (error) throw error;
+      studentsById = Object.fromEntries((students || []).map(s => [s.student_id,s]));
+    }
+    const feeRows = feePayments.filter(p => !existingFeeSources.has(p.payment_id)).map(p => {
+      const s = studentsById[p.student_id] || {};
+      return {record_type:'fee_receipt',voucher_id:null,voucher_no:p.receipt_no,voucher_type:'fee_receipt',voucher_date:localDateISO(p.paid_at),amount:p.amount,account_name:p.payment_method,party_name:s.full_name||s.student_code||'—',reference:p.reference,description:p.notes||'Monthly Fee',status:'posted',source_type:'fee_payment',source_id:p.payment_id,created_at:p.paid_at};
+    });
+    const rows = [...vouchers,...feeRows].sort((a,b) => new Date(b.created_at||b.voucher_date||0)-new Date(a.created_at||a.voucher_date||0));
+    $('todayVoucherCount').textContent = rows.length + (rows.length === 1 ? ' voucher' : ' vouchers');
+    body.innerHTML = rows.map(v => '<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td>'+esc(v.voucher_type)+'</td><td>'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td>'+esc(overviewVoucherSource(v))+'</td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+overviewVoucherPrintHref(v)+'">Print</a></td></tr>').join('') || '<tr><td colspan="8">আজকের কোনো Voucher নেই।</td></tr>';
+    message('todayVoucherMessage','');
+  }
+
   async function loadOverviewReports() {
     const grid = $('overviewReportGrid');
     if (!grid) return;
@@ -813,7 +863,7 @@
     };
 
     void optional(loadMetrics, null, 'Dashboard metrics');
-    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');\n    void optional(loadTodayVouchers, 'todayVoucherMessage', 'Today vouchers');
     if (access.can('settings.manage')) {
       void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
       void optional(loadFinancialSettings, 'financialSettingsMessage', 'Financial Settings');
