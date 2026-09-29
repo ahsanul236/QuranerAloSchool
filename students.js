@@ -79,6 +79,7 @@ function exportGroupsCsv(){
   downloadCsv('QuranerAlo_Groups_'+new Date().toISOString().slice(0,10)+'.csv',[{label:'Group',key:'group'},{label:'Teacher',key:'teacher'},{label:'Students',key:'students'},{label:'Status',key:'status'}],rows);
 }
 function bindGroupListTools(){
+  $('groupToggleFilters')?.addEventListener('click',()=>{const open=$('groupAdvancedFilters')?.classList.toggle('is-open');$('groupToggleFilters')?.setAttribute('aria-expanded',String(!!open));});
   $('groupResetFilters')?.addEventListener('click',resetGroupFilters);
   $('groupExport')?.addEventListener('click',exportGroupsCsv);
   $('groupColumns')?.addEventListener('click',e=>{e.stopPropagation();$('groupColumnMenu')?.classList.toggle('hidden');});
