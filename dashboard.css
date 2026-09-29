@@ -2107,3 +2107,138 @@ th.qa-sortable-th:hover{background:#eef8f4}
     color:#fff!important;
   }
 }
+
+
+/* 2026-09-29 SURGICAL GROUP ORDER + MOBILE STAFF-REFERENCE LOCK */
+/* Desktop: Group must be filter -> actions -> results. */
+@media (min-width:621px){
+  #groupView .group-workspace-panel{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #groupView .group-workspace-panel>.list-filter-shell{
+    order:1!important;
+  }
+  #groupView .group-workspace-panel>.panel-head{
+    order:2!important;
+  }
+  #groupView .group-workspace-panel>.group-list-head{
+    order:3!important;
+  }
+  #groupView .group-workspace-panel>.embedded-group-list{
+    order:4!important;
+  }
+}
+
+/* Mobile: keep Teacher/Helper as reference; only force Student + Group to the same geometry. */
+@media (max-width:620px){
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.panel-head{
+    display:block!important;
+    margin:0!important;
+    padding:10px 12px!important;
+    border:0!important;
+    border-bottom:1px solid var(--line)!important;
+    background:#fff!important;
+  }
+
+  #studentView .list-management-panel>.panel-head>div:first-child,
+  #groupView .group-workspace-panel>.panel-head>div:first-child{
+    display:none!important;
+  }
+
+  #studentView .list-management-panel>.panel-head .list-head-actions,
+  #groupView .group-workspace-panel>.panel-head .list-head-actions{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+    width:100%!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+
+  #studentView .list-management-panel>.panel-head .list-head-actions>.list-export-wrap,
+  #studentView .list-management-panel>.panel-head .list-head-actions>.list-column-wrap,
+  #groupView .group-workspace-panel>.panel-head .list-head-actions>.list-column-wrap{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  #studentView .list-management-panel>.panel-head .list-head-actions .list-action-btn,
+  #studentView .list-management-panel>.panel-head .list-head-actions .list-reset-btn,
+  #groupView .group-workspace-panel>.panel-head .list-head-actions .list-action-btn,
+  #groupView .group-workspace-panel>.panel-head .list-head-actions .list-reset-btn,
+  #groupView .group-workspace-panel>.panel-head .list-head-actions>.list-column-wrap>.list-action-btn{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:50px!important;
+    min-height:50px!important;
+    padding:8px 12px!important;
+    border-radius:12px!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:none!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.list-filter-shell{
+    display:block!important;
+    margin:0 12px 10px!important;
+    padding:12px!important;
+    border:1px solid #dce7f1!important;
+    border-radius:15px!important;
+    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
+    box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+    overflow:visible!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-search-row,
+  #groupView .group-workspace-panel>.list-filter-shell .group-search-row{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-search-field input,
+  #groupView .group-workspace-panel>.list-filter-shell .list-search-field input{
+    min-height:54px!important;
+    border-radius:12px!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-filter-toggle,
+  #groupView .group-workspace-panel>.list-filter-shell .list-filter-toggle{
+    display:inline-flex!important;
+    width:100%!important;
+    height:50px!important;
+    min-height:50px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-radius:12px!important;
+    font-size:16px!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-filter-grid,
+  #groupView .group-workspace-panel>.list-filter-shell .group-filter-bar{
+    display:none!important;
+    margin-top:10px!important;
+    padding:0!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-filter-grid.is-open,
+  #groupView .group-workspace-panel>.list-filter-shell .group-filter-bar.is-open{
+    display:grid!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell .list-filter-footer,
+  #groupView .group-workspace-panel>.list-filter-shell .list-filter-footer{
+    display:none!important;
+  }
+}
