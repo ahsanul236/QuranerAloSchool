@@ -819,6 +819,11 @@
     panel.setAttribute('data-settings-detail', 'true');
     ensureSettingsBackButton(panel);
 
+    if (id === 'settingsStoragePanel') {
+      window.__qaStorageRequested = true;
+      window.dispatchEvent(new CustomEvent('qa:storage-open'));
+    }
+
     if (id === 'schoolProfilePanel') {
       $('schoolProfileBody')?.classList.remove('hidden');
       $('toggleSchoolProfile')?.setAttribute('aria-expanded', 'true');
@@ -921,44 +926,60 @@
     bindUI();
     bindSettingsNavigation();
 
+    const optional = async (fn, target, label) => {
+      try { await fn(); }
+      catch (error) { console.error(label, error); if (target) message(target, `${label} load করা যায়নি।`, 'error'); }
+    };
+
+    let overviewStarted = false;
+    let settingsStarted = false;
+
+    const loadOverviewOnce = () => {
+      if (overviewStarted) return;
+      overviewStarted = true;
+      void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
+      void optional(loadTodayVouchers, 'todayVoucherMessage', 'Today vouchers');
+    };
+
+    const loadSettingsOnce = () => {
+      if (settingsStarted) return;
+      settingsStarted = true;
+
+      // Activation metrics and Settings data are only needed inside Settings.
+      void optional(loadMetrics, null, 'Dashboard metrics');
+
+      if (access.can('settings.manage')) {
+        void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
+        void optional(loadFinancialSettings, 'financialSettingsMessage', 'Financial Settings');
+      }
+
+      if (profile.role === 'owner') {
+        show('userManagement');
+        show('subAdminPanel');
+        fillPermissionPanels();
+        void optional(loadPreview, 'previewMessage', 'Portal preview');
+        void optional(loadUsers, null, 'User management');
+      } else if (profile.role === 'admin') {
+        show('userManagement');
+        void optional(loadUsers, null, 'User management');
+      }
+    };
 
     const renderView = () => {
       const view = location.hash.replace('#', '') === 'settings' ? 'settings' : 'overview';
       if (view === 'settings') {
         hide('overviewView');
         show('settingsView');
+        loadSettingsOnce();
       } else {
         show('overviewView');
         hide('settingsView');
+        loadOverviewOnce();
       }
     };
 
     renderView();
     window.addEventListener('hashchange', renderView);
-
-    const optional = async (fn, target, label) => {
-      try { await fn(); }
-      catch (error) { console.error(label, error); if (target) message(target, `${label} load করা যায়নি।`, 'error'); }
-    };
-
-    void optional(loadMetrics, null, 'Dashboard metrics');
-    void optional(loadOverviewReports, 'overviewReportMessage', 'Report summary');
-    void optional(loadTodayVouchers, 'todayVoucherMessage', 'Today vouchers');
-    if (access.can('settings.manage')) {
-      void optional(loadSchoolProfile, 'schoolProfileMessage', 'School Profile');
-      void optional(loadFinancialSettings, 'financialSettingsMessage', 'Financial Settings');
-    }
-
-    if (profile.role === 'owner') {
-      show('userManagement');
-      show('subAdminPanel');
-      fillPermissionPanels();
-      void optional(loadPreview, 'previewMessage', 'Portal preview');
-      void optional(loadUsers, null, 'User management');
-    } else if (profile.role === 'admin') {
-      show('userManagement');
-      void optional(loadUsers, null, 'User management');
-    }
   }
 
   window.addEventListener('error', (event) => console.error('Dashboard runtime error', event.error || event.message));
