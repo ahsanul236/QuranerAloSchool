@@ -242,8 +242,9 @@ async function load(){
   row=data;
   fill();
   syncMode();
-  await renderStaffDocuments();
-  if(type==='teacher'){ await loadTeacherAssignments(); await loadTeacherGroups(); }
+  const profileLoads=[renderStaffDocuments()];
+  if(type==='teacher')profileLoads.push(loadTeacherAssignments(),loadTeacherGroups());
+  await Promise.all(profileLoads);
 }
 $('maritalStatus')?.addEventListener('change',syncSpouseField);
 $('saveGroupAssignmentsBtn')?.addEventListener('click',async()=>{const btn=$('saveGroupAssignmentsBtn');btn.disabled=true;$('groupAssignmentMessage').textContent='Saving…';$('groupAssignmentMessage').className='message-inline';try{await saveTeacherGroupAssignments();}catch(e){console.error(e);$('groupAssignmentMessage').textContent=e.message||'Group assignment save করা যায়নি।';$('groupAssignmentMessage').className='message-inline error';}finally{btn.disabled=false;}});
