@@ -769,6 +769,79 @@
     }
   }
 
+  let activeSettingsPane = null;
+
+  function settingsPaneButton(id) {
+    return document.querySelector(`#settingsDesktopNav [data-settings-pane="${id}"]`);
+  }
+
+  function closeSettingsPane(fromHistory = false) {
+    const view = $('settingsView');
+    if (!view) return;
+    view.classList.remove('has-detail');
+    document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => el.classList.remove('settings-pane-active'));
+    document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
+    activeSettingsPane = null;
+    if (!fromHistory && history.state?.qaSettingsPane) history.back();
+  }
+
+  function ensureSettingsBackButton(panel) {
+    let button = panel.querySelector(':scope > .settings-detail-back');
+    if (button) return button;
+    button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'settings-detail-back';
+    button.setAttribute('aria-label', 'Back to Settings');
+    button.innerHTML = '<span aria-hidden="true">←</span><strong>Settings</strong>';
+    button.addEventListener('click', () => closeSettingsPane(false));
+    panel.prepend(button);
+    return button;
+  }
+
+  function openSettingsPane(id, pushHistory = true) {
+    const view = $('settingsView');
+    const panel = $(id);
+    const button = settingsPaneButton(id);
+    if (!view || !panel || !button || button.hidden || button.disabled) return;
+
+    document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => el.classList.remove('settings-pane-active'));
+    document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
+
+    panel.classList.remove('hidden');
+    panel.classList.add('settings-pane-active');
+    button.classList.add('is-active');
+    view.classList.add('has-detail');
+    activeSettingsPane = id;
+    ensureSettingsBackButton(panel);
+
+    if (id === 'schoolProfilePanel') {
+      $('schoolProfileBody')?.classList.remove('hidden');
+      $('toggleSchoolProfile')?.setAttribute('aria-expanded', 'true');
+    } else if (id === 'financialSettingsPanel') {
+      $('financialSettingsBody')?.classList.remove('hidden');
+      $('toggleFinancialSettings')?.setAttribute('aria-expanded', 'true');
+    } else if (id === 'userManagement') {
+      $('userManagementBody')?.classList.remove('hidden');
+      $('toggleUserManagement')?.setAttribute('aria-expanded', 'true');
+    }
+
+    if (pushHistory && history.state?.qaSettingsPane !== id) {
+      history.pushState({ ...(history.state || {}), qaSettingsPane: id }, '', location.href);
+    }
+    panel.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function bindSettingsNavigation() {
+    document.querySelectorAll('#settingsDesktopNav [data-settings-pane]').forEach((button) => {
+      button.addEventListener('click', () => openSettingsPane(button.dataset.settingsPane, true));
+    });
+    window.addEventListener('popstate', (event) => {
+      if (event.state?.qaSettingsPane) openSettingsPane(event.state.qaSettingsPane, false);
+      else closeSettingsPane(true);
+    });
+  }
+
   function bindUI() {
     const previewSearch = $('portalPreviewSearch');
     previewSearch?.addEventListener('focus', () => renderPreviewResults(previewSearch.value));
@@ -841,6 +914,7 @@
     hide('loading');
     show('app');
     bindUI();
+    bindSettingsNavigation();
 
 
     const renderView = () => {
