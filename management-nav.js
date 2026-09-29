@@ -39,8 +39,62 @@
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 
+  const NON_SORTABLE_HEADERS = /^(action|actions|print|message|whatsapp|attendance|access|portal|save|edit|delete|remove)$/i;
+  const tableSortState = new WeakMap();
+  let sortApplying = false;
+
+  function sortableValue(cell) {
+    const raw = String(cell?.textContent || '').replace(/\s+/g,' ').trim();
+    if (!raw || raw === '—') return { type:'empty', value:'' };
+    const numeric = raw.replace(/[৳,$,%\s]/g,'').replace(/,/g,'');
+    if (/^-?\d+(?:\.\d+)?$/.test(numeric)) return { type:'number', value:Number(numeric) };
+    if (/^\d{4}-\d{2}-\d{2}/.test(raw)) { const t=Date.parse(raw); if(!Number.isNaN(t)) return {type:'number',value:t}; }
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) { const [d,m,y]=raw.split('/'); return {type:'number',value:Date.parse(y+'-'+m+'-'+d)}; }
+    return { type:'text', value:raw.toLocaleLowerCase() };
+  }
+
+  function applyTableSort(table) {
+    if (sortApplying) return;
+    const state = tableSortState.get(table); if (!state) return;
+    const body=table.tBodies?.[0]; if(!body) return;
+    const rows=[...body.rows];
+    if(rows.length<2 || rows.some(r=>r.cells.length===1 && Number(r.cells[0].colSpan)>1)) return;
+    sortApplying=true;
+    rows.sort((a,b)=>{
+      const av=sortableValue(a.cells[state.index]), bv=sortableValue(b.cells[state.index]);
+      if(av.type==='empty'&&bv.type!=='empty')return 1;if(bv.type==='empty'&&av.type!=='empty')return -1;
+      let cmp=0;
+      if(av.type==='number'&&bv.type==='number')cmp=av.value-bv.value;
+      else cmp=String(av.value).localeCompare(String(bv.value),undefined,{numeric:true,sensitivity:'base'});
+      return state.direction==='asc'?cmp:-cmp;
+    });
+    rows.forEach(r=>body.appendChild(r)); sortApplying=false;
+  }
+
+  function initSortableTables(root=document) {
+    root.querySelectorAll?.('table').forEach(table=>{
+      if(table.dataset.qaSortableBound)return;
+      const headers=[...table.querySelectorAll('thead th')]; if(!headers.length)return;
+      headers.forEach((th,index)=>{
+        const label=String(th.textContent||'').trim();
+        if(!label || NON_SORTABLE_HEADERS.test(label))return;
+        th.classList.add('qa-sortable-th'); th.tabIndex=0; th.setAttribute('role','button'); th.setAttribute('aria-sort','none');
+        const activate=()=>{
+          const prev=tableSortState.get(table); const direction=prev?.index===index&&prev.direction==='asc'?'desc':'asc';
+          tableSortState.set(table,{index,direction});
+          headers.forEach(h=>{h.classList.remove('qa-sort-asc','qa-sort-desc');if(h.classList.contains('qa-sortable-th'))h.setAttribute('aria-sort','none')});
+          th.classList.add(direction==='asc'?'qa-sort-asc':'qa-sort-desc'); th.setAttribute('aria-sort',direction==='asc'?'ascending':'descending');
+          applyTableSort(table);
+        };
+        th.addEventListener('click',activate); th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});
+      });
+      table.dataset.qaSortableBound='1';
+      const body=table.tBodies?.[0]; if(body)new MutationObserver(()=>{if(!sortApplying&&tableSortState.has(table))queueMicrotask(()=>applyTableSort(table));}).observe(body,{childList:true});
+    });
+  }
+
   function init() {
-    if (document.body.classList.contains('management-layout')) return;
+    if (document.body.classList.contains('management-layout')) return;\n    initSortableTables();\n    new MutationObserver(()=>initSortableTables()).observe(document.body,{childList:true,subtree:true});
     document.body.classList.add('management-layout');
 
     const sidebar = document.createElement('aside');
