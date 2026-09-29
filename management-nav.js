@@ -41,8 +41,6 @@
 
   const NON_SORTABLE_HEADERS = /^(action|actions|print|message|whatsapp|attendance|access|portal|save|edit|delete|remove)$/i;
   const tableSortState = new WeakMap();
-  let sortApplying = false;
-
   function sortableValue(cell) {
     const raw = String(cell?.textContent || '').replace(/\s+/g,' ').trim();
     if (!raw || raw === '—') return { type:'empty', value:'' };
@@ -54,12 +52,10 @@
   }
 
   function applyTableSort(table) {
-    if (sortApplying) return;
     const state = tableSortState.get(table); if (!state) return;
     const body=table.tBodies?.[0]; if(!body) return;
     const rows=[...body.rows];
     if(rows.length<2 || rows.some(r=>r.cells.length===1 && Number(r.cells[0].colSpan)>1)) return;
-    sortApplying=true;
     rows.sort((a,b)=>{
       const av=sortableValue(a.cells[state.index]), bv=sortableValue(b.cells[state.index]);
       if(av.type==='empty'&&bv.type!=='empty')return 1;if(bv.type==='empty'&&av.type!=='empty')return -1;
@@ -68,7 +64,7 @@
       else cmp=String(av.value).localeCompare(String(bv.value),undefined,{numeric:true,sensitivity:'base'});
       return state.direction==='asc'?cmp:-cmp;
     });
-    rows.forEach(r=>body.appendChild(r)); sortApplying=false;
+    const fragment=document.createDocumentFragment();\n    rows.forEach(r=>fragment.appendChild(r));\n    body.appendChild(fragment);
   }
 
   function initSortableTables(root=document) {
@@ -89,7 +85,6 @@
         th.addEventListener('click',activate); th.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();activate();}});
       });
       table.dataset.qaSortableBound='1';
-      const body=table.tBodies?.[0]; if(body)new MutationObserver(()=>{if(!sortApplying&&tableSortState.has(table))queueMicrotask(()=>applyTableSort(table));}).observe(body,{childList:true});
     });
   }
 
