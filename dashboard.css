@@ -1650,3 +1650,81 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #groupView .group-workspace-panel .list-filter-footer{display:none!important}
   #groupView .group-workspace-panel .list-filter-toggle{display:inline-flex!important;width:100%!important;align-items:center!important;justify-content:center!important}
 }
+
+
+/* 2026-09-29 final Student/Group geometry parity.
+   This block intentionally mirrors the Student/Staff mature list layout. */
+#groupView .group-workspace-panel>.panel-head{order:0!important}
+#groupView .group-workspace-panel>.list-filter-shell{order:0!important}
+#groupView .group-workspace-panel>.group-list-head{order:0!important}
+#groupView .group-workspace-panel>.embedded-group-list{order:0!important}
+
+@media (min-width:621px){
+  #groupView .group-workspace-panel{
+    display:block!important;
+  }
+  #groupView .group-workspace-panel>.list-filter-shell{
+    display:grid!important;
+    grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr)!important;
+    gap:10px!important;align-items:end!important;
+    margin:0!important;padding:14px 16px 10px!important;
+    border:0!important;border-bottom:1px solid var(--line)!important;border-radius:0!important;
+    background:#fbfdfc!important;box-shadow:none!important;
+  }
+  #groupView .group-workspace-panel .group-search-row{display:block!important;min-width:0!important}
+  #groupView .group-workspace-panel .group-filter-bar{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;min-width:0!important;margin:0!important;padding:0!important;
+  }
+  #groupView .group-workspace-panel .group-filter-bar>label,
+  #groupView .group-workspace-panel .list-search-field{min-width:0!important;width:100%!important}
+  #groupView .group-workspace-panel>.panel-head{
+    display:flex!important;align-items:center!important;margin:0!important;padding:10px 16px!important;
+    border-top:0!important;border-bottom:1px solid var(--line)!important;background:#fff!important;
+  }
+  #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
+  #groupView .group-workspace-panel>.panel-head .list-head-actions{
+    display:flex!important;width:auto!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;
+  }
+  #groupView .group-workspace-panel>.panel-head .list-action-btn,
+  #groupView .group-workspace-panel>.panel-head .list-reset-btn{
+    width:auto!important;min-width:132px!important;height:42px!important;min-height:42px!important;
+    padding:8px 16px!important;border-radius:10px!important;font-size:14px!important;
+  }
+}
+
+@media (max-width:620px){
+  #groupView .group-workspace-panel{display:block!important}
+  #groupView .group-workspace-panel>.panel-head{
+    display:grid!important;grid-template-columns:1fr!important;margin:0!important;padding:10px 12px!important;
+    border-bottom:1px solid var(--line)!important;background:#fff!important;
+  }
+  #groupView .group-workspace-panel>.panel-head>div:first-child{display:none!important}
+  #groupView .group-workspace-panel>.panel-head .list-head-actions{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;width:100%!important;overflow:visible!important;padding:0!important;
+  }
+  #groupView .group-workspace-panel>.panel-head .list-column-wrap{display:block!important;width:100%!important}
+  #groupView .group-workspace-panel>.panel-head .list-action-btn,
+  #groupView .group-workspace-panel>.panel-head .list-reset-btn,
+  #groupView .group-workspace-panel>.panel-head .list-column-wrap>.list-action-btn{
+    width:100%!important;min-width:0!important;max-width:none!important;flex:none!important;
+    height:50px!important;min-height:50px!important;padding:8px 12px!important;border-radius:12px!important;font-size:13px!important;
+  }
+  #groupView .group-workspace-panel>.list-filter-shell{
+    display:block!important;margin:0 12px 10px!important;padding:12px!important;
+    border:1px solid #dce7f1!important;border-radius:15px!important;
+    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+  }
+  #groupView .group-workspace-panel .group-search-row{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  }
+  #groupView .group-workspace-panel .list-search-field input{min-height:54px!important;border-radius:12px!important}
+  #groupView .group-workspace-panel .list-filter-toggle{
+    display:inline-flex!important;width:100%!important;height:50px!important;min-height:50px!important;
+    align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:16px!important;
+  }
+  #groupView .group-workspace-panel .group-filter-bar{display:none!important;margin-top:10px!important;padding:0!important}
+  #groupView .group-workspace-panel .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  #groupView .group-workspace-panel .list-filter-footer{display:none!important}
+}
