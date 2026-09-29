@@ -94,7 +94,9 @@
   }
 
   function init() {
-    if (document.body.classList.contains('management-layout')) return;\n    initSortableTables();\n    new MutationObserver(()=>initSortableTables()).observe(document.body,{childList:true,subtree:true});
+    if (document.body.classList.contains('management-layout')) return;
+    initSortableTables();
+    new MutationObserver(()=>initSortableTables()).observe(document.body,{childList:true,subtree:true});
     document.body.classList.add('management-layout');
 
     const sidebar = document.createElement('aside');
