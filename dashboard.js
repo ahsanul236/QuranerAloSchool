@@ -792,7 +792,9 @@
     button.type = 'button';
     button.className = 'settings-detail-back';
     button.setAttribute('aria-label', 'Back to Settings');
-    button.innerHTML = '<span aria-hidden="true">←</span><strong>Settings</strong>';
+    const navButton = settingsPaneButton(panel.id);
+    const title = navButton?.querySelector('strong')?.textContent?.trim() || navButton?.textContent?.replace('›','').trim() || 'Settings';
+    button.innerHTML = '<span aria-hidden="true">‹</span><span>Back</span><strong>' + escapeHtml(title) + '</strong>';
     button.addEventListener('click', () => closeSettingsPane(false));
     panel.prepend(button);
     return button;
