@@ -39,6 +39,41 @@
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 
+  const QA_NON_SORTABLE = /^(action|actions|print|message|whatsapp|attendance|access|portal|save|edit|delete|remove)$/i;
+
+  function qaSortValue(cell) {
+    const raw=String(cell?.textContent||'').replace(/\s+/g,' ').trim();
+    if(!raw||raw==='—')return {empty:true,value:''};
+    const numeric=raw.replace(/[৳$,%\s]/g,'').replace(/,/g,'');
+    if(/^-?\d+(?:\.\d+)?$/.test(numeric))return {empty:false,value:Number(numeric),numeric:true};
+    if(/^\d{4}-\d{2}-\d{2}/.test(raw)){const t=Date.parse(raw);if(!Number.isNaN(t))return {empty:false,value:t,numeric:true};}
+    return {empty:false,value:raw.toLocaleLowerCase(),numeric:false};
+  }
+
+  function qaSortTable(th) {
+    const table=th.closest('table'), body=table?.tBodies?.[0];
+    if(!table||!body)return;
+    const headers=[...th.parentElement.children], index=headers.indexOf(th);
+    const rows=[...body.rows];
+    if(index<0||rows.length<2||rows.some(r=>!r.cells[index]||(r.cells.length===1&&r.cells[0].colSpan>1)))return;
+    const direction=th.dataset.sortDirection==='asc'?'desc':'asc';
+    headers.forEach(h=>{delete h.dataset.sortDirection;h.classList.remove('qa-sort-asc','qa-sort-desc');h.setAttribute('aria-sort','none');});
+    th.dataset.sortDirection=direction;th.classList.add(direction==='asc'?'qa-sort-asc':'qa-sort-desc');th.setAttribute('aria-sort',direction==='asc'?'ascending':'descending');
+    rows.sort((a,b)=>{const av=qaSortValue(a.cells[index]),bv=qaSortValue(b.cells[index]);if(av.empty&&!bv.empty)return 1;if(bv.empty&&!av.empty)return -1;let cmp;if(av.numeric&&bv.numeric)cmp=av.value-bv.value;else cmp=String(av.value).localeCompare(String(bv.value),undefined,{numeric:true,sensitivity:'base'});return direction==='asc'?cmp:-cmp;});
+    const frag=document.createDocumentFragment();rows.forEach(row=>frag.appendChild(row));body.appendChild(frag);
+  }
+
+  function qaSortableHeader(target) {
+    const th=target.closest?.('table thead th');if(!th)return null;
+    const label=String(th.textContent||'').trim();if(!label||QA_NON_SORTABLE.test(label))return null;
+    return th;
+  }
+
+  function enableSafeTableSorting() {
+    document.querySelectorAll('table thead th').forEach(th=>{if(qaSortableHeader(th)){th.classList.add('qa-sortable-th');th.setAttribute('aria-sort','none');}});
+    document.addEventListener('click',event=>{const th=qaSortableHeader(event.target);if(!th)return;qaSortTable(th);});
+  }
+
   function init() {
     if (document.body.classList.contains('management-layout')) return;
     document.body.classList.add('management-layout');
@@ -192,6 +227,8 @@
 
     const syncMobileActive=()=>{const key=currentKey();mobileBar.querySelectorAll('[data-mobile-key]').forEach(el=>el.classList.toggle('is-active',el.dataset.mobileKey===key||(el.dataset.mobileKey==='more'&&['staff','expense','settings'].includes(key))));};
     syncMobileActive();window.addEventListener('hashchange',syncMobileActive);
+    enableSafeTableSorting();
+
     let lastY=window.scrollY, hidden=false;
     window.addEventListener('scroll',()=>{if(innerWidth>620)return;const y=window.scrollY;if(y<40||y<lastY-7){if(hidden){mobileBar.classList.remove('is-hidden');topbar?.classList.remove('is-mobile-hidden');mobileTabs?.classList.remove('is-mobile-hidden');hidden=false}}else if(y>lastY+9&&y>120){if(!hidden&&!moreSheet.classList.contains('is-open')&&!activeSlide){mobileBar.classList.add('is-hidden');topbar?.classList.add('is-mobile-hidden');mobileTabs?.classList.add('is-mobile-hidden');hidden=true}}lastY=y;},{passive:true});
 
