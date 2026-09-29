@@ -385,9 +385,9 @@
     const monthKey = today.slice(0, 7);
 
     const peoplePromise = Promise.all([
-      canStudents ? countRows('qa_students') : Promise.resolve(null),
-      canTeachers ? countRows('qa_teachers') : Promise.resolve(null),
-      canHelpers ? countRows('qa_staff', q => q.eq('staff_type', 'helper')) : Promise.resolve(null)
+      canStudents ? countRows('qa_students', q => q.eq('status', 'active')) : Promise.resolve(null),
+      canTeachers ? countRows('qa_teachers', q => q.eq('active', true)) : Promise.resolve(null),
+      canHelpers ? countRows('qa_staff', q => q.eq('staff_type', 'helper').eq('active', true)) : Promise.resolve(null)
     ]);
 
     const financePromise = canFinance ? loadFinanceRows() : Promise.resolve(null);
@@ -422,9 +422,9 @@
     if (openingResult.error) throw openingResult.error;
 
     const peopleRows = [
-      canStudents ? `<a class="overview-people-row overview-people-link" href="students.html" aria-label="Open Students list"><span class="overview-people-icon student">S</span><span class="overview-people-label">Total Students</span><strong>${students}</strong></a>` : '',
-      canTeachers ? `<a class="overview-people-row overview-people-link" href="staff.html#teachers" aria-label="Open Teachers list"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Total Teachers</span><strong>${teachers}</strong></a>` : '',
-      canHelpers ? `<a class="overview-people-row overview-people-link" href="staff.html#helpers" aria-label="Open Helpers list"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Total Helpers</span><strong>${helpers}</strong></a>` : ''
+      canStudents ? `<a class="overview-people-row overview-people-link" href="students.html" aria-label="Open Students list"><span class="overview-people-icon student">S</span><span class="overview-people-label">Active Students</span><strong>${students}</strong></a>` : '',
+      canTeachers ? `<a class="overview-people-row overview-people-link" href="staff.html#teachers" aria-label="Open Teachers list"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Active Teachers</span><strong>${teachers}</strong></a>` : '',
+      canHelpers ? `<a class="overview-people-row overview-people-link" href="staff.html#helpers" aria-label="Open Helpers list"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Active Helpers</span><strong>${helpers}</strong></a>` : ''
     ].join('');
 
     const sum = (items, key = 'amount') => (items || []).reduce((total, item) => total + Number(item[key] || 0), 0);
