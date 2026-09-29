@@ -1212,3 +1212,18 @@
 .mobile-slide-summary-trigger:hover{background:#f8fcfa}
 .mobile-slide-summary-trigger:active{background:#f3faf7}
 .mobile-slide-summary-trigger:focus-visible{outline:3px solid rgba(7,132,103,.18);outline-offset:-3px}
+
+
+/* Shared Excel-style data rows: visual only; no table behavior changes */
+.user-table tbody tr:nth-child(odd),
+.student-table tbody tr:nth-child(odd),
+.staff-table tbody tr:nth-child(odd){background:#ffffff}
+.user-table tbody tr:nth-child(even),
+.student-table tbody tr:nth-child(even),
+.staff-table tbody tr:nth-child(even){background:#f2faf7}
+.user-table tbody tr:hover,
+.student-table tbody tr:hover,
+.staff-table tbody tr:hover{background:#e7f6f0}
+.user-table tbody tr,
+.student-table tbody tr,
+.staff-table tbody tr{transition:background-color .14s ease}
