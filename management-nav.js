@@ -154,9 +154,6 @@
       add('toggleManualVoucher','manualVoucherBody','Manual Voucher');
       add('togglePayrollEntry','payrollEntryBody','Monthly Salary Record');
       add('toggleExpenseEntry','expenseEntryBody','নতুন Expense');
-      if(location.pathname.endsWith('dashboard.html')&&location.hash==='#settings'){
-        document.querySelectorAll('#settingsView .settings-accordion').forEach(panel=>{const trigger=panel.querySelector('.settings-toggle-btn'),body=panel.querySelector('.settings-accordion-body'),title=panel.querySelector('.settings-accordion-title h2')?.textContent?.trim();if(trigger&&body)map.push({trigger,body,title:title||'Settings'});});
-      }
       return map;
     };
     let activeSlide=null;
