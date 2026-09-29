@@ -1414,3 +1414,44 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #settingsView.has-detail .settings-pane-active>.settings-detail-back>strong{text-align:right;font-size:15px}
   #settingsView.has-detail .settings-pane-active{padding-top:0!important}
 }
+
+/* Final responsive corrections: Groups desktop row + create button + Settings mobile detail. */
+@media (min-width:621px){
+  .group-filter-shell{display:grid!important;grid-template-columns:minmax(260px,2fr) minmax(330px,1.7fr);gap:10px;align-items:end;padding:14px 16px 10px;border-bottom:1px solid var(--line);background:#fbfdfc}
+  .group-filter-shell>.group-search-row{display:block!important}
+  .group-filter-shell>.group-search-row>.list-filter-toggle{display:none!important}
+  .group-filter-shell>.group-search-row>.list-search-field{width:100%}
+  .group-filter-shell>.group-filter-bar{display:grid!important;grid-template-columns:minmax(140px,.7fr) minmax(190px,1fr)!important;gap:10px!important;padding:0!important;border:0!important;background:transparent!important;align-items:end}
+}
+.group-action-row>#newGroupInline.primary-btn{
+  background:#153f6d!important;color:#fff!important;border-color:#153f6d!important;
+}
+.group-action-row>#newGroupInline.primary-btn:hover{
+  background:#0f3158!important;color:#fff!important;border-color:#0f3158!important;
+}
+
+@media (max-width:620px){
+  #settingsView.has-detail{overflow:visible!important}
+  #settingsView.has-detail>.settings-desktop-nav{display:none!important}
+  #settingsView.has-detail>#settingsStoragePanel.settings-pane-active,
+  #settingsView.has-detail>#schoolProfilePanel.settings-pane-active,
+  #settingsView.has-detail>#financialSettingsPanel.settings-pane-active,
+  #settingsView.has-detail>#userManagement.settings-pane-active{
+    display:block!important;position:fixed!important;inset:0!important;z-index:4200!important;
+    overflow-y:auto!important;margin:0!important;border:0!important;border-radius:0!important;
+    background:#f3faf7!important;padding:0 0 calc(28px + env(safe-area-inset-bottom))!important;
+  }
+  #settingsView.has-detail>.portal-settings-cards{display:contents!important}
+  #settingsView.has-detail>.portal-settings-cards>#portalStatusPanel.settings-pane-active,
+  #settingsView.has-detail>.portal-settings-cards>#portalPreview.settings-pane-active{
+    display:block!important;position:fixed!important;inset:0!important;z-index:4200!important;
+    overflow-y:auto!important;margin:0!important;border:0!important;border-radius:0!important;
+    background:#f3faf7!important;padding:0 0 calc(28px + env(safe-area-inset-bottom))!important;
+  }
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back{
+    display:grid!important;position:sticky!important;top:0!important;z-index:30!important;
+  }
+  #settingsView.has-detail .settings-pane-active>.settings-accordion-summary{display:none!important}
+  #settingsView.has-detail .settings-pane-active>.settings-accordion-body{display:block!important;max-height:none!important;overflow:visible!important}
+  #settingsView.has-detail .settings-pane-active>.settings-accordion-body.hidden{display:block!important}
+}
