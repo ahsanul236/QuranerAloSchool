@@ -782,6 +782,7 @@
     document.querySelectorAll('#settingsView .settings-pane-active').forEach((el) => el.classList.remove('settings-pane-active'));
     document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
     activeSettingsPane = null;
+    document.querySelectorAll('#settingsView [data-settings-detail]').forEach((el) => el.removeAttribute('data-settings-detail'));
     if (!fromHistory && history.state?.qaSettingsPane) history.back();
   }
 
@@ -810,10 +811,12 @@
     document.querySelectorAll('#settingsDesktopNav button.is-active').forEach((el) => el.classList.remove('is-active'));
 
     panel.classList.remove('hidden');
+    panel.hidden = false;
     panel.classList.add('settings-pane-active');
     button.classList.add('is-active');
     view.classList.add('has-detail');
     activeSettingsPane = id;
+    panel.setAttribute('data-settings-detail', 'true');
     ensureSettingsBackButton(panel);
 
     if (id === 'schoolProfilePanel') {
