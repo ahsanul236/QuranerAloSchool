@@ -116,7 +116,16 @@ async function init() {
     return;
   }
 
-  const payroll = await loadPayroll(previewHelperId);
+  const payrollPromise = loadPayroll(previewHelperId);
+  const profileImagePromise = setProfileImage({role:'helper',personId:p.staff_id,img:$('helperPortalProfileImage')});
+  const documentsPromise = mountDocumentsPanel({
+    container:$('helperPortalDocuments'),
+    role:'helper',
+    personId:p.staff_id,
+    editable:!previewHelperId,
+    canDelete:false,
+    title:'My Documents'
+  });
 
   $('staffCodeBadge').textContent = p.staff_code || '—';
   $('name').textContent = p.full_name || '—';
@@ -137,15 +146,7 @@ async function init() {
   $('nidNumber').textContent = p.nid_number || '—';
   $('address').textContent = p.address || '—';
 
-  await setProfileImage({role:'helper',personId:p.staff_id,img:$('helperPortalProfileImage')});
-  await mountDocumentsPanel({
-    container:$('helperPortalDocuments'),
-    role:'helper',
-    personId:p.staff_id,
-    editable:!previewHelperId,
-    canDelete:false,
-    title:'My Documents'
-  });
+  const [payroll] = await Promise.all([payrollPromise, profileImagePromise, documentsPromise]);
 
   $('latestPaidAmount').textContent = money(payroll.summary?.latestPaidAmount || 0);
   $('latestPaidMonth').textContent = payroll.summary?.latestPaidMonth
