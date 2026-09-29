@@ -1852,3 +1852,258 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #groupView .list-filter-footer,
   .staff-list-management-panel .list-filter-footer{display:none!important}
 }
+
+
+/* 2026-09-29 CONTROL PARITY LOCK — desktop follows Student; mobile follows Staff. */
+/* Structure only: no feature/data behavior changes. */
+@media (min-width:621px){
+  #studentView .list-management-panel,
+  #groupView .group-workspace-panel,
+  .staff-list-management-panel{
+    display:flex!important;
+    flex-direction:column!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.list-filter-shell,
+  .staff-list-management-panel>.list-filter-shell{
+    order:1!important;
+    display:grid!important;
+    grid-template-columns:minmax(220px,1.55fr) minmax(0,5fr)!important;
+    gap:10px!important;
+    align-items:end!important;
+    margin:0!important;
+    padding:14px 16px 10px!important;
+    border:1px solid #dce7f1!important;
+    border-radius:15px!important;
+    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
+    box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+    overflow:visible!important;
+  }
+
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.panel-head,
+  .staff-list-management-panel>.panel-head{
+    order:2!important;
+    display:flex!important;
+    align-items:center!important;
+    margin:0!important;
+    padding:10px 16px!important;
+    border:0!important;
+    border-bottom:1px solid var(--line)!important;
+    border-radius:0!important;
+    background:#fff!important;
+  }
+
+  #studentView .list-management-panel>.panel-head>div:first-child,
+  #groupView .group-workspace-panel>.panel-head>div:first-child,
+  .staff-list-management-panel>.panel-head>div:first-child{
+    display:none!important;
+  }
+
+  #studentView .list-head-actions,
+  #groupView .list-head-actions,
+  .staff-list-management-panel .list-head-actions{
+    display:flex!important;
+    width:100%!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    flex-wrap:nowrap!important;
+    overflow:visible!important;
+    padding:0!important;
+  }
+
+  #studentView .list-head-actions .list-action-btn,
+  #studentView .list-head-actions .list-reset-btn,
+  #groupView .list-head-actions .list-action-btn,
+  #groupView .list-head-actions .list-reset-btn,
+  .staff-list-management-panel .list-head-actions .list-action-btn,
+  .staff-list-management-panel .list-head-actions .list-reset-btn{
+    width:auto!important;
+    min-width:132px!important;
+    height:42px!important;
+    min-height:42px!important;
+    padding:8px 16px!important;
+    border-radius:10px!important;
+    font-size:14px!important;
+    line-height:1.2!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    white-space:nowrap!important;
+  }
+
+  #studentView .list-search-row,
+  .staff-list-management-panel .list-search-row,
+  #groupView .group-search-row{
+    display:block!important;
+    min-width:0!important;
+  }
+
+  #studentView .list-filter-grid,
+  .staff-list-management-panel .list-filter-grid{
+    display:grid!important;
+    grid-template-columns:repeat(var(--filter-count,7),minmax(92px,1fr))!important;
+    gap:10px!important;
+    margin:0!important;
+    align-items:end!important;
+  }
+
+  #groupView .group-filter-bar{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(92px,1fr))!important;
+    gap:10px!important;
+    margin:0!important;
+    padding:0!important;
+    align-items:end!important;
+  }
+
+  #studentView .list-filter-toggle,
+  #groupView .list-filter-toggle,
+  .staff-list-management-panel .list-filter-toggle,
+  #studentView .list-filter-footer,
+  #groupView .list-filter-footer,
+  .staff-list-management-panel .list-filter-footer{
+    display:none!important;
+  }
+
+  #studentView .table-wrap,
+  .staff-list-management-panel>.table-wrap{order:3!important}
+  #studentView .list-pagination,
+  .staff-list-management-panel>.list-pagination{order:4!important}
+  #groupView .group-list-head{order:3!important}
+  #groupView .embedded-group-list{order:4!important}
+
+  #studentView #newStudent,
+  #groupView #newGroupInline,
+  .staff-list-management-panel #newRecord{
+    background:#153f6d!important;
+    border-color:#153f6d!important;
+    color:#fff!important;
+  }
+}
+
+/* Mobile reference is the current Teacher/Helper layout.
+   Teacher/Helper geometry is not changed; Student + Group mirror it. */
+@media (max-width:620px){
+  #studentView .list-management-panel,
+  #groupView .group-workspace-panel{
+    display:block!important;
+  }
+
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.panel-head{
+    display:block!important;
+    margin:0!important;
+    padding:10px 12px!important;
+    border:0!important;
+    border-bottom:1px solid var(--line)!important;
+    border-radius:0!important;
+    background:#fff!important;
+  }
+
+  #studentView .list-management-panel>.panel-head>div:first-child,
+  #groupView .group-workspace-panel>.panel-head>div:first-child{
+    display:none!important;
+  }
+
+  #studentView .list-head-actions,
+  #groupView .list-head-actions{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+    width:100%!important;
+    overflow:visible!important;
+    padding:0!important;
+  }
+
+  #studentView .list-head-actions>.list-export-wrap,
+  #studentView .list-head-actions>.list-column-wrap,
+  #groupView .list-head-actions>.list-column-wrap{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+
+  #studentView .list-head-actions .list-action-btn,
+  #studentView .list-head-actions .list-reset-btn,
+  #groupView .list-head-actions .list-action-btn,
+  #groupView .list-head-actions .list-reset-btn{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:50px!important;
+    min-height:50px!important;
+    padding:8px 12px!important;
+    border-radius:12px!important;
+    font-size:13px!important;
+    line-height:1.2!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.list-filter-shell{
+    display:block!important;
+    margin:0 12px 10px!important;
+    padding:12px!important;
+    border:1px solid #dce7f1!important;
+    border-radius:15px!important;
+    background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
+    box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+    overflow:visible!important;
+  }
+
+  #studentView .list-search-row,
+  #groupView .group-search-row{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+
+  #studentView .list-search-field input,
+  #groupView .list-search-field input{
+    min-height:54px!important;
+    border-radius:12px!important;
+  }
+
+  #studentView .list-filter-toggle,
+  #groupView .list-filter-toggle{
+    display:inline-flex!important;
+    width:100%!important;
+    height:50px!important;
+    min-height:50px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    border-radius:12px!important;
+    font-size:16px!important;
+  }
+
+  #studentView .list-filter-grid,
+  #groupView .group-filter-bar{
+    display:none!important;
+    margin-top:10px!important;
+    padding:0!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+  }
+
+  #studentView .list-filter-grid.is-open,
+  #groupView .group-filter-bar.is-open{
+    display:grid!important;
+  }
+
+  #studentView .list-filter-footer,
+  #groupView .list-filter-footer{
+    display:none!important;
+  }
+
+  #studentView #newStudent,
+  #groupView #newGroupInline{
+    background:#153f6d!important;
+    border-color:#153f6d!important;
+    color:#fff!important;
+  }
+}
