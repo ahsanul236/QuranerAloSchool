@@ -617,7 +617,16 @@ $('signOut').addEventListener('click', async () => {
   redirectToLogin();
 });
 
+function applyCompactListLayout(){
+  const panel=document.querySelector('.list-management-panel');
+  const actions=panel?.querySelector('.list-head-actions');
+  const reset=document.getElementById('resetFilters');
+  if(panel&&actions&&reset&&!actions.contains(reset)) actions.appendChild(reset);
+  panel?.classList.add('compact-list-layout');
+}
+
 async function init() {
+  applyCompactListLayout();
   const access = await getAccess(supabase);
   if (!access) {
     await supabase.auth.signOut();
