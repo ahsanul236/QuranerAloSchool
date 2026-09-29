@@ -1369,3 +1369,12 @@ th.qa-sortable-th:hover{background:#eef8f4}
 }
 @keyframes settingsSlideIn{from{opacity:.35;transform:translateX(28px)}to{opacity:1;transform:translateX(0)}}
 @media (prefers-reduced-motion:reduce){#settingsView .settings-pane-active{animation:none!important}}
+
+@media (max-width:620px){
+  #settingsView>.settings-desktop-nav{display:grid!important;gap:10px;padding:0}
+  #settingsView>.settings-desktop-nav button{width:100%;min-height:62px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;display:grid;grid-template-columns:40px minmax(0,1fr) 20px;align-items:center;gap:10px;text-align:left;color:var(--navy);font:inherit;cursor:pointer}
+  #settingsView>.settings-desktop-nav button>span{width:38px;height:38px;border-radius:11px;background:#e9f8f1;display:grid;place-items:center;color:#078467;font-weight:800}
+  #settingsView>.settings-desktop-nav button>strong{font-size:14px;white-space:normal;line-height:1.25}
+  #settingsView>.settings-desktop-nav button>b{font-size:20px;font-weight:500;color:var(--muted);text-align:right}
+  #settingsView>.settings-desktop-nav button.is-active{border-color:#8fd8c5;background:#f3fcf8}
+}
