@@ -1378,3 +1378,39 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #settingsView>.settings-desktop-nav button>b{font-size:20px;font-weight:500;color:var(--muted);text-align:right}
   #settingsView>.settings-desktop-nav button.is-active{border-color:#8fd8c5;background:#f3fcf8}
 }
+
+/* Mobile list filters: compact toggle pattern; desktop/tablet one-line layout stays unchanged. */
+@media (max-width:620px){
+  .compact-list-layout>.list-filter-shell{display:block!important;overflow:visible!important;padding:10px!important}
+  .compact-list-layout .list-search-row{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  .compact-list-layout .list-filter-toggle{display:inline-flex!important;width:100%!important;align-items:center;justify-content:center}
+  .compact-list-layout .list-filter-grid{display:none!important;margin-top:10px!important;grid-template-columns:1fr!important;gap:8px!important}
+  .compact-list-layout .list-filter-grid.is-open{display:grid!important}
+  .compact-list-layout .list-filter-grid>label{width:100%!important;flex:none!important}
+  .compact-list-layout .list-filter-footer{display:none!important}
+
+  .group-filter-shell{padding:10px;border-bottom:1px solid var(--line);background:#fbfdfc}
+  .group-search-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .group-search-row .list-filter-toggle{display:inline-flex!important;width:100%!important;align-items:center;justify-content:center}
+  .group-filter-bar{display:none!important;overflow:visible!important;padding:10px 0 0!important;gap:8px!important}
+  .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important}
+  .group-filter-bar>label,.group-filter-bar>.list-search-field{width:100%!important;flex:none!important}
+  .group-action-row{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px!important;overflow:visible!important;padding:10px!important}
+  .group-action-row>.list-action-btn,.group-action-row>.list-reset-btn,.group-action-row .list-action-btn,.group-action-row .list-column-wrap{width:100%!important;min-width:0!important;max-width:none!important;flex:none!important}
+  .group-action-row .list-column-wrap>.list-action-btn{width:100%!important}
+}
+
+/* Mobile Settings detail uses the same Back + title header language as other slide views. */
+@media (max-width:620px){
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back{
+    display:grid!important;position:sticky;top:0;z-index:12;width:100%!important;min-height:62px;
+    grid-template-columns:auto auto 1fr;align-items:center;gap:6px;margin:0!important;padding:9px 14px!important;
+    border:0!important;border-bottom:1px solid #dce9e4!important;border-radius:0!important;
+    background:rgba(255,255,255,.97)!important;backdrop-filter:blur(12px);color:#0b294b!important;
+    box-shadow:0 4px 16px rgba(5,75,61,.06);text-align:left
+  }
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back>span:first-child{font-size:32px;line-height:1;color:#078467}
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back>span:nth-child(2){font-size:13px;font-weight:800;color:#078467}
+  #settingsView.has-detail .settings-pane-active>.settings-detail-back>strong{text-align:right;font-size:15px}
+  #settingsView.has-detail .settings-pane-active{padding-top:0!important}
+}
