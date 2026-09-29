@@ -395,6 +395,7 @@ async function switchStaffMode(nextMode){
   const target=mode==='helper'?'#helpers':'#teachers';
   if(location.hash!==target)history.replaceState(null,'',target);
   try{await loadFilterOptions();await load();}catch(error){console.error(error);msg('Data load করা যায়নি।','error');}
+  refreshCompactFilterCount();
 }
 $('teacherListTab').addEventListener('click',()=>switchStaffMode('teacher'));
 $('helperListTab').addEventListener('click',()=>switchStaffMode('helper'));
@@ -515,12 +516,19 @@ $('signOut').addEventListener('click', async () => {
   location.replace('./');
 });
 
+function refreshCompactFilterCount(){
+  const grid=document.getElementById('advancedFilters'); if(!grid)return;
+  const visible=[...grid.children].filter(el=>!el.classList.contains('hidden'));
+  grid.style.setProperty('--filter-count',String(Math.max(1,visible.length)));
+}
+
 function applyCompactListLayout(){
   const panel=document.querySelector('.list-management-panel');
   const actions=panel?.querySelector('.list-head-actions');
   const reset=document.getElementById('resetFilters');
   if(panel&&actions&&reset&&!actions.contains(reset)) actions.appendChild(reset);
   panel?.classList.add('compact-list-layout');
+  refreshCompactFilterCount();
 }
 
 async function init() {
