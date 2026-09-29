@@ -1263,3 +1263,38 @@ th.qa-sortable-th:hover{background:#eef8f4}
   .compact-list-layout .list-filter-grid label,.compact-list-layout .list-search-field{font-size:11px}
   .compact-list-layout .list-filter-grid select,.compact-list-layout .list-search-field input{padding-left:8px;padding-right:8px;font-size:12px}
 }
+
+
+/* Settings master-detail — desktop/tablet only */
+@media (min-width:621px){
+  #settingsView{position:relative}
+  #settingsView>.settings-desktop-nav{display:grid;gap:10px}
+  .settings-desktop-nav button{width:100%;min-height:72px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px 18px;display:grid;grid-template-columns:42px minmax(0,1fr) 24px;align-items:center;gap:12px;text-align:left;color:var(--navy);font:inherit;cursor:pointer}
+  .settings-desktop-nav button>span{width:40px;height:40px;border-radius:12px;background:#e9f8f1;display:grid;place-items:center;color:#078467;font-weight:800}
+  .settings-desktop-nav button>strong{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .settings-desktop-nav button>b{font-size:22px;font-weight:500;color:var(--muted);text-align:right}
+  .settings-desktop-nav button:hover,.settings-desktop-nav button.is-active{border-color:#8fd8c5;background:#f3fcf8}
+  #settingsView>.settings-detail-stage{display:none}
+  #settingsView>#settingsStoragePanel,#settingsView>.portal-settings-cards,#settingsView>#schoolProfilePanel,#settingsView>#financialSettingsPanel,#settingsView>#userManagement{display:none!important}
+  #settingsView.has-detail{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,70%);gap:14px;align-items:start}
+  #settingsView.has-detail>.settings-desktop-nav{grid-column:1}
+  #settingsView.has-detail>.settings-desktop-nav button{min-height:60px;padding:8px 12px}
+  #settingsView.has-detail>.settings-detail-stage{display:none}
+  #settingsView.has-detail>#settingsStoragePanel.settings-pane-active,
+  #settingsView.has-detail>#schoolProfilePanel.settings-pane-active,
+  #settingsView.has-detail>#financialSettingsPanel.settings-pane-active,
+  #settingsView.has-detail>#userManagement.settings-pane-active{display:block!important;grid-column:2;grid-row:1}
+  #settingsView.has-detail>.portal-settings-cards{display:contents!important}
+  #settingsView.has-detail>.portal-settings-cards>#portalStatusPanel.settings-pane-active,
+  #settingsView.has-detail>.portal-settings-cards>#portalPreview.settings-pane-active{display:block!important;grid-column:2;grid-row:1}
+  #settingsView.has-detail>.portal-settings-cards>#portalStatusPanel:not(.settings-pane-active),
+  #settingsView.has-detail>.portal-settings-cards>#portalPreview:not(.settings-pane-active){display:none!important}
+  .settings-pane-active{position:relative;margin:0!important}
+  .settings-detail-close{position:absolute;z-index:5;right:12px;top:10px;width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--navy);font-size:22px;line-height:1;cursor:pointer}
+  .settings-pane-active>.settings-accordion-summary{padding-right:56px}
+  .settings-pane-active .settings-accordion-controls{display:none!important}
+  .settings-pane-active>.settings-accordion-body{display:block!important}
+}
+@media (max-width:620px){
+  .settings-desktop-nav,.settings-detail-stage,.settings-detail-close{display:none!important}
+}
