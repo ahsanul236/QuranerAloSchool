@@ -71,6 +71,21 @@ function bindEmbeddedGroupEditor(){
  form.onsubmit=async e=>{e.preventDefault();groupSetMessage('Group save হচ্ছে…');const fd=new FormData(form),wanted=new Set([...form.elements.students.selectedOptions].map(o=>o.value));try{const{error}=await supabase.from('qa_study_groups').update({group_name:String(fd.get('group_name')||'').trim(),teacher_id:fd.get('teacher_id')||null,active:fd.get('active')==='true',notes:String(fd.get('notes')||'').trim(),updated_at:new Date().toISOString()}).eq('group_id',gid);if(error)throw error;const current=embeddedMembers.filter(m=>m.group_id===gid);for(const m of current.filter(m=>!wanted.has(m.student_id))){const now=new Date();const{error:er}=await supabase.from('qa_group_memberships').update({left_at:now.toISOString().slice(0,10),updated_at:now.toISOString()}).eq('membership_id',m.membership_id);if(er)throw er}for(const sid of wanted){if(current.some(m=>m.student_id===sid))continue;if(embeddedMembers.some(m=>m.student_id===sid&&m.group_id!==gid))throw Error('এই Student অন্য active Group-এ আছে।');const{error:er}=await supabase.from('qa_group_memberships').insert({group_id:gid,student_id:sid});if(er)throw er}await loadEmbeddedGroups();groupSetMessage('Group ও membership সংরক্ষিত হয়েছে।')}catch(err){console.error(err);groupSetMessage(err.message||'Group save করা যায়নি।','error')}};
 }
 async function createEmbeddedGroup(){if(!canManage)return;const name=prompt('নতুন Group-এর নাম লিখুন');if(!name?.trim())return;try{const{data,error}=await supabase.from('qa_study_groups').insert({group_name:name.trim(),active:true}).select('group_id').single();if(error)throw error;openGroupId=data.group_id;await loadEmbeddedGroups();groupSetMessage('নতুন Group তৈরি হয়েছে। এখন Teacher ও Students assign করুন।')}catch(e){console.error(e);groupSetMessage(e.message||'Group তৈরি করা যায়নি।','error')}}
+function resetGroupFilters(){
+  $('groupSearch').value=''; $('groupStatusFilter').value=''; $('groupTeacherFilter').value=''; renderEmbeddedGroups();
+}
+function exportGroupsCsv(){
+  const rows=filteredGroups().map(g=>{const ms=embeddedMembers.filter(m=>m.group_id===g.group_id),ss=ms.map(m=>embeddedStudents.find(s=>s.student_id===m.student_id)).filter(Boolean);return {group:g.group_name||'',teacher:teacherLabel(g.teacher_id),students:ss.map(s=>(s.student_code||'')+' · '+(s.full_name||'')).join('; '),status:g.active!==false?'Active':'Inactive'};});
+  downloadCsv('QuranerAlo_Groups_'+new Date().toISOString().slice(0,10)+'.csv',[{label:'Group',key:'group'},{label:'Teacher',key:'teacher'},{label:'Students',key:'students'},{label:'Status',key:'status'}],rows);
+}
+function bindGroupListTools(){
+  $('groupResetFilters')?.addEventListener('click',resetGroupFilters);
+  $('groupExport')?.addEventListener('click',exportGroupsCsv);
+  $('groupColumns')?.addEventListener('click',e=>{e.stopPropagation();$('groupColumnMenu')?.classList.toggle('hidden');});
+  document.querySelectorAll('[data-group-column]').forEach(box=>box.addEventListener('change',()=>{document.querySelector('.group-workspace-panel')?.classList.toggle('group-hide-'+box.dataset.groupColumn,!box.checked);}));
+  document.addEventListener('click',e=>{if(!$('groupColumnMenu')?.contains(e.target)&&e.target!==$('groupColumns'))$('groupColumnMenu')?.classList.add('hidden');});
+}
+
 function switchStudentGroupTab(mode){const group=mode==='groups';$('studentView').classList.toggle('hidden',group);$('groupView').classList.toggle('hidden',!group);$('studentListTab').classList.toggle('is-active',!group);$('groupListTab').classList.toggle('is-active',group);$('studentListTab').setAttribute('aria-selected',String(!group));$('groupListTab').setAttribute('aria-selected',String(group));$('newStudent').classList.toggle('hidden',group||!canManage);$('newGroupInline').classList.toggle('hidden',!group||!canManage);if(group&&!embeddedGroups.length)loadEmbeddedGroups().catch(e=>{console.error(e);groupSetMessage('Group list load করা যায়নি।','error')})}
 
 function redirectToLogin() { window.location.replace('./'); }
@@ -627,6 +642,7 @@ function applyCompactListLayout(){
 
 async function init() {
   applyCompactListLayout();
+  bindGroupListTools();
   const access = await getAccess(supabase);
   if (!access) {
     await supabase.auth.signOut();
