@@ -2242,3 +2242,73 @@ th.qa-sortable-th:hover{background:#eef8f4}
     display:none!important;
   }
 }
+
+
+/* 2026-09-29 SETTINGS MOBILE SLIDE CANONICAL */
+@media (max-width:620px){
+  #settingsView:not(.has-detail){
+    padding-top:12px!important;
+  }
+  #settingsView:not(.has-detail)>.settings-desktop-nav{
+    margin:0!important;
+    padding:0 10px 12px!important;
+  }
+
+  #settingsView.has-detail{
+    display:block!important;
+    padding:0!important;
+    overflow:visible!important;
+  }
+  #settingsView.has-detail>.settings-desktop-nav{
+    display:none!important;
+  }
+  #settingsView.has-detail>.portal-settings-cards{
+    display:contents!important;
+  }
+
+  #settingsView.has-detail .settings-pane-active.mobile-slide-open{
+    position:fixed!important;
+    inset:0!important;
+    z-index:4200!important;
+    display:block!important;
+    margin:0!important;
+    padding:0 0 calc(28px + env(safe-area-inset-bottom))!important;
+    border:0!important;
+    border-radius:0!important;
+    background:#f3faf7!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    box-shadow:none!important;
+    animation:mobileSlideIn .24s ease both;
+  }
+
+  #settingsView.has-detail .settings-pane-active.mobile-slide-open>.settings-detail-back.mobile-slide-back{
+    display:grid!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:30!important;
+    width:100%!important;
+    min-height:62px!important;
+    margin:0!important;
+  }
+
+  #settingsView.has-detail>#settingsStoragePanel.mobile-slide-open>.panel-head,
+  #settingsView.has-detail>.portal-settings-cards>#portalStatusPanel.mobile-slide-open>.portal-mini-head,
+  #settingsView.has-detail>.portal-settings-cards>#portalPreview.mobile-slide-open>.portal-mini-head,
+  #settingsView.has-detail>#schoolProfilePanel.mobile-slide-open>.settings-accordion-summary,
+  #settingsView.has-detail>#financialSettingsPanel.mobile-slide-open>.settings-accordion-summary,
+  #settingsView.has-detail>#userManagement.mobile-slide-open>.settings-accordion-summary{
+    display:none!important;
+  }
+
+  #settingsView.has-detail>#schoolProfilePanel.mobile-slide-open>.settings-accordion-body,
+  #settingsView.has-detail>#financialSettingsPanel.mobile-slide-open>.settings-accordion-body,
+  #settingsView.has-detail>#userManagement.mobile-slide-open>.settings-accordion-body,
+  #settingsView.has-detail>#schoolProfilePanel.mobile-slide-open>.settings-accordion-body.hidden,
+  #settingsView.has-detail>#financialSettingsPanel.mobile-slide-open>.settings-accordion-body.hidden,
+  #settingsView.has-detail>#userManagement.mobile-slide-open>.settings-accordion-body.hidden{
+    display:block!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
