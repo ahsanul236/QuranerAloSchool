@@ -9,7 +9,7 @@
 <title>Students | QURANER ALO</title>
 <link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-2">
-<link rel="stylesheet" href="dashboard.css?v=20260929-studentgroup-parity1">
+<link rel="stylesheet" href="dashboard.css?v=20260929-canonicalgroup2">
 <style>
 
 .page-head h1{font-family:'Hind Siliguri',system-ui,sans-serif;font-size:32px;font-weight:700;letter-spacing:0}
@@ -172,9 +172,20 @@
 </div>
 </div>
 <div id="groupView" class="hidden">
-  <div class="panel group-workspace-panel compact-list-layout group-list-management-panel">
-    <div class="panel-head group-list-title"><div><h2>গ্রুপ তালিকা</h2><span id="groupCountLabel" class="eyebrow"></span></div></div>
-    <div class="group-filter-shell"><div class="group-search-row"><label class="list-search-field"><span>গ্রুপ খুঁজুন</span><input id="groupSearch" type="search" autocomplete="off" placeholder="Group / Teacher / Student নাম বা ID…"></label><button id="groupToggleFilters" class="secondary-btn list-filter-toggle" type="button" aria-expanded="false">Filters</button></div><div id="groupAdvancedFilters" class="group-filter-bar"><label>স্ট্যাটাস<select id="groupStatusFilter"><option value="">সব</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Teacher<select id="groupTeacherFilter"><option value="">সব Teacher</option></select></label></div></div><div class="group-action-row list-head-actions"><button id="newGroupInline" class="primary-btn list-action-btn" type="button">+ নতুন গ্রুপ</button><button id="groupExport" class="secondary-btn list-action-btn" type="button">⇩ Export</button><div class="list-column-wrap"><button id="groupColumns" class="secondary-btn list-action-btn" type="button">Columns</button><div id="groupColumnMenu" class="list-column-menu hidden"><label><input type="checkbox" data-group-column="teacher" checked> Teacher</label><label><input type="checkbox" data-group-column="students" checked> Students</label><label><input type="checkbox" data-group-column="status" checked> Status</label></div></div><button id="groupResetFilters" class="secondary-btn list-reset-btn" type="button">Reset Filters</button></div>
+  <div class="panel list-management-panel compact-list-layout group-workspace-panel">
+    <div class="panel-head">
+      <div><h2>গ্রুপ তালিকা</h2><span id="groupCountLabel" class="eyebrow"></span></div>
+      <div class="list-head-actions">
+        <button id="groupExport" class="secondary-btn list-action-btn" type="button">⇩ Export ▾</button>
+        <div class="list-column-wrap"><button id="groupColumns" class="secondary-btn list-action-btn" type="button">Columns</button><div id="groupColumnMenu" class="list-column-menu hidden"><label><input type="checkbox" data-group-column="teacher" checked> Teacher</label><label><input type="checkbox" data-group-column="students" checked> Students</label><label><input type="checkbox" data-group-column="status" checked> Status</label></div></div>
+        <button id="newGroupInline" class="primary-btn list-action-btn" type="button">+ নতুন গ্রুপ</button>
+      </div>
+    </div>
+    <div class="list-filter-shell group-filter-shell">
+      <div class="list-search-row group-search-row"><label class="list-search-field"><span>গ্রুপ খুঁজুন</span><input id="groupSearch" type="search" autocomplete="off" placeholder="Group / Teacher / Student নাম বা ID…"></label><button id="groupToggleFilters" class="secondary-btn list-filter-toggle" type="button" aria-expanded="false">Filters</button></div>
+      <div id="groupAdvancedFilters" class="list-filter-grid group-filter-bar"><label>স্ট্যাটাস<select id="groupStatusFilter"><option value="">সব</option><option value="active">Active</option><option value="inactive">Inactive</option></select></label><label>Teacher<select id="groupTeacherFilter"><option value="">সব Teacher</option></select></label></div>
+      <div class="list-filter-footer"><div class="list-filter-chips is-empty"></div><button id="groupResetFilters" class="secondary-btn list-reset-btn" type="button">Reset Filters</button></div>
+    </div>
     <div class="group-list-head"><span>Group</span><span>Teacher</span><span>Students</span><span>Status</span></div>
     <div id="embeddedGroupList" class="embedded-group-list"></div>
   </div>
