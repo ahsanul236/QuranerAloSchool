@@ -64,7 +64,9 @@
       else cmp=String(av.value).localeCompare(String(bv.value),undefined,{numeric:true,sensitivity:'base'});
       return state.direction==='asc'?cmp:-cmp;
     });
-    const fragment=document.createDocumentFragment();\n    rows.forEach(r=>fragment.appendChild(r));\n    body.appendChild(fragment);
+    const fragment=document.createDocumentFragment();
+    rows.forEach(r=>fragment.appendChild(r));
+    body.appendChild(fragment);
   }
 
   function initSortableTables(root=document) {
