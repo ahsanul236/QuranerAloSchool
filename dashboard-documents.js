@@ -6,12 +6,18 @@ function storageApi(path){
  return location.hostname.endsWith('.vercel.app')?path:'https://quraneralo-school-drive-test.vercel.app'+path;
 }
 
+let storageSessionPromise=null;
 async function storageSession(){
- const cfg=window.QURANER_ALO_CONFIG;
- const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
- if(!cfg) throw new Error('AUTH_CONFIG_UNAVAILABLE');
- const client=createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
- return (await client.auth.getSession()).data.session;
+ if(!storageSessionPromise){
+  storageSessionPromise=(async()=>{
+   const cfg=window.QURANER_ALO_CONFIG;
+   const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+   if(!cfg) throw new Error('AUTH_CONFIG_UNAVAILABLE');
+   const client=createClient(cfg.supabaseUrl,cfg.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+   return (await client.auth.getSession()).data.session;
+  })().catch(error=>{storageSessionPromise=null;throw error});
+ }
+ return storageSessionPromise;
 }
 
 async function init() {
@@ -38,7 +44,6 @@ async function init() {
   }
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once:true }); else init();
 
 async function loadGithubStorage(){
  const status=$('githubStorageStatus'); if(!status)return;
@@ -51,7 +56,6 @@ async function loadGithubStorage(){
   $('githubStorageUsed').textContent=q?q.toFixed(q<10?2:1)+' '+(sr[0]?.unitType||''):'0'; $('githubStorageFree').textContent='Plan based'; $('githubStoragePercent').textContent='Usage'; status.textContent='Connected'; $('githubStorageBar').style.width='0%';
  }catch(e){console.warn('GitHub usage unavailable',e);status.textContent='Unavailable';$('githubStorageUsed').textContent='—';$('githubStorageFree').textContent='—';$('githubStoragePercent').textContent='—';}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadGithubStorage,{once:true});else loadGithubStorage();
 
 async function loadVercelStorage(){
  const status=$('vercelStorageStatus');if(!status)return;
@@ -61,7 +65,6 @@ async function loadVercelStorage(){
   $('vercelStorageUsed').textContent=String(data.deploymentCount??0);$('vercelStorageFree').textContent=String(data.latest||'—');$('vercelStoragePercent').textContent='Health';status.textContent='Connected';$('vercelStorageBar').style.width=data.latest==='READY'?'100%':'55%';
  }catch(e){console.warn('Vercel status unavailable',e);status.textContent='Unavailable';$('vercelStorageUsed').textContent='—';$('vercelStorageFree').textContent='—';$('vercelStoragePercent').textContent='—';}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadVercelStorage,{once:true});else loadVercelStorage();
 
 async function loadSupabaseStorage(){
  const status=$('supabaseStorageStatus');if(!status)return;
@@ -72,4 +75,25 @@ async function loadSupabaseStorage(){
   $('supabaseStorageUsed').textContent=bytesToHuman(used);$('supabaseStorageFree').textContent=bytesToHuman(free);$('supabaseStoragePercent').textContent=pct.toFixed(pct<10?1:0)+'%';$('supabaseStorageBar').style.width=Math.min(100,Math.max(0,pct))+'%';status.textContent='Live · Database';
  }catch(e){console.warn('Supabase storage unavailable',e);status.textContent='Unavailable';$('supabaseStorageUsed').textContent='—';$('supabaseStorageFree').textContent='—';$('supabaseStoragePercent').textContent='—';}
 }
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',loadSupabaseStorage,{once:true});else loadSupabaseStorage();
+
+
+let storageMetricsPromise=null;
+let storageMetricsLoaded=false;
+
+async function loadStorageMetrics(){
+ if(storageMetricsLoaded)return;
+ if(storageMetricsPromise)return storageMetricsPromise;
+ storageMetricsPromise=Promise.allSettled([
+  init(),
+  loadGithubStorage(),
+  loadVercelStorage(),
+  loadSupabaseStorage()
+ ]).finally(()=>{
+  storageMetricsLoaded=true;
+  storageMetricsPromise=null;
+ });
+ return storageMetricsPromise;
+}
+
+window.addEventListener('qa:storage-open',()=>{void loadStorageMetrics()});
+if(window.__qaStorageRequested)void loadStorageMetrics();
