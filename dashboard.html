@@ -13,8 +13,8 @@
   
 </div>
 
-<div id="settingsView" class="settings-view hidden">
-  <div class="panel storage-overview-panel">
+<div id="settingsView" class="settings-view hidden">\n  <nav id="settingsDesktopNav" class="settings-desktop-nav" aria-label="Settings sections">\n    <button type="button" data-settings-pane="settingsStoragePanel"><span>▣</span><strong>Storage</strong><b>›</b></button>\n    <button type="button" data-settings-pane="portalPreview"><span>▧</span><strong>Portal Preview</strong><b>›</b></button>\n    <button type="button" data-settings-pane="portalStatusPanel"><span>●</span><strong>Portal Activation / Login Status</strong><b>›</b></button>\n    <button type="button" data-settings-pane="schoolProfilePanel"><span>⌂</span><strong>School Profile</strong><b>›</b></button>\n    <button type="button" data-settings-pane="financialSettingsPanel"><span>৳</span><strong>Financial Settings</strong><b>›</b></button>\n    <button type="button" data-settings-pane="userManagement"><span>👥</span><strong>User & Role Management</strong><b>›</b></button>\n  </nav>\n  <div id="settingsDetailStage" class="settings-detail-stage"></div>
+  <div id="settingsStoragePanel" class="panel storage-overview-panel">
     <div class="panel-head"><div><h2>Storage</h2></div><span class="eyebrow" id="storageOverviewStatus">Checking…</span></div>
     <div class="storage-provider-grid">
       <article id="googleDriveStorageCard" class="storage-provider-card">
@@ -45,7 +45,7 @@
   </div>
 
     <div class="portal-settings-cards">
-    <div class="panel portal-status-card">
+    <div id="portalStatusPanel" class="panel portal-status-card">
       <div class="portal-mini-head"><span class="portal-mini-icon" aria-hidden="true">●</span><h2>Portal Activation / Login Status</h2></div>
       <div class="portal-summary-grid portal-summary-list">
         <div class="portal-summary-card"><span class="portal-role-mark student" aria-hidden="true">S</span><span class="portal-role-copy"><span>Students</span><small id="studentActivationHint">—</small></span><strong id="studentActivationSummary">—</strong></div>
