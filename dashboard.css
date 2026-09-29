@@ -1487,3 +1487,118 @@ th.qa-sortable-th:hover{background:#eef8f4}
   #settingsView.has-detail .settings-pane-active>.settings-detail-back{display:grid!important}
   #settingsView.has-detail .settings-pane-active>.settings-accordion-summary{display:none!important}
 }
+
+
+/* 2026-09-29 Student / Group tab visual parity.
+   Keep different functions, but use one control geometry on both sibling views. */
+#studentView .list-management-panel,
+#groupView .group-workspace-panel{
+  border-radius:0 0 16px 16px;
+  background:#fff;
+  overflow:visible;
+}
+#studentView .list-management-panel>.panel-head,
+#groupView .group-workspace-panel>.group-action-row{
+  margin:0!important;
+  background:#fff!important;
+}
+#studentView .list-management-panel>.list-filter-shell,
+#groupView .group-workspace-panel>.group-filter-shell{
+  margin:0!important;
+  border-left:1px solid #dce7f1!important;
+  border-right:1px solid #dce7f1!important;
+  border-top:1px solid #dce7f1!important;
+  border-bottom:1px solid #dce7f1!important;
+  border-radius:15px!important;
+  background:linear-gradient(180deg,#fbfdff,#f7fafe)!important;
+  box-shadow:0 5px 16px rgba(11,35,66,.035)!important;
+}
+#studentView .list-head-actions,
+#groupView .group-action-row{
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+#studentView .list-head-actions .list-action-btn,
+#studentView .list-head-actions .list-reset-btn,
+#groupView .group-action-row .list-action-btn,
+#groupView .group-action-row .list-reset-btn{
+  height:42px!important;min-height:42px!important;min-width:132px!important;
+  padding:8px 16px!important;border-radius:10px!important;font-size:14px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+}
+#studentView #newStudent,
+#groupView #newGroupInline{
+  background:#153f6d!important;border-color:#153f6d!important;color:#fff!important;
+}
+#studentView #newStudent:hover,#studentView #newStudent:focus-visible,
+#groupView #newGroupInline:hover,#groupView #newGroupInline:focus-visible{
+  background:#0f3158!important;border-color:#0f3158!important;color:#fff!important;
+}
+
+@media (min-width:621px){
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.group-filter-shell{
+    padding:14px 16px 10px!important;
+  }
+  #groupView .group-workspace-panel>.group-filter-shell{
+    display:grid!important;
+    grid-template-columns:minmax(220px,1.55fr) minmax(140px,.7fr) minmax(190px,1fr)!important;
+    gap:10px!important;align-items:end!important;
+  }
+  #groupView .group-filter-shell>.group-search-row,
+  #groupView .group-filter-shell>.group-filter-bar{display:contents!important}
+  #groupView .group-filter-shell .list-filter-toggle{display:none!important}
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.group-action-row{
+    padding:10px 16px!important;border-top:0!important;border-bottom:1px solid var(--line)!important;
+  }
+}
+
+/* Phones: identical two-row control skeleton in both tabs:
+   row 1 = action buttons, row 2 = search + Filters. */
+@media (max-width:620px){
+  #studentView .list-management-panel>.panel-head,
+  #groupView .group-workspace-panel>.group-action-row{
+    padding:10px 12px!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+    border-bottom:1px solid var(--line)!important;
+  }
+  #studentView .list-management-panel>.panel-head>div:first-child{display:none!important}
+  #studentView .list-management-panel>.panel-head .list-head-actions{display:contents!important}
+  #studentView .list-head-actions>.list-export-wrap,
+  #studentView .list-head-actions>.list-column-wrap,
+  #groupView .group-action-row>.list-column-wrap{display:block!important;width:100%!important}
+  #studentView .list-head-actions .list-action-btn,
+  #studentView .list-head-actions .list-reset-btn,
+  #groupView .group-action-row .list-action-btn,
+  #groupView .group-action-row .list-reset-btn,
+  #studentView .list-head-actions>.list-export-wrap>.list-action-btn,
+  #studentView .list-head-actions>.list-column-wrap>.list-action-btn,
+  #groupView .group-action-row>.list-column-wrap>.list-action-btn{
+    width:100%!important;min-width:0!important;height:50px!important;min-height:50px!important;
+    font-size:13px!important;border-radius:12px!important;
+  }
+  #studentView .list-management-panel>.list-filter-shell,
+  #groupView .group-workspace-panel>.group-filter-shell{
+    margin:0 12px 10px!important;padding:12px!important;display:block!important;
+  }
+  #studentView .list-search-row,
+  #groupView .group-search-row{
+    display:grid!important;grid-template-columns:1fr!important;gap:10px!important;
+  }
+  #studentView .list-search-field input,
+  #groupView .list-search-field input{min-height:54px!important;border-radius:12px!important}
+  #studentView .list-filter-toggle,
+  #groupView .list-filter-toggle{
+    display:inline-flex!important;width:100%!important;height:50px!important;min-height:50px!important;
+    align-items:center!important;justify-content:center!important;border-radius:12px!important;font-size:16px!important;
+  }
+  #studentView .list-filter-grid,
+  #groupView .group-filter-bar{display:none!important;margin-top:10px!important;padding:0!important;gap:8px!important}
+  #studentView .list-filter-grid.is-open,
+  #groupView .group-filter-bar.is-open{display:grid!important;grid-template-columns:1fr!important}
+  #studentView .list-filter-footer{display:none!important}
+}
