@@ -114,23 +114,29 @@ async function attendanceForDate(students,date){
 }
 async function saveAttendanceRows(teacher,students,date,containerId){
   const today=new Date().toISOString().slice(0,10); if(!date||date>today)throw new Error('Future date save করা যাবে না।');
-  const existing=await attendanceForDate(students,date); let changed=0;
+  const existing=await attendanceForDate(students,date);
+  const writes=[];
   for(const student of students){
     const choice=document.querySelector('#'+containerId+' [data-attendance-student="'+CSS.escape(student.student_id)+'"] input:checked');
     const status=choice?.value??''; const old=existing[student.student_id];
     if(!status){
-      if(old){const r=await supabase.from('qa_attendance').delete().eq('attendance_id',old.attendance_id);if(r.error)throw r.error;changed++}
+      if(old)writes.push(supabase.from('qa_attendance').delete().eq('attendance_id',old.attendance_id));
       continue;
     }
     if(old?.status===status)continue;
     const payload={teacher_id:teacher.teacher_id,student_id:student.student_id,attendance_date:date,session_id:null,status,remarks:'',updated_at:new Date().toISOString()};
-    const r=old?await supabase.from('qa_attendance').update(payload).eq('attendance_id',old.attendance_id):await supabase.from('qa_attendance').insert(payload);
-    if(r.error)throw r.error;changed++;
+    writes.push(old
+      ? supabase.from('qa_attendance').update(payload).eq('attendance_id',old.attendance_id)
+      : supabase.from('qa_attendance').insert(payload));
   }
-  return changed;
+  if(!writes.length)return 0;
+  const results=await Promise.all(writes);
+  const failed=results.find(result=>result.error);
+  if(failed?.error)throw failed.error;
+  return writes.length;
 }
 async function renderAssignedStudents(students,mode=false,date='',readOnly=false){
-  const summaries=await attendanceSummaryMap(students); const daily=mode?await attendanceForDate(students,date):{};
+  const summaries=mode?{}:await attendanceSummaryMap(students); const daily=mode?await attendanceForDate(students,date):{};
   $('assignedStudentRows').innerHTML=students.map(student=>{
     const digits=String(student.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');const waDigits=digits?(digits.startsWith('0')?'88'+digits:digits):'';
     const wa=waDigits?'<a class="whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="muted">ফোন নেই</span>';
@@ -149,13 +155,18 @@ async function loadTeachingGroups(teacherId){
   if(gids.length){const r=await supabase.from('qa_group_memberships').select('group_id,student_id').in('group_id',gids).is('left_at',null);if(r.error)throw r.error;memberships=r.data||[]}
   const ids=[...new Set(memberships.map(m=>m.student_id))];let sm={};
   if(ids.length){const r=await supabase.from('qa_students').select('student_id,student_code,full_name,phone,status').in('student_id',ids);if(r.error)throw r.error;sm=Object.fromEntries((r.data||[]).map(s=>[s.student_id,s]))}
-  return {groups:groups||[],memberships,students:ids.map(id=>sm[id]).filter(Boolean),studentMap:sm};
+  const membershipsByGroup=new Map();
+  memberships.forEach(member=>{
+    if(!membershipsByGroup.has(member.group_id))membershipsByGroup.set(member.group_id,[]);
+    membershipsByGroup.get(member.group_id).push(member);
+  });
+  return {groups:groups||[],memberships,students:ids.map(id=>sm[id]).filter(Boolean),studentMap:sm,membershipsByGroup};
 }
 async function renderGroups(groupData,mode=false,date='',readOnly=false){
-  const summaries=await attendanceSummaryMap(groupData.students);const daily=mode?await attendanceForDate(groupData.students,date):{};
+  const summaries=mode?{}:await attendanceSummaryMap(groupData.students);const daily=mode?await attendanceForDate(groupData.students,date):{};
   const rows=[];
   for(const g of groupData.groups){
-    const list=groupData.memberships.filter(m=>m.group_id===g.group_id).map(m=>groupData.studentMap[m.student_id]).filter(Boolean);
+    const list=(groupData.membershipsByGroup?.get(g.group_id)||[]).map(m=>groupData.studentMap[m.student_id]).filter(Boolean);
     if(!list.length){rows.push('<tr><td><strong>'+esc(g.group_name)+'</strong></td><td>কোনো active Student নেই।</td><td class="group-attendance-cell">—</td><td>—</td></tr>');continue}
     list.forEach((s,i)=>{
       const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';
