@@ -1228,3 +1228,11 @@
 .student-table tbody tr,
 .staff-table tbody tr{transition:background-color .14s ease}
 
+
+
+/* Observer-free sortable table headers */
+th.qa-sortable-th{cursor:pointer;user-select:none;white-space:nowrap;padding-right:28px!important;position:relative}
+th.qa-sortable-th::after{content:'↕';position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;opacity:.3}
+th.qa-sortable-th.qa-sort-asc::after{content:'▲';opacity:.8}
+th.qa-sortable-th.qa-sort-desc::after{content:'▼';opacity:.8}
+th.qa-sortable-th:hover{background:#eef8f4}
