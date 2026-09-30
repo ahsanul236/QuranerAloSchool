@@ -2312,3 +2312,110 @@ th.qa-sortable-th:hover{background:#eef8f4}
     overflow:visible!important;
   }
 }
+
+
+/* 2026-09-30 Expense direct salary form */
+.payroll-top-actions{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  margin:0 0 10px;
+}
+.payroll-income-link{
+  width:auto!important;
+  min-width:112px;
+  text-decoration:none;
+}
+.payroll-entry-panel{
+  margin-top:0;
+  overflow:hidden;
+}
+.payroll-slim-head{
+  min-height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 16px;
+  border-bottom:1px solid #dfe8e5;
+  background:#fff;
+  box-shadow:inset 0 -3px 0 #15966f;
+}
+.payroll-slim-head h2{
+  margin:0;
+  color:#073f35;
+  font-size:15px;
+  font-weight:800;
+  line-height:1.2;
+}
+.payroll-entry-body{background:#fff}
+#payrollForm.payroll-compact-form{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px 10px;
+  padding:12px 14px;
+}
+#payrollForm.payroll-compact-form>label{
+  display:grid;
+  gap:4px;
+  min-width:0;
+  font-size:12px;
+}
+#payrollForm.payroll-compact-form input,
+#payrollForm.payroll-compact-form select{
+  min-height:40px;
+  height:40px;
+}
+#payrollForm.payroll-compact-form textarea{
+  min-height:56px;
+  resize:vertical;
+}
+#payrollForm .payroll-field-wide,
+#payrollForm .payroll-notes-field{
+  grid-column:span 2;
+}
+#payrollForm .payroll-form-actions{
+  grid-column:1/-1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding-top:2px;
+}
+.payroll-message{
+  display:block;
+  padding:0 14px 12px;
+}
+
+@media(max-width:900px){
+  #payrollForm.payroll-compact-form{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:620px){
+  .payroll-top-actions{margin:0 0 8px}
+  .payroll-income-link{width:100%!important}
+  .payroll-slim-head{min-height:48px;padding:9px 12px}
+  .payroll-slim-head h2{font-size:14px}
+  #payrollForm.payroll-compact-form{
+    grid-template-columns:1fr;
+    gap:8px;
+    padding:10px 12px 12px;
+  }
+  #payrollForm.payroll-compact-form input,
+  #payrollForm.payroll-compact-form select{
+    min-height:44px;
+    height:44px;
+  }
+  #payrollForm .payroll-field-wide,
+  #payrollForm .payroll-notes-field,
+  #payrollForm .payroll-form-actions{
+    grid-column:auto;
+  }
+  #payrollForm .payroll-form-actions{
+    display:grid;
+    gap:8px;
+  }
+  #payrollForm .payroll-form-actions .primary-btn{
+    width:100%!important;
+  }
+  .payroll-message{padding:0 12px 10px}
+}
