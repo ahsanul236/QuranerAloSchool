@@ -1,3 +1,4 @@
+import {initMobileListTools} from './mobile-list-tools.js?v=20260930-mobile1';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
 import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, visibleExportColumns, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-3';
@@ -656,6 +657,8 @@ function applyCompactListLayout(){
 
 async function init() {
   applyCompactListLayout();
+  initMobileListTools({search:'search',toggle:'toggleFilters',filters:'advancedFilters',export:'exportList',columns:'columnsButton',reset:'resetFilters',create:'newStudent',chips:'activeFilters',count:'countLabel'});
+  initMobileListTools({search:'groupSearch',toggle:'groupToggleFilters',filters:'groupAdvancedFilters',export:'groupExport',columns:'groupColumns',reset:'groupResetFilters',create:'newGroupInline',count:'groupCountLabel',group:true});
   bindGroupListTools();
   const access = await getAccess(supabase);
   if (!access) {
