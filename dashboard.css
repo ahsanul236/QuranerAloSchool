@@ -2315,16 +2315,6 @@ th.qa-sortable-th:hover{background:#eef8f4}
 
 
 /* 2026-09-30 Expense direct salary form */
-.payroll-top-actions{
-  display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  margin:0 0 10px;
-}
-.payroll-top-action{
-  width:auto!important;
-  min-width:128px;
-}
 .payroll-entry-panel{
   margin-top:0;
   overflow:hidden;
@@ -2390,8 +2380,6 @@ th.qa-sortable-th:hover{background:#eef8f4}
 }
 
 @media(max-width:620px){
-  .payroll-top-actions{margin:0 0 8px}
-  .payroll-top-action{width:100%!important}
   .payroll-slim-head{min-height:48px;padding:9px 12px}
   .payroll-slim-head h2{font-size:14px}
   #payrollForm.payroll-compact-form{
@@ -2420,58 +2408,3 @@ th.qa-sortable-th:hover{background:#eef8f4}
 }
 
 
-/* 2026-09-30 Expense top action launcher lock */
-.payroll-top-actions.mobile-slide-summary-trigger,
-.management-layout .payroll-top-actions.mobile-slide-summary-trigger{
-  min-height:0!important;
-  padding:0!important;
-  justify-content:flex-end!important;
-  text-align:initial!important;
-  background:transparent!important;
-}
-.payroll-top-actions.mobile-slide-summary-trigger::after{
-  display:none!important;
-}
-.payroll-top-actions.mobile-slide-summary-trigger:active{
-  background:transparent!important;
-}
-@media(max-width:620px){
-  .payroll-top-actions.mobile-slide-summary-trigger,
-  .management-layout .payroll-top-actions.mobile-slide-summary-trigger{
-    min-height:0!important;
-    padding:0!important;
-  }
-  .payroll-top-actions.mobile-slide-summary-trigger .payroll-top-action{
-    display:inline-flex!important;
-    width:100%!important;
-  }
-}
-
-
-/* 2026-09-30 Expense body-only panel */
-.expense-entry-panel{
-  margin-top:0!important;
-  border:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  overflow:visible!important;
-}
-.expense-entry-panel>.expense-entry-summary{
-  display:none!important;
-}
-.expense-entry-panel>#expenseEntryBody:not(.hidden){
-  margin-top:12px;
-  border:1px solid #dfe9e6;
-  border-radius:14px;
-  background:#fbfdfc;
-  overflow:hidden;
-}
-@media(max-width:620px){
-  .expense-entry-panel.mobile-slide-open>#expenseEntryBody,
-  .expense-entry-panel.mobile-slide-open>#expenseEntryBody:not(.hidden){
-    margin-top:0!important;
-    border:0!important;
-    border-radius:0!important;
-    background:transparent!important;
-  }
-}
