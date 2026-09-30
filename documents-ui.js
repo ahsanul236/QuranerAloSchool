@@ -152,7 +152,7 @@ export async function setProfileImage({ role, personId, img }) {
   if (!img) return false;
   try {
     const result = await getProfileImage({ role, personId });
-    if (!result?.found || !result.file?.documentToken) { img.classList.add('hidden'); return false; }
+    if (!result?.found || !result.file?.documentToken) { img.src='assets/quraner-alo-logo.jpg';img.classList.remove('hidden');return false; }
     const file = await fetchDocumentBlob(result.file.documentToken);
     const url = URL.createObjectURL(file.blob);
     img.src = url;

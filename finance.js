@@ -1,3 +1,4 @@
+import {readAll} from './ui-data.js';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
 
@@ -53,11 +54,11 @@ async function loadVouchers(){
   }
   const feeViewAllowed=!!(access&&(access.can('payments.view')||access.can('payments.manage')));
   const [voucherResult,feeResult]=await Promise.all([
-    supabase.from('qa_vouchers')
+    readAll(()=>supabase.from('qa_vouchers')
       .select('voucher_id,voucher_no,voucher_type,voucher_date,amount,account_name,party_name,reference,description,status,source_type,source_id,created_at')
-      .order('created_at',{ascending:false}).limit(1000),
+      .order('created_at',{ascending:false}).order('voucher_id')),
     feeViewAllowed
-      ? supabase.from('qa_fee_payments').select('payment_id,receipt_no,student_id,paid_at,amount,payment_method,reference,notes').order('paid_at',{ascending:false}).limit(1000)
+      ? readAll(()=>supabase.from('qa_fee_payments').select('payment_id,receipt_no,student_id,paid_at,amount,payment_method,reference,notes').order('paid_at',{ascending:false}).order('payment_id'))
       : Promise.resolve({data:[],error:null})
   ]);
   if(voucherResult.error)throw voucherResult.error;
@@ -121,9 +122,9 @@ function renderVoucherRows(){
   $('voucherCount').textContent=filtered.length+' of '+voucherRecords.length+' vouchers';
   $('voucherSearchSummary').textContent=scope==='today-income' ? 'আজকের Fee + Other Income Voucher দেখানো হচ্ছে' : scope==='today-expense' ? 'আজকের Payroll + Other Expense Voucher দেখানো হচ্ছে' : filtered.length===voucherRecords.length ? 'সব Voucher দেখানো হচ্ছে' : filtered.length+'টি Voucher filter অনুযায়ী পাওয়া গেছে';
 
-  $('voucherRows').innerHTML=filtered.map(v=>'<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td>'+esc(v.voucher_type)+'</td><td>৳'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td><span class="voucher-source">'+esc(sourceLabel(v))+'</span></td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+voucherPrintHref(v)+'">Print</a></td></tr>').join('')||'<tr><td colspan="8">এই filter অনুযায়ী কোনো Voucher পাওয়া যায়নি।</td></tr>';
+  $('voucherRows').innerHTML=filtered.map(v=>'<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td><span class="qa-enum">'+esc(({fee_receipt:'Fee Receipt',income:'Income',expense:'Expense',donation:'Donation',salary:'Salary Payment',refund:'Refund',advance:'Advance'})[v.voucher_type]||v.voucher_type)+'</span></td><td>৳'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td><span class="voucher-source">'+esc(sourceLabel(v))+'</span></td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+voucherPrintHref(v)+'">Print</a></td></tr>').join('')||'<tr><td colspan="8">এই filter অনুযায়ী কোনো Voucher পাওয়া যায়নি।</td></tr>';
 }
-async function refresh(){await loadVouchers();updateView();}
+async function refresh(){window.dispatchEvent(new CustomEvent('qa-finance-refresh'));await loadVouchers();updateView();}
 $('financeForm').addEventListener('submit',async e=>{
   e.preventDefault();if(!canFinanceManage){msg('financeMessage','Income manage permission নেই।','error');return;}msg('financeMessage','Income saving হচ্ছে…');
   const row={transaction_date:$('transactionDate').value,direction:'income',category:$('category').value.trim(),amount:+$('amount').value,account_name:$('accountName').value,reference:$('reference').value.trim()||null,description:$('description').value.trim()};

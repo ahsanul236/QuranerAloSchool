@@ -1,5 +1,6 @@
+import {personName} from './ui-i18n.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260928-1';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260930-design1';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -181,7 +182,8 @@ async function init() {
   }
 
   $('loginId').textContent = student.student_code;
-  $('studentName').textContent = student.full_name;
+  $('studentName').textContent=personName(student)||'—';
+  window.addEventListener('qa-language-change',()=>{$('studentName').textContent=personName(student)||'—';});
   $('studentSubtitle').textContent =
     `Student ID: ${student.student_code || '—'} · ${student.status || '—'}`;
   $('studentCodeHero').textContent = student.student_code || '—';

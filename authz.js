@@ -1,6 +1,8 @@
+import {setLanguageUser} from './ui-i18n.js';
 export async function getAccess(supabase){
   const {data:{session}}=await supabase.auth.getSession();
   if(!session) return null;
+  setLanguageUser(session.user.id);
   const {data:profile,error:profileError}=await supabase.from('qa_users').select('user_id,email,full_name,role,active').eq('user_id',session.user.id).maybeSingle();
   if(profileError||!profile||!profile.active) return null;
   if(profile.role==='owner'){

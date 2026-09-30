@@ -1,6 +1,7 @@
+import {personName} from './ui-i18n.js';
 import {initProfileTabs} from './profile-tabs.js?v=20260930-tabs1';
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';import{getAccess}from'./authz.js';
-import{mountDocumentsPanel,setProfileImage}from'./documents-ui.js?v=20260928-1';
+import{mountDocumentsPanel,setProfileImage}from'./documents-ui.js?v=20260930-design1';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}}),$=id=>document.getElementById(id);
 const qs=new URLSearchParams(location.search),type=qs.get('type')==='teacher'?'teacher':'helper',id=qs.get('id');let access=null,row=null,editing=false,allAssignedStudents=[],allTeacherGroups=[],editBaseline='',allowNavigation=false;
 initProfileTabs({formId:'form',academicIds:type==='teacher'?['teacherStudentsCard','teacherGroupsCard']:[],documentsId:'staffDocumentsCard'});
@@ -53,7 +54,7 @@ function fill(refreshImage=true){
   $('joiningDate').value=row.joining_date||'';
   $('active').value=String(row.active!==false);
   $('notes').value=row.notes||'';
-  $('title').textContent=row.full_name||row.full_name_bn||'—';
+  $('title').textContent=personName(row)||row.full_name_bn||'—';
   $('subtitle').textContent=`${teacher?'Teacher':'Helper'} ID: ${teacher?row.teacher_code:row.staff_code}`;
   if(refreshImage)void loadProfileImageWithFallback(type,id,$('staffProfileImage'));
   setWhatsAppLink(row.phone);
@@ -326,3 +327,4 @@ guardLink('topBack');
     $('loading').classList.add('hidden');$('app').classList.remove('hidden');await load();
   }catch(e){console.error(e);$('loading').classList.add('hidden');$('errorBox').textContent=e.message||'Profile load করা যায়নি।';$('errorBox').classList.remove('hidden')}
 })();
+window.addEventListener('qa-language-change',()=>{if(row)$('title').textContent=personName(row);});

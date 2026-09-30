@@ -1,4 +1,4 @@
-import {initMobileListTools} from './mobile-list-tools.js?v=20260930-mobile1';
+import {initMobileListTools} from './mobile-list-tools.js?v=20260930-design1';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
 import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, visibleExportColumns, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-3';
@@ -262,7 +262,8 @@ async function fetchStudentRows(from, to, includeCount = false) {
   const fields = 'student_id,student_code,full_name,full_name_bn,gender,phone,admission_date,status,user_id,teacher_id';
   let query = supabase.from('qa_students').select(fields, includeCount ? { count:'exact' } : {});
   query = applyStudentFilters(query, allowed);
-  query = query.order('created_at', { ascending:false }).range(from, to);
+  if($('teacherFilter').value==='__unassigned'){const {data:groups,error:ge}=await supabase.from('qa_study_groups').select('group_id,teacher_id').eq('active',true).not('teacher_id','is',null);if(ge)return {data:null,error:ge};const groupIds=(groups||[]).filter(g=>g.teacher_id).map(g=>g.group_id);if(groupIds.length){const {data:members,error:me}=await supabase.from('qa_group_memberships').select('student_id').is('left_at',null).in('group_id',groupIds);if(me)return {data:null,error:me};const ids=[...new Set((members||[]).map(m=>m.student_id))];if(ids.length)query=query.not('student_id','in','('+ids.join(',')+')');}}
+  query = query.order('created_at', { ascending:false }).order('student_id').range(from, to);
   return query;
 }
 
@@ -635,7 +636,9 @@ $('studentForm').addEventListener('submit', async (event) => {
     setMessage(`শিক্ষার্থী ${data?.student_code || ''} সফলভাবে যুক্ত হয়েছে। ${guardianCount} জন guardian তথ্যও সংরক্ষণ করা হয়েছে।`);
     setFormMessage('');
     page = 1;
+    if(new URLSearchParams(location.search).get('attention')==='unassigned')$('teacherFilter').value='__unassigned';
     await loadStudents();
+    if(location.hash==='#new'&&canManage)$('newStudent').click();
   } catch (error) {
     console.error(error);
     setFormMessage(friendlyRpcError(error), 'error');
@@ -675,7 +678,7 @@ async function init() {
   canManagePortal = access.profile.role === 'owner';
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
-  switchStudentGroupTab('students');
+  switchStudentGroupTab(location.hash==='#groups'?'groups':'students');
 
   syncColumns = bindColumnMenu({
     button:$('columnsButton'), menu:$('columnMenu'), table:$('studentTable')
@@ -683,7 +686,9 @@ async function init() {
 
   try {
     await loadFilterOptions();
+    if(new URLSearchParams(location.search).get('attention')==='unassigned')$('teacherFilter').value='__unassigned';
     await loadStudents();
+    if(location.hash==='#new'&&canManage)$('newStudent').click();
   } catch (error) {
     console.error(error);
     setMessage('Student list load করা যায়নি।', 'error');

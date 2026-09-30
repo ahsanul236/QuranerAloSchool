@@ -1,3 +1,4 @@
+import {t,locale} from './ui-i18n.js';
 import {renderFilterChips} from './list-tools.js?v=20260926-3';
 
 const icons = {
@@ -23,6 +24,7 @@ export function initMobileListTools(config) {
   const searchRow=search.closest('.list-search-row');
   const chips=config.chips?$(config.chips):grid.parentElement.querySelector('.list-filter-chips');
   const count=$(config.count),create=$(config.create),reset=$(config.reset);
+  window.addEventListener('qa-language-change',sync);
   const media=matchMedia('(max-width:620px)');
   let toolbar=null,filterPanel=null,restores=[],iconRestores=[],lastGroupState='';
   const controls=[...grid.querySelectorAll('select')];
@@ -56,7 +58,7 @@ export function initMobileListTools(config) {
     toggle.setAttribute('aria-expanded',String(open));
     toggle.setAttribute('aria-controls',grid.id);
     toggle.setAttribute('aria-label',`Filters${active?' · '+active+' active':''}`);
-    const name=create.textContent.trim();create.setAttribute('aria-label',name);create.title=name;
+    create.dataset.label=locale()==='bn'?'+ নতুন':'+ New';const name=create.textContent.trim();create.setAttribute('aria-label',name);create.title=name;
     if(config.group){
       const items=groupItems(),state=JSON.stringify(items);
       if(state!==lastGroupState){

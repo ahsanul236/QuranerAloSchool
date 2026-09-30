@@ -1,5 +1,6 @@
+import {personName} from './ui-i18n.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260928-1';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260930-design1';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -73,7 +74,7 @@ async function resolveHelper(session) {
   }
 
   const { data, error } = await supabase.from('qa_staff')
-    .select('staff_id,staff_code,full_name,staff_type,phone,email,joining_date,active,father_name,mother_name,nid_number,address')
+    .select('staff_id,staff_code,full_name,full_name_bn,staff_type,phone,email,joining_date,active,father_name,mother_name,nid_number,address')
     .eq('user_id', session.user.id).maybeSingle();
   if (error || !data) throw error || new Error('HELPER_PROFILE_NOT_FOUND');
   return data;
@@ -81,7 +82,7 @@ async function resolveHelper(session) {
 
 async function loadHelperDetails(staffId) {
   const { data, error } = await supabase.from('qa_staff')
-    .select('staff_id,staff_code,full_name,staff_type,phone,email,joining_date,active,father_name,mother_name,nid_number,address')
+    .select('staff_id,staff_code,full_name,full_name_bn,staff_type,phone,email,joining_date,active,father_name,mother_name,nid_number,address')
     .eq('staff_id', staffId)
     .eq('staff_type', 'helper')
     .maybeSingle();
@@ -128,7 +129,8 @@ async function init() {
   });
 
   $('staffCodeBadge').textContent = p.staff_code || '—';
-  $('name').textContent = p.full_name || '—';
+  $('name').textContent=personName(p)||'—';
+  window.addEventListener('qa-language-change',()=>{$('name').textContent=personName(p)||'—';});
   $('subtitle').textContent = `Helper ID: ${p.staff_code || '—'} · ${p.active ? 'Active' : 'Inactive'}`;
   $('staffCodeHero').textContent = p.staff_code || '—';
   $('phoneHero').textContent = p.phone || 'ফোন নম্বর দেওয়া নেই';

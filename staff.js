@@ -1,4 +1,4 @@
-import {initMobileListTools} from './mobile-list-tools.js?v=20260930-mobile1';
+import {initMobileListTools} from './mobile-list-tools.js?v=20260930-design1';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { getAccess } from './authz.js';
 import { debounce, populateYearSelect, renderFilterChips, updatePager, downloadCsv, downloadXlsx, downloadPdf, printRows, visibleExportColumns, bindColumnMenu, bindExportMenu } from './list-tools.js?v=20260926-3';
@@ -214,7 +214,7 @@ async function fetchRows(from, to, includeCount = false) {
   const table = mode === 'teacher' ? 'qa_teachers' : 'qa_staff';
   let query = supabase.from(table).select(staffFields(), includeCount ? { count:'exact' } : {});
   query = applyStaffFilters(query);
-  return query.order('created_at', { ascending:false }).range(from, to);
+  return query.order('created_at', { ascending:false }).order(mode==='teacher'?'teacher_id':'staff_id').range(from, to);
 }
 
 function renderRows(list) {

@@ -364,7 +364,7 @@
     });
     const rows = [...vouchers,...feeRows].sort((a,b) => new Date(b.created_at||b.voucher_date||0)-new Date(a.created_at||a.voucher_date||0));
     $('todayVoucherCount').textContent = rows.length + (rows.length === 1 ? ' voucher' : ' vouchers');
-    body.innerHTML = rows.map(v => '<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td>'+esc(v.voucher_type)+'</td><td>'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td>'+esc(overviewVoucherSource(v))+'</td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+overviewVoucherPrintHref(v)+'">Print</a></td></tr>').join('') || '<tr><td colspan="8">আজকের কোনো Voucher নেই।</td></tr>';
+    body.innerHTML = rows.map(v => '<tr><td><strong>'+esc(v.voucher_no)+'</strong></td><td>'+esc(v.voucher_date)+'</td><td><span class="qa-enum">'+esc(({fee_receipt:'Fee Receipt',income:'Income',expense:'Expense',donation:'Donation',salary:'Salary Payment',refund:'Refund',advance:'Advance'})[v.voucher_type]||v.voucher_type)+'</span></td><td>'+money(v.amount)+'</td><td>'+esc(v.party_name||'—')+'</td><td>'+esc(overviewVoucherSource(v))+'</td><td>'+esc(v.status)+'</td><td><a class="quick-link" target="_blank" rel="noopener" href="'+overviewVoucherPrintHref(v)+'">Print</a></td></tr>').join('') || '<tr><td colspan="8">আজকের কোনো Voucher নেই।</td></tr>';
     message('todayVoucherMessage','');
   }
 
@@ -484,6 +484,7 @@
       });
 
       studentDues = 0;
+      let studentsWithDue=0;
       chargesByStudent.forEach((charges, studentId) => {
         const ordered = [...charges].sort((a,b) => {
           const ad = String(a.billing_month || '');
@@ -495,10 +496,11 @@
           total + Math.max(0, Number(charge.expected_amount || 0) - Number(charge.discount || 0)), 0);
         const initialPreviousDue = Math.max(0, Number(ordered[0]?.previous_due || 0));
         const paid = Number(paymentsByStudent.get(studentId) || 0);
-        studentDues += Math.max(0, baseCharges + initialPreviousDue - paid);
+        const due=Math.max(0, baseCharges + initialPreviousDue - paid);studentDues += due;if(due>0)studentsWithDue++;
       });
 
       schoolPayables = sum(unpaidPayrollRows, 'net_payable');
+      window.QAOverviewSummary={studentsWithDue};window.dispatchEvent(new CustomEvent('qa-overview-summary',{detail:window.QAOverviewSummary}));
     }
 
     grid.innerHTML = `

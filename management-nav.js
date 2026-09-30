@@ -39,7 +39,7 @@
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
   }
 
-  const QA_NON_SORTABLE = /^(action|actions|print|message|whatsapp|attendance|access|portal|save|edit|delete|remove)$/i;
+  const QA_NON_SORTABLE = /^(action|actions|print|message|whatsapp|attendance|access|portal|save|edit|delete|remove|কাজ|প্রিন্ট|মেসেজ|উপস্থিতি|অ্যাক্সেস|পোর্টাল|সংরক্ষণ|সম্পাদনা|সরান)$/i;
 
   function qaSortValue(cell) {
     const raw=String(cell?.textContent||'').replace(/\s+/g,' ').trim();

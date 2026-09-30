@@ -1,5 +1,6 @@
+import {personName} from './ui-i18n.js';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260928-1';
+import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260930-design1';
 
 const c = window.QURANER_ALO_CONFIG;
 const supabase = createClient(c.supabaseUrl, c.supabasePublishableKey, {
@@ -105,7 +106,7 @@ function attendanceChoices(studentId,current){
   return '<div class="attendance-choices" data-attendance-student="'+esc(studentId)+'">'
     +'<label><input type="radio" name="att-'+esc(studentId)+'" value="present" '+(current==='present'?'checked':'')+'> Present</label>'
     +'<label><input type="radio" name="att-'+esc(studentId)+'" value="absent" '+(current==='absent'?'checked':'')+'> Absent</label>'
-    +'<label><input type="radio" name="att-'+esc(studentId)+'" value="" '+(!current?'checked':'')+'> Not Recorded</label></div>';
+    +'<label><input type="radio" name="att-'+esc(studentId)+'" value="" '+(!current?'checked':'')+'> Unmarked</label></div>';
 }
 async function attendanceForDate(students,date){
   const ids=[...new Set(students.map(s=>s.student_id))]; if(!ids.length)return {};
@@ -172,10 +173,11 @@ async function renderGroups(groupData,mode=false,date='',readOnly=false){
       const attendance=mode&&!readOnly?attendanceChoices(s.student_id,daily[s.student_id]?.status||''):'<span class="attendance-summary">'+esc(summaryText(summaries[s.student_id]))+'</span>';
       const digits=String(s.phone||'').replace(/[^0-9]/g,'').replace(/^00/,'');const waDigits=digits?(digits.startsWith('0')?'88'+digits:digits):'';
       const wa=waDigits?'<a class="whatsapp-btn group-whatsapp-btn" href="https://wa.me/'+waDigits+'" target="_blank" rel="noopener noreferrer">WhatsApp</a>':'<span class="muted">ফোন নেই</span>';
-      rows.push('<tr><td>'+(i===0?'<strong>'+esc(g.group_name)+'</strong>':'')+'</td><td><span class="group-student-number">'+(i+1)+'.</span> '+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-message-cell">'+wa+'</td></tr>');
+      rows.push('<tr data-qa-group="'+esc(g.group_id)+'"><td>'+(i===0?'<button type="button" class="qa-group-toggle" data-qa-group-toggle="'+esc(g.group_id)+'" aria-expanded="'+String(mode)+'">'+esc(g.group_name)+' · '+list.length+' ⌄</button>':'')+'</td><td><span class="group-student-number">'+(i+1)+'.</span> '+esc((s.student_code||'')+' · '+(s.full_name||'Student'))+'</td><td class="group-attendance-cell">'+attendance+'</td><td class="group-message-cell">'+wa+'</td></tr>');
     });
   }
   $('groupRows').innerHTML=rows.join('')||'<tr><td colspan="4">কোনো active Group assigned নেই।</td></tr>';
+  for(const button of $('groupRows').querySelectorAll('[data-qa-group-toggle]')){const groupRows=[...$('groupRows').querySelectorAll('[data-qa-group]')].filter(r=>r.dataset.qaGroup===button.dataset.qaGroupToggle);const toggle=open=>{button.setAttribute('aria-expanded',String(open));groupRows.slice(1).forEach(r=>r.classList.toggle('qa-group-hidden',!open));};toggle(mode);button.onclick=()=>toggle(button.getAttribute('aria-expanded')!=='true');}
 }
 function setupAttendanceSection({teacher,students,getGroupData,buttonId,dateId,dateWrapId,messageId,containerId,render,readOnly}){
   const button=$(buttonId),input=$(dateId),wrap=$(dateWrapId),message=$(messageId);const today=new Date().toISOString().slice(0,10);input.max=today;input.value=today;
@@ -237,7 +239,8 @@ async function init() {
   }).catch(error=>console.warn('teacher documents unavailable',error));
 
   $('teacherCodeBadge').textContent = teacher.teacher_code || '—';
-  $('teacherName').textContent = teacher.full_name_bn || teacher.full_name || '—';
+  $('teacherName').textContent=personName(teacher)||'—';
+  window.addEventListener('qa-language-change',()=>{$('teacherName').textContent=personName(teacher)||'—';});
   $('teacherSubtitle').textContent = `Teacher ID: ${teacher.teacher_code || '—'} · ${teacher.active ? 'Active' : 'Inactive'}`;
   $('teacherCodeHero').textContent = teacher.teacher_code || '—';
   $('teacherPhoneHero').textContent = teacher.phone || 'ফোন নম্বর দেওয়া নেই';

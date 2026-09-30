@@ -1,7 +1,8 @@
+import {personName} from './ui-i18n.js';
 import {initProfileTabs} from './profile-tabs.js?v=20260930-tabs1';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
-import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260928-1';
+import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260930-design1';
 
 const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
@@ -146,7 +147,7 @@ function fillStudent(refreshImage=true){
   $('motherName').value=student.mother_name||'';
   $('motherNid').value=student.mother_nid||'';
   $('birthRegistrationNo').value=student.birth_registration_no||'';
-  $('profileTitle').textContent=student.full_name||'শিক্ষার্থী প্রোফাইল';
+  $('profileTitle').textContent=personName(student)||'শিক্ষার্থী প্রোফাইল';
   $('profileSubtitle').textContent=`Student ID: ${student.student_code||'—'} · Status: ${String(student.status||'').replaceAll('_',' ')}`;
   if(refreshImage)void loadProfileImageWithFallback('student',student.student_id,$('studentProfileImage'));
   setWhatsAppLink(student.phone);
@@ -336,3 +337,5 @@ guardLink('backBtn');
 guardLink('topBack');
 
 (async()=>{try{access=await getAccess(supabase);if(!access){await supabase.auth.signOut();return login();}if(!access.can('students.view')&&!access.can('students.manage'))throw new Error('Student profile দেখার permission নেই।');$('loading').classList.add('hidden');$('app').classList.remove('hidden');await load();}catch(e){console.error(e);$('loading').classList.add('hidden');$('errorBox').textContent=e.message||'Profile load করা যায়নি।';$('errorBox').classList.remove('hidden');}})();
+
+window.addEventListener('qa-language-change',()=>{if(student)$('profileTitle').textContent=personName(student);});
