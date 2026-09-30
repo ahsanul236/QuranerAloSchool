@@ -21,7 +21,6 @@
   .tabbed-profile .profile-action-text{display:none}
   .tabbed-profile .profile-actions #whatsappBtn svg{width:22px;height:22px}
   .tabbed-profile .profile-actions #removeBtn{background:#fff1f0;color:#b42318;border-color:#f0b4ae}
-  .tabbed-profile .profile-actions #saveBtn,.tabbed-profile .profile-actions #cancelBtn{grid-column:span 2;padding:0 8px;font-size:13px}
   .tabbed-profile .profile-tab{min-height:44px;font-size:13px;padding:9px 4px;white-space:nowrap}
   .tabbed-profile .profile-tab-panel{gap:10px}
 }
