@@ -1,3 +1,4 @@
+import {initProfileTabs} from './profile-tabs.js?v=20260930-tabs1';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
 import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260928-1';
@@ -5,6 +6,7 @@ import {mountDocumentsPanel,setProfileImage} from './documents-ui.js?v=20260928-
 const c=window.QURANER_ALO_CONFIG;
 const supabase=createClient(c.supabaseUrl,c.supabasePublishableKey,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
+initProfileTabs({formId:'profileForm',academicIds:['teacherAssignmentCard'],documentsId:'studentDocumentsCard'});
 const studentId=new URLSearchParams(location.search).get('id');
 let access=null,student=null,guardians=[],teachers=[],groupAssignment=null,editing=false,editBaseline='',allowNavigation=false;
 let studentReady=false,guardiansReady=false,assignmentReady=false,documentsMounted=false,attendanceStarted=false,saving=false,teacherBusy=false,profileNeedsRefresh=false,assignmentViewKey='';
@@ -52,7 +54,7 @@ async function loadProfileImageWithFallback(role,personId,img){
   return loaded;
 }
 function normalizeWaNumber(value){const digits=String(value||'').trim().replace(/[^0-9]/g,'');if(!digits)return '';return digits.startsWith('00')?digits.slice(2):digits.startsWith('0')?'88'+digits:digits;}
-function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.removeAttribute('title');btn.onclick=null;}
+function setWhatsAppLink(phone){const btn=$('whatsappBtn');if(!btn)return;const digits=normalizeWaNumber(phone);if(!digits){btn.href='#';btn.classList.add('is-disabled');btn.setAttribute('aria-disabled','true');btn.title='এই profile-এর WhatsApp number সংরক্ষিত নেই।';btn.onclick=e=>e.preventDefault();return;}btn.href='https://wa.me/'+digits;btn.classList.remove('is-disabled');btn.removeAttribute('aria-disabled');btn.title='Send message on WhatsApp';btn.onclick=null;}
 async function loadTeachers(){
   if(!access?.can('teachers.view')&&!access?.can('teachers.manage'))return;
   const {data,error}=await supabase.from('qa_teachers').select('teacher_id,teacher_code,full_name,full_name_bn,phone,specialization,active').order('full_name',{ascending:true});

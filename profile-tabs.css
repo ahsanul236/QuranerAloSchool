@@ -1,0 +1,27 @@
+.tabbed-profile .profile-tabs{display:flex;margin-bottom:14px;border:1px solid #dfe8e5;border-radius:12px;overflow:hidden;background:#fbfdfc}
+.tabbed-profile .profile-tab{flex:1;min-width:0;min-height:48px;padding:10px 8px;border:0;border-right:1px solid #e2ebe8;background:transparent;color:#66758a;font:inherit;font-weight:700;cursor:pointer}
+.tabbed-profile .profile-tab:last-child{border-right:0}
+.tabbed-profile .profile-tab[aria-selected="true"]{background:#fff;color:#073f35;box-shadow:inset 0 -3px 0 #15966f}
+.tabbed-profile .profile-tab:focus-visible,.tabbed-profile .profile-actions>:focus-visible{outline:3px solid #15966f;outline-offset:-3px}
+.tabbed-profile .profile-tab-panel{grid-column:1/-1;min-width:0;display:grid;gap:14px}
+.tabbed-profile .profile-tab-panel[hidden]{display:none}
+.tabbed-profile .profile-action-icon{display:none;flex:none}
+.tabbed-profile .profile-actions #whatsappBtn{gap:6px}
+.tabbed-profile #staffDocuments.staff-documents-view [data-document-add],
+.tabbed-profile #staffDocuments.staff-documents-view [data-document-upload-panel],
+.tabbed-profile #staffDocuments.staff-documents-view [data-delete]{display:none}
+@media(max-width:620px){
+  .tabbed-profile .profile-head{gap:12px;margin-bottom:14px}
+  .tabbed-profile.student-profile .profile-head .profile-identity{align-items:center!important;text-align:center}
+  .tabbed-profile.student-profile .profile-photo-box{width:80px!important;height:80px!important;margin:0 auto 8px}
+  .tabbed-profile.student-profile #profileSubtitle{margin:6px 0 0;font-size:12px}
+  .tabbed-profile .profile-head .profile-actions{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .tabbed-profile .profile-actions>a,.tabbed-profile .profile-actions>button{min-height:48px;height:48px;min-width:0;padding:0;border-radius:12px}
+  .tabbed-profile .profile-action-icon{display:block}
+  .tabbed-profile .profile-action-text{display:none}
+  .tabbed-profile .profile-actions #whatsappBtn svg{width:22px;height:22px}
+  .tabbed-profile .profile-actions #removeBtn{background:#fff1f0;color:#b42318;border-color:#f0b4ae}
+  .tabbed-profile .profile-actions #saveBtn,.tabbed-profile .profile-actions #cancelBtn{grid-column:span 2;padding:0 8px;font-size:13px}
+  .tabbed-profile .profile-tab{min-height:44px;font-size:13px;padding:9px 4px;white-space:nowrap}
+  .tabbed-profile .profile-tab-panel{gap:10px}
+}
