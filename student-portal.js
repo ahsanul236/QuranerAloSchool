@@ -1,4 +1,6 @@
-import {personName} from './ui-i18n.js';
+import {readAll} from './ui-data.js?v=20261001-fourstep1';
+import {chargeLabel} from './fee-types.js?v=20261001-fourstep1';
+import {personName} from './ui-i18n.js?v=20261001-fourstep1';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260930-design1';
 
@@ -222,18 +224,16 @@ async function init() {
       .from('qa_student_guardians')
       .select('guardian_id,is_primary')
       .eq('student_id', student.student_id),
-    supabase
+    readAll(()=>supabase
       .from('qa_fee_charges')
-      .select('billing_month,expected_amount,discount,previous_due,current_payable,due_date,status')
+      .select('charge_id,billing_month,expected_amount,discount,previous_due,current_payable,due_date,status,fee_category,fee_name')
       .eq('student_id', student.student_id)
-      .order('billing_month', { ascending: false })
-      .limit(12),
-    supabase
+      .order('billing_month', { ascending: false }).order('charge_id')),
+    readAll(()=>supabase
       .from('qa_fee_payments')
-      .select('payment_id,receipt_no,paid_at,amount,payment_method')
+      .select('payment_id,charge_id,receipt_no,paid_at,amount,payment_method')
       .eq('student_id', student.student_id)
-      .order('paid_at', { ascending: false })
-      .limit(12)
+      .order('paid_at', { ascending: false }).order('payment_id'))
   ]);
 
   if (assignedTeacher?.teacher_id) setProfileImage({role:'teacher',personId:assignedTeacher.teacher_id,img:$('assignedTeacherProfileImage')}).catch(error=>console.warn('teacher profile image unavailable',error));
@@ -335,10 +335,10 @@ async function init() {
       </tr>`;
   }).join('') || '<tr><td colspan="6">No upcoming class scheduled.</td></tr>';
 
-  const totalDue = charges.reduce(
-    (sum, item) => sum + Math.max(0, Number(item.current_payable || 0)), 0
-  );
-  const openCharges = charges.filter((item) => item.status !== 'paid').length;
+  const paidByCharge=new Map();payments.forEach(p=>paidByCharge.set(p.charge_id,(paidByCharge.get(p.charge_id)||0)+Number(p.amount||0)));
+  const remaining=item=>Math.max(0,Number(item.current_payable||0)-(paidByCharge.get(item.charge_id)||0));
+  const totalDue=charges.reduce((sum,item)=>sum+remaining(item),0);
+  const openCharges=charges.filter(item=>remaining(item)>0).length;
   const totalPaid = payments.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
   $('totalDue').textContent = money(totalDue);
@@ -348,14 +348,14 @@ async function init() {
 
   $('fees').innerHTML = charges.slice(0, 6).map((item) => `
     <li>
-      <b>${esc(item.billing_month)}</b><br>
+      <b>${esc(chargeLabel(item))}</b><br>
       Payable: ${esc(money(item.current_payable))}
       · <span class="active-badge ${statusClass(item.status)}">${esc(item.status)}</span>
       ${item.due_date ? `<br><span class="muted">Due: ${esc(formatDate(item.due_date))}</span>` : ''}
     </li>
   `).join('') || '<li>No fee record yet.</li>';
 
-  $('paymentRows').innerHTML = payments.map((item) => `
+  $('paymentRows').innerHTML = payments.slice(0,12).map((item) => `
     <tr>
       <td><strong>${esc(item.receipt_no)}</strong></td>
       <td>${esc(item.paid_at ? new Date(item.paid_at).toLocaleDateString('en-GB') : '—')}</td>

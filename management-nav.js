@@ -1,4 +1,5 @@
 (() => {
+  if(new URLSearchParams(location.search).get("embed")==="1")return;
   const items = [
     ['Overview', 'dashboard.html#overview', 'overview', '⌂'],
     ['Students', 'students.html', 'students', '♙'],

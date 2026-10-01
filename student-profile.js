@@ -1,4 +1,4 @@
-import {personName} from './ui-i18n.js';
+import {personName} from './ui-i18n.js?v=20261001-fourstep1';
 import {initProfileTabs} from './profile-tabs.js?v=20260930-tabs1';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';

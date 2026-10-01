@@ -1,9 +1,10 @@
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
-import {readAll} from './ui-data.js';
-import {t,locale,personName,setLanguage} from './ui-i18n.js';
+import {readAll} from './ui-data.js?v=20261001-fourstep1';
+import {t,locale,personName,setLanguage} from './ui-i18n.js?v=20261001-fourstep1';
 import {getProfileImage,fetchDocumentBlob} from './documents-client.js';
 const c=window.QURANER_ALO_CONFIG,supabase=createClient(c.supabaseUrl,c.supabasePublishableKey),$=id=>document.getElementById(id),el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n};
+const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('qa-id-embedded');
 const types={student:{table:'qa_students',id:'student_id',code:'student_code',date:'admission_date',permission:'students',label:'Student'},teacher:{table:'qa_teachers',id:'teacher_id',code:'teacher_code',date:'joining_date',permission:'teachers',label:'Teacher'},helper:{table:'qa_staff',id:'staff_id',code:'staff_code',date:'joining_date',permission:'staff',label:'Helper'}};
 let people=[],school={name_bn:'কোরআনের আলো',name_en:'QURANER ALO',logo_path:'assets/quraner-alo-logo.jpg'},selected=new Set(),access,loadId=0;const pictures=new Map();
 const photoPromises=new Map();

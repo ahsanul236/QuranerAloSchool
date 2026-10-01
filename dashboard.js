@@ -395,7 +395,7 @@
       ? loadPagedRows('qa_fee_payments','student_id,paid_at,amount','paid_at')
       : Promise.resolve(null);
     const feeChargesPromise = canFees
-      ? loadPagedRows('qa_fee_charges','student_id,billing_month,expected_amount,discount,previous_due,created_at','billing_month')
+      ? loadPagedRows('qa_fee_charges','student_id,billing_month,expected_amount,discount,previous_due,created_at,fee_category','billing_month')
       : Promise.resolve(null);
     const payrollPromise = canPayroll
       ? loadPagedRows('qa_payroll_records','employee_type,net_payable,status,paid_at,created_at','created_at')
@@ -422,9 +422,9 @@
     if (openingResult.error) throw openingResult.error;
 
     const peopleRows = [
-      canStudents ? `<a class="overview-people-row overview-people-link" href="students.html" aria-label="Open Students list"><span class="overview-people-icon student">S</span><span class="overview-people-label">Active Students</span><strong>${students}</strong></a>` : '',
-      canTeachers ? `<a class="overview-people-row overview-people-link" href="staff.html#teachers" aria-label="Open Teachers list"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Active Teachers</span><strong>${teachers}</strong></a>` : '',
-      canHelpers ? `<a class="overview-people-row overview-people-link" href="staff.html#helpers" aria-label="Open Helpers list"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Active Helpers</span><strong>${helpers}</strong></a>` : ''
+      canStudents ? `<a class="overview-people-row overview-people-link" href="students.html" aria-label="Open Students list"><span class="overview-people-icon student">S</span><span class="overview-people-label">Students</span><strong>${students}</strong></a>` : '',
+      canTeachers ? `<a class="overview-people-row overview-people-link" href="staff.html#teachers" aria-label="Open Teachers list"><span class="overview-people-icon teacher">T</span><span class="overview-people-label">Teachers</span><strong>${teachers}</strong></a>` : '',
+      canHelpers ? `<a class="overview-people-row overview-people-link" href="staff.html#helpers" aria-label="Open Helpers list"><span class="overview-people-icon helper">H</span><span class="overview-people-label">Helpers</span><strong>${helpers}</strong></a>` : ''
     ].join('');
 
     const sum = (items, key = 'amount') => (items || []).reduce((total, item) => total + Number(item[key] || 0), 0);
@@ -494,7 +494,7 @@
         });
         const baseCharges = ordered.reduce((total, charge) =>
           total + Math.max(0, Number(charge.expected_amount || 0) - Number(charge.discount || 0)), 0);
-        const initialPreviousDue = Math.max(0, Number(ordered[0]?.previous_due || 0));
+        const initialPreviousDue = Math.max(0, Number(ordered.find(charge=>!charge.fee_category||charge.fee_category==='monthly')?.previous_due || 0));
         const paid = Number(paymentsByStudent.get(studentId) || 0);
         const due=Math.max(0, baseCharges + initialPreviousDue - paid);studentDues += due;if(due>0)studentsWithDue++;
       });
@@ -538,11 +538,7 @@
       <section class="overview-report-card overview-balance-card">
         <div class="overview-card-title"><span class="overview-card-symbol balance">◒</span><strong>Balance &amp; Dues</strong></div>
         <div class="overview-balance-main">
-          <span>Today’s Net Balance</span>
-          <strong>${todayNet === null ? '—' : money(todayNet)}</strong>
-        </div>
-        <div class="overview-current-balance">
-          <span>Current Balance</span>
+          <span>Current School Balance</span>
           <strong>${currentBalance === null ? '—' : money(currentBalance)}</strong>
         </div>
         <div class="overview-dues-grid">
@@ -851,6 +847,11 @@
       document.body.classList.remove('mobile-slide-active');
     }
 
+    if (id === 'idCardPanel') {
+      const frame=$('idCardFrame');
+      if(!frame.getAttribute('src')) {frame.onload=()=>{const doc=frame.contentDocument;if(!doc)return;const resize=()=>requestAnimationFrame(()=>{const height=Math.max(350,(doc.querySelector('.dashboard-card')?.scrollHeight||350)+20);if(frame.style.height!==height+'px')frame.style.height=height+'px'});new ResizeObserver(resize).observe(doc.querySelector('.dashboard-card')||doc.body);resize();};frame.src='id-cards.html?embed=1&lang='+document.documentElement.lang;}
+    }
+
     if (id === 'settingsStoragePanel') {
       window.__qaStorageRequested = true;
       window.dispatchEvent(new CustomEvent('qa:storage-open'));
@@ -875,6 +876,7 @@
   }
 
   function bindSettingsNavigation() {
+    window.addEventListener('qa-language-change',()=>{$('idCardFrame')?.contentWindow?.QALanguage?.setLanguage(document.documentElement.lang,false)});
     document.querySelectorAll('#settingsDesktopNav [data-settings-pane]').forEach((button) => {
       button.addEventListener('click', () => openSettingsPane(button.dataset.settingsPane, true));
     });

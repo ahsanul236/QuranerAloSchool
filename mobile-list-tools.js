@@ -1,4 +1,4 @@
-import {t,locale} from './ui-i18n.js';
+import {t,locale} from './ui-i18n.js?v=20261001-fourstep1';
 import {renderFilterChips} from './list-tools.js?v=20260926-3';
 
 const icons = {

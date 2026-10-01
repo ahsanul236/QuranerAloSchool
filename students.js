@@ -516,6 +516,7 @@ function bindPortalActions() {
 
 $('studentListTab').addEventListener('click',()=>switchStudentGroupTab('students'));
 $('groupListTab').addEventListener('click',()=>switchStudentGroupTab('groups'));
+window.addEventListener('hashchange',()=>{if(location.hash==='#groups')switchStudentGroupTab('groups');else if(!location.hash)switchStudentGroupTab('students')});
 $('groupSearch').addEventListener('input',debounce(renderEmbeddedGroups,250));
 $('groupStatusFilter').addEventListener('change',renderEmbeddedGroups);
 $('groupTeacherFilter').addEventListener('change',renderEmbeddedGroups);
