@@ -1,5 +1,5 @@
 import {getProfileImage,fetchDocumentBlob} from './documents-client.js';
-import {t} from './ui-i18n.js?v=20261001-fourstep1';
+import {t} from './ui-i18n.js?v=20261001-fixes2';
 // Fetch only visible cards, share results across filtering and language changes.
 const cache=new Map(),queue=[];let running=0;
 function load(role,id){const key=role+':'+id;if(cache.has(key))return cache.get(key);const promise=new Promise(resolve=>{queue.push({role,id,resolve});drain()});cache.set(key,promise);return promise;}

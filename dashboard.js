@@ -847,9 +847,9 @@
       document.body.classList.remove('mobile-slide-active');
     }
 
-    if (id === 'idCardPanel') {
-      const frame=$('idCardFrame');
-      if(!frame.getAttribute('src')) {frame.onload=()=>{const doc=frame.contentDocument;if(!doc)return;const resize=()=>requestAnimationFrame(()=>{const height=Math.max(350,(doc.querySelector('.dashboard-card')?.scrollHeight||350)+20);if(frame.style.height!==height+'px')frame.style.height=height+'px'});new ResizeObserver(resize).observe(doc.querySelector('.dashboard-card')||doc.body);resize();};frame.src='id-cards.html?embed=1&lang='+document.documentElement.lang;}
+    if (id === 'idCardPanel' || id === 'certificatePanel') {
+      const frame=$(id==='idCardPanel'?'idCardFrame':'certificateFrame');
+      if(!frame.getAttribute('src')) {frame.onload=()=>{const doc=frame.contentDocument;if(!doc)return;const resize=()=>requestAnimationFrame(()=>{const height=Math.max(350,(doc.querySelector('.dashboard-card')?.scrollHeight||350)+20);if(frame.style.height!==height+'px')frame.style.height=height+'px'});new ResizeObserver(resize).observe(doc.querySelector('.dashboard-card')||doc.body);resize();};frame.src=(id==='idCardPanel'?'id-cards.html':'certificates.html')+'?embed=1&lang='+document.documentElement.lang;}
     }
 
     if (id === 'settingsStoragePanel') {

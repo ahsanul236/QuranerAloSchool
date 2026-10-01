@@ -1,6 +1,6 @@
-import {readAll} from './ui-data.js?v=20261001-fourstep1';
-import {chargeLabel} from './fee-types.js?v=20261001-fourstep1';
-import {personName} from './ui-i18n.js?v=20261001-fourstep1';
+import {readAll} from './ui-data.js?v=20261001-fixes2';
+import {chargeLabel} from './fee-types.js?v=20261001-fixes2';
+import {personName} from './ui-i18n.js?v=20261001-fixes2';
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { mountDocumentsPanel, setProfileImage } from './documents-ui.js?v=20260930-design1';
 

@@ -1,4 +1,4 @@
-import {readAll} from './ui-data.js?v=20261001-fourstep1';
+import {readAll} from './ui-data.js?v=20261001-fixes2';
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import {getAccess} from './authz.js';
 

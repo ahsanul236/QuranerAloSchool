@@ -101,7 +101,17 @@ function bindGroupListTools(){
 }
 
 function syncStudentGroupCreateActions(group){const studentBtn=$('newStudent'),groupBtn=$('newGroupInline');if(studentBtn){studentBtn.classList.toggle('hidden',group||!canManage);studentBtn.hidden=group||!canManage;}if(groupBtn){groupBtn.classList.toggle('hidden',!group||!canManage);groupBtn.hidden=!group||!canManage;}}
-function switchStudentGroupTab(mode){const group=mode==='groups';$('studentView').classList.toggle('hidden',group);$('groupView').classList.toggle('hidden',!group);$('studentListTab').classList.toggle('is-active',!group);$('groupListTab').classList.toggle('is-active',group);$('studentListTab').setAttribute('aria-selected',String(!group));$('groupListTab').setAttribute('aria-selected',String(group));syncStudentGroupCreateActions(group);requestAnimationFrame(()=>syncStudentGroupCreateActions(group));if(group&&!embeddedGroups.length)loadEmbeddedGroups().catch(e=>{console.error(e);groupSetMessage('Group list load করা যায়নি।','error')})}
+let enrollmentReady=null,studentAccess=null;
+function switchStudentGroupTab(mode){
+ if(mode==='enrollment'&&studentAccess&&!studentAccess.can('enrollments.view')&&!studentAccess.can('enrollments.manage'))mode='students';
+ const group=mode==='groups',enrollment=mode==='enrollment';
+ for(const [view,tab,on] of [['studentView','studentListTab',!group&&!enrollment],['groupView','groupListTab',group],['enrollmentView','enrollmentTab',enrollment]]){ $(view).classList.toggle('hidden',!on);$(tab)?.classList.toggle('is-active',on);$(tab)?.setAttribute('aria-selected',String(on)); }
+ syncStudentGroupCreateActions(group);
+ if(enrollment){$('newStudent').classList.add('hidden');$('newStudent').hidden=true;$('newGroupInline').classList.add('hidden');$('newGroupInline').hidden=true;
+ if(studentAccess&&!enrollmentReady){$('enr-loading').textContent='Loading…';enrollmentReady=import('./enrollment-workspace.js?v=20261001-fixes2').then(m=>m.initEnrollment($('enrollmentView'),supabase,studentAccess)).catch(e=>{console.error(e);$('enr-loading').textContent='এনরোলমেন্ট লোড করা যায়নি। ট্যাবটি আবার খুলে চেষ্টা করুন।';enrollmentReady=null;});}}
+ if(group&&!embeddedGroups.length)loadEmbeddedGroups().catch(e=>{console.error(e);groupSetMessage('Group list load করা যায়নি।','error')});
+}
+
 
 function redirectToLogin() { window.location.replace('./'); }
 
@@ -514,9 +524,10 @@ function bindPortalActions() {
   }));
 }
 
-$('studentListTab').addEventListener('click',()=>switchStudentGroupTab('students'));
-$('groupListTab').addEventListener('click',()=>switchStudentGroupTab('groups'));
-window.addEventListener('hashchange',()=>{if(location.hash==='#groups')switchStudentGroupTab('groups');else if(!location.hash)switchStudentGroupTab('students')});
+$('studentListTab').addEventListener('click',()=>{history.replaceState(null,'',location.pathname);switchStudentGroupTab('students')});
+$('enrollmentTab').addEventListener('click',()=>{history.replaceState(null,'','#enrollment');switchStudentGroupTab('enrollment')});
+$('groupListTab').addEventListener('click',()=>{history.replaceState(null,'','#groups');switchStudentGroupTab('groups')});
+window.addEventListener('hashchange',()=>{if(location.hash==='#enrollment')switchStudentGroupTab('enrollment');else if(location.hash==='#groups')switchStudentGroupTab('groups');else if(!location.hash)switchStudentGroupTab('students')});
 $('groupSearch').addEventListener('input',debounce(renderEmbeddedGroups,250));
 $('groupStatusFilter').addEventListener('change',renderEmbeddedGroups);
 $('groupTeacherFilter').addEventListener('change',renderEmbeddedGroups);
@@ -675,11 +686,12 @@ async function init() {
     return;
   }
 
+  studentAccess=access;
   canManage = access.can('students.manage');
   canManagePortal = access.profile.role === 'owner';
   $('loading').classList.add('hidden');
   $('app').classList.remove('hidden');
-  switchStudentGroupTab(location.hash==='#groups'?'groups':'students');
+  switchStudentGroupTab(location.hash==='#enrollment'?'enrollment':location.hash==='#groups'?'groups':'students');
 
   syncColumns = bindColumnMenu({
     button:$('columnsButton'), menu:$('columnMenu'), table:$('studentTable')

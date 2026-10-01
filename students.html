@@ -9,7 +9,7 @@
 <title>Students | QURANER ALO</title>
 <link rel="icon" type="image/jpeg" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-2">
-<link rel="stylesheet" href="dashboard.css?v=20260929-layoutparity2">
+<link rel="stylesheet" href="dashboard.css?v=20261001-fixes2">
 <style>
 
 .page-head h1{font-family:'Hind Siliguri',system-ui,sans-serif;font-size:32px;font-weight:700;letter-spacing:0}
@@ -40,7 +40,7 @@
 @media(min-width:761px){.list-head-actions>.primary-btn.list-action-btn{width:auto!important;min-width:96px!important;min-height:40px!important;height:40px!important;padding:8px 12px!important;border-radius:10px!important;font-size:13px!important;line-height:1!important;background:#2d7be7!important;border-color:#2d7be7!important;color:#fff!important;box-shadow:none!important}}
 </style>
 <link rel="stylesheet" href="mobile-list-tools.css?v=20260930-mobile1">
-<link rel="stylesheet" href="ui-design.css?v=20261001-fourstep1"></head>
+<link rel="stylesheet" href="ui-design.css?v=20261001-fixes2"></head>
 <body>
 <main class="dashboard-shell">
 <section class="card dashboard-card">
@@ -50,7 +50,8 @@
 </div>
 <div id="loading" class="notice-box">Students load হচ্ছে…</div>
 <div id="app" class="hidden">
-<div class="student-group-tabs" role="tablist"><button id="studentListTab" class="student-group-tab is-active" type="button" role="tab" aria-selected="true">শিক্ষার্থী তালিকা</button><button id="groupListTab" class="student-group-tab" type="button" role="tab" aria-selected="false">গ্রুপ তালিকা</button></div>
+<div class="student-group-tabs" role="tablist"><button id="studentListTab" class="student-group-tab is-active" type="button" role="tab" aria-selected="true">শিক্ষার্থী তালিকা</button><button id="groupListTab" class="student-group-tab" type="button" role="tab" aria-selected="false">গ্রুপ তালিকা</button><button id="enrollmentTab" class="student-group-tab qa-enrollment-tab" type="button" role="tab" aria-selected="false">Enrollment</button></div>
+<div id="enrollmentView" class="hidden"><p id="enr-loading" role="status"></p><details class="panel qa-enrollment-create"><summary>New Enrollment</summary><form id="enr-enrollmentForm" class="form-grid" style="padding:16px"><label>Student<select id="enr-studentSelect" required></select></label><label>Course / Class<input id="enr-courseCode" required placeholder="HIFZ / NAZERA / TAJWEED"></label><label>Start date<input id="enr-startDate" type="date" required></label><label>End date<input id="enr-endDate" type="date"></label><label>Teacher / Mentor<select id="enr-teacherUser"><option value="">— নির্ধারিত নয় —</option></select></label><label>Status<select id="enr-status"><option value="active">Active</option><option value="paused">Paused</option><option value="completed">Completed</option><option value="cancelled">Cancelled</option></select></label><label class="span-2">Notes<textarea id="enr-notes"></textarea></label><div class="page-actions span-2"><button class="primary-btn" type="submit">Save Enrollment</button><span id="enr-formMessage" class="message-inline"></span></div></form></details><div class="panel"><div class="panel-head"><h2>Enrollment List</h2><span id="enr-countLabel" class="eyebrow"></span></div><div class="table-wrap"><table class="user-table"><thead><tr><th>Student</th><th>Course</th><th>Start</th><th>End</th><th>Teacher</th><th>Status</th><th>Actions</th></tr></thead><tbody id="enr-rows"></tbody></table></div></div></div>
 <div id="studentView">
 <div id="studentFormPanel" class="panel hidden">
 <div class="panel-head"><h2>নতুন শিক্ষার্থী ও Guardian তথ্য</h2></div>
@@ -198,6 +199,6 @@
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="students.js?v=20261001-fourstep1"></script>
-<script src="management-nav.js?v=20261001-fourstep1"></script><script type="module" src="ui-bootstrap.js?v=20261001-fourstep1"></script></body>
+<script type="module" src="students.js?v=20261001-fixes2"></script>
+<script src="management-nav.js?v=20261001-fixes2"></script><script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script></body>
 </html>
