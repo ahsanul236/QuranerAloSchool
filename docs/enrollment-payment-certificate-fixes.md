@@ -16,3 +16,8 @@ Certificates are a lightweight Settings pane using existing profile data, editab
 - SQL tests ran inside rolled-back transactions: exact totals, partial/paid states, idempotent retry, failed batch atomic rollback, wrong-student rejection, inactive historical payments and anonymous denial. The suite also passed as the authenticated role under RLS after removing an inaccessible private-schema call from the invoker RPC.
 - The production migration is recorded as `20261001105257_batch_fee_payments`. Its public RPC is SECURITY INVOKER, not executable by anon, and executable by authenticated. Security advisors introduced no new findings.
 - Browser fixtures do not constitute real-account end-to-end payment testing; no real student payment was created during QA.
+
+
+### Student-wide balances on fee receipts
+
+Single-payment and grouped receipts keep the balance for their selected fee(s), and also show the student's current outstanding balance across every issued fee and payment. Both ledgers use `readAll` pagination so Supabase page limits do not truncate the total. Confirmed against QAS-26-008: October monthly charge ৳500, paid ৳250, remaining ৳250; the last batch settled the separate admission and transport fees; student-wide due remains ৳250.
