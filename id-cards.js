@@ -29,7 +29,8 @@ function render(){
   const details=el('div',null,'qa-id-details');details.append(el('p',cardText(type.label+' ID Card',({student:'শিক্ষার্থী',teacher:'শিক্ষক',helper:'হেল্পার'}[role])+' পরিচয়পত্র'),'qa-id-role qa-record-name'),el('h3',personName(p),'qa-record-name'),el('div',p[type.code],'qa-id-code qa-record-name'));
   const dl=el('dl'),rowsToShow=[[cardText('Role','ধরন'),cardText(type.label,({student:'শিক্ষার্থী',teacher:'শিক্ষক',helper:'হেল্পার'}[role]))]];
   if(role==='student')rowsToShow.push([cardText('Guardian','অভিভাবক'),p.guardian_name||p.father_name||p.mother_name||'—']);
-  rowsToShow.push([role==='student'?cardText('Admission date','ভর্তির তারিখ'):cardText('Joining date','যোগদানের তারিখ'),p[type.date]||'—'],[cardText('Phone','ফোন'),p.phone||'—']);
+  if(role!=='student')rowsToShow.push([cardText('Joining date','যোগদানের তারিখ'),p[type.date]||'—']);
+  rowsToShow.push([cardText('Phone','ফোন'),p.phone||'—']);
   for(const [label,value] of rowsToShow){const row=el('div');row.append(el('dt',label,'qa-record-name'),el('dd',value,'qa-record-name'));dl.append(row)}details.append(dl);body.append(details);card.append(body,el('footer',cardText('Authorizing Authority','অনুমোদনকারী কর্তৃপক্ষ'),'qa-record-name qa-id-authority'));
   $('idCards').append(card);if(!pictures.has(role+id))photoObserver.observe(photo)
  }
