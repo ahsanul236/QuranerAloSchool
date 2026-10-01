@@ -13,19 +13,6 @@
   <div id="incomeEntryBody" class="settings-accordion-body hidden"><form id="incomeForm" class="form-grid" style="padding:18px"><label>Date<input id="incomeDate" type="date" required></label><label>Category<input id="incomeCategory" required placeholder="Donation, Service, Other..."></label><label>Amount (৳)<input id="incomeAmount" type="number" min="0.01" step="0.01" required></label><label>Account<select id="incomeAccount"><option>Cash</option><option>Bank</option><option>bKash</option><option>Nagad</option><option>Rocket</option><option>Other</option></select></label><label>Reference<input id="incomeReference" placeholder="Optional reference"></label><label class="span-2">Description<textarea id="incomeDescription"></textarea></label><div class="span-2 page-actions"><button class="primary-btn" style="width:auto" type="submit">Save Income</button></div></form><div id="incomeMessage" class="message-inline" style="padding:0 18px 18px"></div></div>
 </div>
 
-<div class="panel student-dues-panel">
-  <div class="panel-head">
-    <div><h2>Student Dues</h2></div>
-    <label class="dues-student-filter">Student<select id="duesStudentSelect"><option value="">সব শিক্ষার্থী</option></select></label>
-  </div>
-  <div class="dues-summary-grid">
-    <div class="dues-summary-card"><span>Total Due</span><strong>৳ <span id="duesTotal">0.00</span></strong></div>
-    <div class="dues-summary-card"><span>Open / Partial</span><strong id="duesOpenCount">0</strong></div>
-    <div class="dues-summary-card"><span>Students with Due</span><strong id="duesStudentCount">0</strong></div>
-  </div>
-  <div class="table-wrap"><table class="user-table attendance-table dues-table"><thead><tr><th>Fee / Month</th><th>Student</th><th>Payable</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody id="duesRows"></tbody></table></div>
-  <div id="duesEmpty" class="dues-empty hidden">কোনো outstanding fee due নেই।</div>
-</div>
 <div class="panel fee-action-panel">
   <div class="fee-action-tabs" role="tablist" aria-label="Fee actions">
     <button id="paymentTab" class="fee-action-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="paymentPane">Receive Fee Payment</button>
@@ -56,5 +43,18 @@
     </form><div id="chargeMessage" class="message-inline"></div>
   </div>
 </div>
+<div class="panel student-dues-panel">
+  <div class="panel-head">
+    <div><h2>Student Dues</h2></div>
+    <label class="dues-student-filter">Student<select id="duesStudentSelect"><option value="">সব শিক্ষার্থী</option></select></label>
+  </div>
+  <div class="dues-summary-grid">
+    <div class="dues-summary-card"><span>Total Due</span><strong>৳ <span id="duesTotal">0.00</span></strong></div>
+    <div class="dues-summary-card"><span>Open / Partial</span><strong id="duesOpenCount">0</strong></div>
+    <div class="dues-summary-card"><span>Students with Due</span><strong id="duesStudentCount">0</strong></div>
+  </div>
+  <div class="table-wrap"><table class="user-table attendance-table dues-table"><thead><tr><th>Fee / Month</th><th>Student</th><th>Payable</th><th>Paid</th><th>Remaining</th><th>Status</th></tr></thead><tbody id="duesRows"></tbody></table></div>
+  <div id="duesEmpty" class="dues-empty hidden">কোনো outstanding fee due নেই।</div>
+</div>
 <p class="footer-note">RLS enforced · Receipt numbers are generated server-side · Payments are never stored in browser local storage.</p>
-</div></section></main><script src="supabase-config.js"></script><script type="module" src="fees.js?v=20261001-fixes2"></script><script src="management-nav.js?v=20261001-fixes2"></script><script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script></body></html>
+</div></section></main><script src="supabase-config.js"></script><script type="module" src="fees.js?v=20261001-feesreceipt2"></script><script src="management-nav.js?v=20261001-fixes2"></script><script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script></body></html>

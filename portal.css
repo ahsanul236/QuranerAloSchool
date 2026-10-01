@@ -228,3 +228,7 @@ body.portal-page{background:#f3f8f6}
  .portal-hero{grid-template-columns:52px minmax(0,1fr)}
  .portal-avatar{width:52px;height:52px}
 }
+/* Profile image hierarchy and compact mobile identity alignment */
+@media(min-width:1001px){.portal-hero{grid-template-columns:112px minmax(0,1fr) minmax(170px,auto)}.portal-avatar{width:112px;height:112px;border-radius:22px}}
+@media(min-width:621px) and (max-width:1000px){.portal-hero{grid-template-columns:92px minmax(0,1fr);align-items:center}.portal-avatar{width:92px;height:92px;border-radius:18px}}
+@media(max-width:620px){.portal-hero{grid-template-columns:64px minmax(0,1fr);grid-template-rows:auto auto;align-items:center;gap:5px 12px;padding:14px}.portal-avatar{grid-column:1;grid-row:1/3;align-self:center;width:64px;height:64px;border-radius:15px}.portal-identity{grid-column:2;grid-row:1;align-self:end;min-width:0}.portal-identity h1{font-size:22px;line-height:1.2}.portal-identity p{font-size:12px;line-height:1.35}.portal-hero-meta{grid-column:2;grid-row:2;display:flex;justify-items:start;justify-content:flex-start;align-items:center;align-self:start;gap:6px 8px;min-width:0;text-align:left;flex-wrap:wrap}.portal-hero-meta>*{min-width:0}.portal-mini-badge{padding:4px 8px;font-size:11px}.portal-mini-contact{font-size:12px}}
