@@ -10,9 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css?v=20261001-fixes2">
+  <link rel="stylesheet" href="dashboard.css?v=20261003-documents8">
   <link rel="stylesheet" href="ui-design.css?v=20261001-fixes2">
-  <link rel="stylesheet" href="certificates.css?v=20261003-certificates7">
+  <link rel="stylesheet" href="certificates.css?v=20261003-documents8">
 </head>
 <body>
   <main class="dashboard-shell">
@@ -37,7 +37,7 @@
               <label>Language<select id="certificateLanguage"><option value="bn">বাংলা</option><option value="en">English</option></select></label>
               <label>Issue date<input id="certificateDate" type="date" required></label>
               <label>Certificate number<input id="certificateNumber" maxlength="80" autocomplete="off"></label>
-              <label>Manual Reference <span class="muted-text">(optional)</span><input id="certificateReference" maxlength="120" autocomplete="off"></label>
+              <label><span class="certificate-field-label">Manual Reference <small class="muted-text">(optional)</small></span><input id="certificateReference" maxlength="120" autocomplete="off"></label>
               <label class="span-2">Certificate text<textarea id="certificateText" rows="6" required maxlength="5000"></textarea></label>
               <label>Authorized signatory<input id="certificateSigner" maxlength="150"></label>
               <div class="page-actions span-2 certificate-actions">
@@ -66,13 +66,14 @@
             <div class="certificate-pagination"><button id="recordsPrev" class="secondary-btn" type="button">Previous</button><span id="recordsPage"></span><button id="recordsNext" class="secondary-btn" type="button">Next</button></div>
           </section>
         </section>
-        <article id="certificatePreview" class="certificate-paper hidden" data-no-translate></article>
+        <p id="certificateFitWarning" class="notice-box error-box hidden" role="alert">Certificate text is too long for one A4 page. Please shorten it before printing.</p>
+        <div id="certificatePreviewFrame" class="certificate-preview-frame hidden"><article id="certificatePreview" class="certificate-paper hidden" data-no-translate></article></div>
       </div>
     </section>
   </main>
   <script src="supabase-config.js"></script>
   <script src="management-nav.js"></script>
   <script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script>
-  <script type="module" src="certificates.js?v=20261003-certificates7"></script>
+  <script type="module" src="certificates.js?v=20261003-documents8"></script>
 </body>
 </html>

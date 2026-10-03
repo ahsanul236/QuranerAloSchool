@@ -1276,7 +1276,7 @@ th.qa-sortable-th:hover{background:#eef8f4}
   .settings-desktop-nav button:hover,.settings-desktop-nav button.is-active{border-color:#8fd8c5;background:#f3fcf8}
   #settingsView>.settings-detail-stage{display:none}
   #settingsView>#settingsStoragePanel,#settingsView>.portal-settings-cards,#settingsView>#schoolProfilePanel,#settingsView>#financialSettingsPanel,#settingsView>#userManagement{display:none!important}
-  #settingsView.has-detail{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,70%);gap:14px;align-items:start}
+  #settingsView.has-detail{display:grid;grid-template-columns:minmax(240px,3fr) minmax(0,7fr);gap:14px;align-items:start}
   #settingsView.has-detail>.settings-desktop-nav{grid-column:1}
   #settingsView.has-detail>.settings-desktop-nav button{min-height:60px;padding:8px 12px}
   #settingsView.has-detail>.settings-detail-stage{display:none}
@@ -2408,3 +2408,10 @@ th.qa-sortable-th:hover{background:#eef8f4}
 }
 
 
+
+/* Settings panels contain their search results and use the available grid width. */
+.panel.portal-preview-card{overflow:visible;min-width:0}
+.portal-preview-card .portal-preview-results{position:static;margin-top:6px;max-height:330px}
+.portal-preview-card .portal-preview-open{align-self:start;min-height:48px}
+.portal-summary-list .portal-summary-card>.portal-role-mark{display:grid;place-items:center;width:34px;height:34px;padding:0;line-height:1;flex-shrink:0;text-align:center}
+@media(min-width:621px){#settingsView.has-detail .portal-preview-card{min-height:380px}}

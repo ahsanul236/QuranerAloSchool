@@ -25,3 +25,11 @@
 .qa-id-authority{border:0!important;margin:0!important;padding:0!important;max-width:none!important}
 @media(max-width:620px){.qa-id-grid{justify-content:center}.qa-id-controls .page-actions{flex-wrap:wrap}}
 @media print{@page{size:A4;margin:12mm}body{background:white!important}.management-sidebar,.management-mobile-bar,.management-mobile-toggle,.topbar,.qa-id-controls,#loading,#errorBox,.qa-id-check{display:none!important}.dashboard-shell,.dashboard-card,#app{padding:0!important;margin:0!important;width:100%!important;max-width:none!important;border:0!important;box-shadow:none!important}.qa-id-grid{display:grid!important;grid-template-columns:repeat(3,54mm);align-items:start;justify-content:start;gap:8mm;margin:0!important;padding:0!important;overflow:visible!important}.qa-id-card{display:grid!important;box-sizing:border-box;width:54mm!important;height:85.6mm!important;min-height:85.6mm!important;max-width:none!important;break-inside:avoid;box-shadow:none;outline:none!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}.qa-id-card:not(.is-selected){display:none!important}}
+
+.qa-id-body{position:relative;isolation:isolate}
+.qa-id-body>.qa-id-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38mm;height:38mm;object-fit:contain;opacity:.055;pointer-events:none;z-index:-1}
+
+@media print{
+ html body.management-layout .management-sidebar,html body .management-mobile-toggle,html body .management-bottom-nav,html body .management-more-sheet,html body .management-nav-backdrop{display:none!important}
+ html body.management-layout .dashboard-shell,html body.management-layout .dashboard-card,html body.management-layout .dashboard-card>#app,html body.qa-id-embedded .dashboard-shell,html body.qa-id-embedded .dashboard-card{padding:0!important;margin:0!important;max-width:none!important;width:100%!important;min-height:0!important;background:white!important}
+}

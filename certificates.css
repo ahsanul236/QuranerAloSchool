@@ -27,5 +27,34 @@
 .certificate-pagination{display:flex;justify-content:flex-end;align-items:center;gap:12px;padding-top:12px}
 .certificate-records .notice-box{margin:8px 0}
 @media(max-width:700px){.certificate-tabs{gap:6px;border-radius:12px 12px 0 0}.certificate-tabs>.student-group-tab{min-height:44px;padding:8px 5px;font-size:12px}.certificate-records{padding:12px}.certificate-record-filters{grid-template-columns:1fr 1fr;gap:8px}.certificate-record-filters label:first-child{grid-column:1/-1}.certificate-record-table{min-width:700px}.certificate-record-table th,.certificate-record-table td{padding:8px;font-size:12px}.certificate-actions{align-items:stretch}.certificate-actions button{flex:1}.certificate-actions span{flex-basis:100%}}
-@media(max-width:620px){.certificate-paper{padding:16px;border-width:5px;min-height:0}.certificate-paper header{gap:10px}.certificate-paper h2{font-size:19px}.certificate-paper header img{width:45px;height:45px}.certificate-paper h1{font-size:32px;margin:22px 0 12px}.certificate-name{font-size:30px}.certificate-body{font-size:16px}.certificate-paper footer{max-width:100%}.certificate-meta{flex-wrap:wrap}}
-@media print{@page{size:A4 landscape;margin:12mm}body{background:white!important}.topbar,.management-sidebar,.management-mobile-bar,.qa-id-controls,#loading,#errorBox{display:none!important}.dashboard-shell,.dashboard-card,#app{margin:0!important;padding:0!important;width:100%!important;max-width:none!important;border:0!important;box-shadow:none!important}.certificate-paper{width:100%;max-width:none;margin:0;min-height:175mm;padding:10mm;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}.certificate-paper h1{font-size:36px;margin:20px 0}.certificate-name{font-size:34px}.certificate-body{font-size:17px;min-height:90px}}
+
+#certificateForm{align-items:start}
+#certificateForm>label{display:flex;flex-direction:column;gap:6px;align-self:start;text-align:left;min-width:0}
+#certificateForm>.span-2{grid-column:1/-1!important}
+.certificate-field-label{display:flex;align-items:baseline;gap:5px;flex-wrap:wrap}
+.certificate-field-label small{font-size:12px;font-weight:400}
+#certificateForm input,#certificateForm select{min-height:44px}
+.certificate-preview-frame{position:relative;max-width:100%;margin:20px auto}
+.certificate-paper{position:relative;isolation:isolate;width:297mm;height:210mm;max-width:none;min-height:0;margin:0;padding:14mm;display:flex;flex-direction:column;transform-origin:top left;box-sizing:border-box}
+.certificate-paper>.certificate-watermark{position:absolute;width:100mm;height:100mm;object-fit:contain;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.055;z-index:-1;pointer-events:none}
+.certificate-paper header{flex-shrink:0;min-height:80px}
+.certificate-paper h1{font-size:44px;margin:30px 0 24px;flex-shrink:0}
+.certificate-meta{flex-wrap:wrap;flex-shrink:0}
+.certificate-body{font-size:20px;line-height:1.8;margin:0;min-height:0}
+.certificate-paper footer{margin:auto 0 0 auto;flex-shrink:0}
+.certificate-overflow{outline:3px solid #b42318}
+@media print{
+ @page{size:A4 landscape;margin:0}
+ html,body{margin:0!important;padding:0!important;background:white!important}
+ .topbar,.management-sidebar,.management-mobile-bar,.qa-id-controls,#loading,#errorBox{display:none!important}
+ .dashboard-shell,.dashboard-card,#app{margin:0!important;padding:0!important;width:100%!important;max-width:none!important;border:0!important;box-shadow:none!important}
+ .certificate-preview-frame{width:297mm!important;height:210mm!important;margin:0!important}
+ .certificate-paper{transform:none!important;width:297mm!important;height:210mm!important;margin:0;box-shadow:none;break-inside:avoid;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+
+@media print{
+ html body.management-layout .management-sidebar,html body .management-mobile-toggle,html body .management-bottom-nav,html body .management-more-sheet,html body .management-nav-backdrop{display:none!important}
+ html body.management-layout .dashboard-shell,html body.management-layout .dashboard-card,html body.management-layout .dashboard-card>#app,html body.qa-id-embedded .dashboard-shell,html body.qa-id-embedded .dashboard-card{padding:0!important;margin:0!important;max-width:none!important;width:100%!important;min-height:0!important;background:white!important}
+}
+
+@media print{#certificateFitWarning{display:none!important}}
