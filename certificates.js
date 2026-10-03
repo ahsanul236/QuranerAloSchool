@@ -32,6 +32,7 @@ async function load(){
   const token=++loadToken;
   invalidate();
   $('certificatePerson').replaceChildren(node('option',''));
+  $('certificatePerson').dispatchEvent(new Event('change'));
   const role=$('certificateRole').value,r=roles[role],fields=role==='student'?',gender,date_of_birth,admission_date,father_name,mother_name,birth_registration_no':'';
   if(!r)return;
   const {data,error}=await readAll(()=>db.from(r[0]).select(r[1]+','+r[2]+',full_name,full_name_bn'+fields).order(r[1]));
@@ -40,8 +41,10 @@ async function load(){
   people=data||[];
   for(const p of people){const o=node('option',(p.full_name||'')+' · '+(p.full_name_bn||'')+' · '+p[r[2]]);o.value=p[r[1]];$('certificatePerson').append(o)}
   $('certificatePerson').dispatchEvent(new Event('change'));
+  const searchInput=$('qa-search-certificatePerson');
+  if(searchInput?.getAttribute('aria-expanded')==='true')searchInput.dispatchEvent(new Event('input',{bubbles:true}));
   updateTypes();
-  if(numberIsAutomatic)await getNextNumber();
+  if(numberIsAutomatic)getNextNumber().catch(error=>{console.error(error);message('certificateMessage',t('Unable to generate certificate number.'),true)});
 }
 function schoolSnapshot(){return {name_bn:school.name_bn||'কোরআনের আলো',name_en:school.name_en||'QURANER ALO',address:school.address||'',phone:school.phone||'',logo_path:school.logo_path||'assets/quraner-alo-logo.jpg'}}
 function renderCertificate(data){
@@ -163,21 +166,22 @@ $('recordsPrev').addEventListener('click',()=>{if(recordsPage>0){recordsPage--;l
 $('recordsNext').addEventListener('click',()=>{if((recordsPage+1)*pageSize<recordsCount){recordsPage++;loadRecords()}});
 $('signOut').onclick=async()=>{await db.auth.signOut();location.replace('./')};
 (async()=>{
-  const formControls=[...$('certificateForm').querySelectorAll('input,select,textarea,button')];
-  formControls.forEach(control=>control.disabled=true);
   $('loading').classList.add('hidden');$('app').classList.remove('hidden');
   try{
     access=await getAccess(db);if(!access)throw Error(t('Please sign in'));
     rolesAllowed=Object.entries(roles).filter(([,r])=>access.can(r[3]+'.view')||access.can(r[3]+'.manage')).map(([role])=>role);
     if(!rolesAllowed.length)throw Error(t('No permission'));
     $('certificateRole').replaceChildren(...rolesAllowed.map(role=>{const o=node(t(roles[role][4]));o.value=role;return o}));
-    const result=await db.from('qa_app_settings').select('value').eq('key','school_profile').maybeSingle();
-    school={name_bn:'কোরআনের আলো',name_en:'QURANER ALO',...result.data?.value};
     $('certificateLanguage').value=locale();
     $('certificateDate').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'});
     filterYearOptions();filterTypeOptions();
     searchableSelect($('certificatePerson'));
-    await load();
-    formControls.forEach(control=>control.disabled=false);
+    updateTypes();
+    load().catch(e=>{console.error(e);message('errorBox',t('Unable to load students.'),true)});
+    db.from('qa_app_settings').select('value').eq('key','school_profile').maybeSingle().then(result=>{
+      if(result.error)console.warn('School profile could not be loaded:',result.error);
+      school={name_bn:'কোরআনের আলো',name_en:'QURANER ALO',...result.data?.value};
+      if($('certificatePerson').value)template();
+    }).catch(error=>console.warn('School profile could not be loaded:',error));
   }catch(e){$('loading').classList.add('hidden');$('errorBox').textContent=e.message;$('errorBox').classList.remove('hidden')}
 })();
