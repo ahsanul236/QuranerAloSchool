@@ -40,9 +40,10 @@ async function load(){
   if(error){message('errorBox',t('Unable to load students.'),true);return}
   people=data||[];
   for(const p of people){const o=node('option',(p.full_name||'')+' · '+(p.full_name_bn||'')+' · '+p[r[2]]);o.value=p[r[1]];$('certificatePerson').append(o)}
+  const searchInput=$('qa-search-certificatePerson'),searchTerm=searchInput?.value||'';
   $('certificatePerson').dispatchEvent(new Event('change'));
-  const searchInput=$('qa-search-certificatePerson');
-  if(searchInput?.getAttribute('aria-expanded')==='true')searchInput.dispatchEvent(new Event('input',{bubbles:true}));
+  if(searchInput&&searchTerm){searchInput.value=searchTerm;searchInput.dispatchEvent(new Event('input',{bubbles:true}))}
+  else if(searchInput?.getAttribute('aria-expanded')==='true')searchInput.dispatchEvent(new Event('input',{bubbles:true}));
   updateTypes();
   if(numberIsAutomatic)getNextNumber().catch(error=>{console.error(error);message('certificateMessage',t('Unable to generate certificate number.'),true)});
 }
