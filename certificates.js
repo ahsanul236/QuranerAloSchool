@@ -159,6 +159,9 @@ $('recordsPrev').addEventListener('click',()=>{if(recordsPage>0){recordsPage--;l
 $('recordsNext').addEventListener('click',()=>{if((recordsPage+1)*pageSize<recordsCount){recordsPage++;loadRecords()}});
 $('signOut').onclick=async()=>{await db.auth.signOut();location.replace('./')};
 (async()=>{
+  const formControls=[...$('certificateForm').querySelectorAll('input,select,textarea,button')];
+  formControls.forEach(control=>control.disabled=true);
+  $('loading').classList.add('hidden');$('app').classList.remove('hidden');
   try{
     access=await getAccess(db);if(!access)throw Error(t('Please sign in'));
     rolesAllowed=Object.entries(roles).filter(([,r])=>access.can(r[3]+'.view')||access.can(r[3]+'.manage')).map(([role])=>role);
@@ -170,7 +173,7 @@ $('signOut').onclick=async()=>{await db.auth.signOut();location.replace('./')};
     $('certificateDate').value=new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Dhaka'});
     filterYearOptions();filterTypeOptions();
     searchableSelect($('certificatePerson'));
-    $('loading').classList.add('hidden');$('app').classList.remove('hidden');
-    load().catch(e=>message('errorBox',e?.message||t('Unable to load students.'),true));
+    await load();
+    formControls.forEach(control=>control.disabled=false);
   }catch(e){$('loading').classList.add('hidden');$('errorBox').textContent=e.message;$('errorBox').classList.remove('hidden')}
 })();
