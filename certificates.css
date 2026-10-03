@@ -35,15 +35,15 @@
 .certificate-field-label small{font-size:12px;font-weight:400}
 #certificateForm input,#certificateForm select{min-height:44px}
 .certificate-preview-frame{position:relative;max-width:100%;margin:20px auto}
-.certificate-paper{position:relative;isolation:isolate;width:297mm;height:210mm;max-width:none;min-height:0;margin:0;padding:14mm;display:flex;flex-direction:column;transform-origin:top left;box-sizing:border-box}
+.certificate-paper{position:relative;isolation:isolate;width:297mm;height:210mm;max-width:none;min-height:0;margin:0;border:0;padding:calc(24mm + 8px);display:flex;flex-direction:column;transform-origin:top left;box-sizing:border-box}
 .certificate-paper>.certificate-watermark{position:absolute;left:0;right:0;overflow:hidden;opacity:.065;z-index:-1;pointer-events:none}
 /* Original logo is unchanged. Its outer white padding is excluded from the visible height. */
 .certificate-watermark>img{position:absolute;top:-3.93%;left:50%;transform:translateX(-50%);height:107.18%;width:auto;max-width:none;object-fit:contain}
 .certificate-paper header{flex-shrink:0;min-height:80px}
-.certificate-paper h1{font-size:44px;margin:30px 0 24px;flex-shrink:0}
+.certificate-paper h1{font-size:44px;margin:0 0 24px;flex-shrink:0}
 .certificate-meta{flex-wrap:wrap;flex-shrink:0}
 .certificate-body{font-size:20px;line-height:1.8;margin:0;min-height:0}
-.certificate-paper footer{margin:auto 0 0 auto;flex-shrink:0}
+.certificate-paper footer{margin:0 0 0 auto;flex-shrink:0}
 .certificate-overflow{outline:3px solid #b42318}
 @media print{
  @page{size:A4 landscape;margin:0}
@@ -60,3 +60,8 @@
 }
 
 @media print{#certificateFitWarning{display:none!important}}
+
+/* The article remains the full A4 sheet; the existing double border is inset by 10 mm. */
+.certificate-paper::before{content:"";position:absolute;inset:10mm;border:8px double #487966;pointer-events:none;z-index:-1}
+.certificate-content{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:24px 0;box-sizing:border-box}
+.certificate-content>.certificate-body{flex-shrink:0}

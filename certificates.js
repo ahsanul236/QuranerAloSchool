@@ -60,17 +60,19 @@ function renderCertificate(data){
   const meta=node('div',null,'certificate-meta');
   meta.append(node('span',(isBn?'সনদ নম্বর: ':'Certificate No: ')+(data.certificate_number||'')),node('span',(isBn?'তারিখ: ':'Date: ')+data.issue_date));
   if(data.manual_reference)meta.append(node('span',(isBn?'রেফারেন্স: ':'Reference: ')+data.manual_reference));
-  box.append(watermark,head,meta,node('h1',data.certificate_title),node('p',data.certificate_text,'certificate-body'),node('footer',[data.authorized_signatory,isBn?'অনুমোদনকারী কর্তৃপক্ষ':'Authorized Signatory'].filter(Boolean).join('\n')));
+  const content=node('section',null,'certificate-content');content.append(node('h1',data.certificate_title),node('p',data.certificate_text,'certificate-body'));
+  box.append(watermark,head,meta,content,node('footer',[data.authorized_signatory,isBn?'অনুমোদনকারী কর্তৃপক্ষ':'Authorized Signatory'].filter(Boolean).join('\n')));
   box.classList.remove('hidden');$('certificatePreviewFrame').classList.remove('hidden');fitCertificate();
 }
 function fitCertificate(){
   const box=$('certificatePreview'),frame=$('certificatePreviewFrame');if(box.classList.contains('hidden'))return;
   const scale=Math.min(1,frame.parentElement.clientWidth/box.offsetWidth);
   frame.style.width=(box.offsetWidth*scale)+'px';frame.style.height=(box.offsetHeight*scale)+'px';box.style.transform=`scale(${scale})`;
-  const body=box.querySelector('.certificate-body');body.style.fontSize='20px';
+  const body=box.querySelector('.certificate-body'),content=box.querySelector('.certificate-content');body.style.fontSize='20px';
+  const contentFits=()=>{const style=getComputedStyle(content);return [...content.children].reduce((height,e)=>height+e.offsetHeight+parseFloat(getComputedStyle(e).marginTop)+parseFloat(getComputedStyle(e).marginBottom),parseFloat(style.paddingTop)+parseFloat(style.paddingBottom))<=content.clientHeight+1};
   // Keep long text within this single sheet, without altering its page ratio.
-  for(let size=20;box.scrollHeight>box.clientHeight+1&&size>11;size-=.5)body.style.fontSize=(size-.5)+'px';
-  const fits=box.scrollHeight<=box.clientHeight+1;$('printCertificate').disabled=!fits;
+  for(let size=20;!contentFits()&&size>11;size-=.5)body.style.fontSize=(size-.5)+'px';
+  const fits=contentFits()&&box.scrollHeight<=box.clientHeight+1;$('printCertificate').disabled=!fits;
   // Anchor the logo area to the actual header rule and signature rule.
   const head=box.querySelector('header'),footer=box.querySelector('footer'),watermark=box.querySelector('.certificate-watermark');
   const top=head.offsetTop+head.offsetHeight;
