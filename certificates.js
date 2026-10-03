@@ -53,7 +53,7 @@ function schoolSnapshot(){return {name_bn:school.name_bn||'কোরআনের
 function renderCertificate(data){
   const box=$('certificatePreview'),snap=data.school_snapshot||schoolSnapshot(),isBn=data.language==='bn';
   box.replaceChildren();box.lang=isBn?'bn':'en';
-  const watermark=node('img',null,'certificate-watermark');watermark.src=snap.logo_path||'assets/quraner-alo-logo.jpg';watermark.alt='';watermark.setAttribute('aria-hidden','true');
+  const watermark=node('div',null,'certificate-watermark'),watermarkLogo=node('img');watermarkLogo.src='assets/quraner-alo-watermark.png';watermarkLogo.alt='';watermark.setAttribute('aria-hidden','true');watermark.append(watermarkLogo);
   const head=node('header'),logo=node('img');logo.src=snap.logo_path||'assets/quraner-alo-logo.jpg';logo.alt='';
   const schoolText=node('div');schoolText.append(node('h2',isBn?(snap.name_bn||snap.name_en):(snap.name_en||snap.name_bn)),node('p',[snap.address,snap.phone].filter(Boolean).join(' · ')));
   head.append(logo,schoolText);
@@ -71,6 +71,10 @@ function fitCertificate(){
   // Keep long text within this single sheet, without altering its page ratio.
   for(let size=20;box.scrollHeight>box.clientHeight+1&&size>11;size-=.5)body.style.fontSize=(size-.5)+'px';
   const fits=box.scrollHeight<=box.clientHeight+1;$('printCertificate').disabled=!fits;
+  // Anchor the logo area to the actual header rule and signature rule.
+  const head=box.querySelector('header'),footer=box.querySelector('footer'),watermark=box.querySelector('.certificate-watermark');
+  const top=head.offsetTop+head.offsetHeight;
+  watermark.style.top=top+'px';watermark.style.height=Math.max(0,footer.offsetTop-top)+'px';
   box.classList.toggle('certificate-overflow',!fits);$('certificateFitWarning').classList.toggle('hidden',fits);
 }
 new ResizeObserver(fitCertificate).observe($('certificatePreviewFrame').parentElement);

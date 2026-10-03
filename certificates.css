@@ -36,7 +36,9 @@
 #certificateForm input,#certificateForm select{min-height:44px}
 .certificate-preview-frame{position:relative;max-width:100%;margin:20px auto}
 .certificate-paper{position:relative;isolation:isolate;width:297mm;height:210mm;max-width:none;min-height:0;margin:0;padding:14mm;display:flex;flex-direction:column;transform-origin:top left;box-sizing:border-box}
-.certificate-paper>.certificate-watermark{position:absolute;width:100mm;height:100mm;object-fit:contain;left:50%;top:50%;transform:translate(-50%,-50%);opacity:.055;z-index:-1;pointer-events:none}
+.certificate-paper>.certificate-watermark{position:absolute;left:0;right:0;overflow:hidden;opacity:.065;z-index:-1;pointer-events:none}
+/* Original logo is unchanged. Its outer white padding is excluded from the visible height. */
+.certificate-watermark>img{position:absolute;top:-3.93%;left:50%;transform:translateX(-50%);height:107.18%;width:auto;max-width:none;object-fit:contain}
 .certificate-paper header{flex-shrink:0;min-height:80px}
 .certificate-paper h1{font-size:44px;margin:30px 0 24px;flex-shrink:0}
 .certificate-meta{flex-wrap:wrap;flex-shrink:0}
