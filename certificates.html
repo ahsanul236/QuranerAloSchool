@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css?v=20261001-fixes2">
   <link rel="stylesheet" href="ui-design.css?v=20261001-fixes2">
-  <link rel="stylesheet" href="certificates.css?v=20261003-management1">
+  <link rel="stylesheet" href="certificates.css?v=20261003-certificates7">
 </head>
 <body>
   <main class="dashboard-shell">
@@ -25,10 +25,9 @@
       <p id="errorBox" class="notice-box hidden" role="alert"></p>
       <div id="app" class="hidden">
         <section class="panel qa-id-controls">
-          <div class="panel-head"><h2>Certificates</h2></div>
           <nav class="certificate-tabs" role="tablist" aria-label="Certificate sections">
-            <button id="generateTab" type="button" class="active" role="tab" aria-selected="true" aria-controls="generatePanel">Generate Certificates</button>
-            <button id="recordsTab" type="button" role="tab" aria-selected="false" aria-controls="recordsPanel">Certificate Records</button>
+            <button id="generateTab" type="button" class="student-group-tab is-active" role="tab" aria-selected="true" aria-controls="generatePanel">Generate Certificates</button>
+            <button id="recordsTab" type="button" class="student-group-tab" role="tab" aria-selected="false" aria-controls="recordsPanel">Certificate Records</button>
           </nav>
           <section id="generatePanel" role="tabpanel" aria-labelledby="generateTab">
             <form id="certificateForm" class="form-grid" style="padding:16px">
@@ -74,6 +73,6 @@
   <script src="supabase-config.js"></script>
   <script src="management-nav.js"></script>
   <script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script>
-  <script type="module" src="certificates.js?v=20261003-management6"></script>
+  <script type="module" src="certificates.js?v=20261003-certificates7"></script>
 </body>
 </html>
