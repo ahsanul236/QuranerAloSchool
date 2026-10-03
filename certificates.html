@@ -1,1 +1,79 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://quraneralo-school-drive-test.vercel.app; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://quraneralo-school-drive-test.vercel.app;"><title>Certificates | QURANER ALO</title><link rel="icon" href="assets/quraner-alo-logo.jpg"><link rel="stylesheet" href="styles.css"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="dashboard.css?v=20261001-fixes2"><link rel="stylesheet" href="ui-design.css?v=20261001-fixes2"><link rel="stylesheet" href="certificates.css?v=20261001-cursive2"></head><body><main class="dashboard-shell"><section class="card dashboard-card"><div class="topbar"><div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO"><div><strong>কোরআনের আলো</strong><span>Certificates</span></div></div><div class="top-actions"><a class="secondary-btn" href="dashboard.html#settings">Settings</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div></div><p id="loading" class="notice-box">Loading…</p><p id="errorBox" class="notice-box hidden" role="alert"></p><div id="app" class="hidden"><section class="panel qa-id-controls"><div class="panel-head"><h2>Certificates</h2></div><form id="certificateForm" class="form-grid" style="padding:16px"><label>Role<select id="certificateRole"></select></label><label>Name or ID<select id="certificatePerson" required></select></label><label>Certificate type<select id="certificateType"></select></label><label>Language<select id="certificateLanguage"><option value="bn">বাংলা</option><option value="en">English</option></select></label><label>Issue date<input id="certificateDate" type="date" required></label><label>Certificate number<input id="certificateNumber" maxlength="80"></label><label class="span-2">Certificate text<textarea id="certificateText" rows="6" required maxlength="5000"></textarea></label><label>Authorized signatory<input id="certificateSigner" maxlength="150"></label><div class="page-actions span-2"><button class="primary-btn" type="submit">Preview</button><button id="printCertificate" class="secondary-btn" type="button" disabled>Print / Save PDF</button><span>Review the details before printing.</span></div></form></section><article id="certificatePreview" class="certificate-paper hidden" data-no-translate></article></div></section></main><script src="supabase-config.js"></script><script src="management-nav.js"></script><script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script><script type="module" src="certificates.js?v=20261001-detail2"></script></body></html>
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' blob: https://quraneralo-school-drive-test.vercel.app; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://xjysbpthosvjxzujmuhe.supabase.co https://quraneralo-school-drive-test.vercel.app;">
+  <title>Certificates | QURANER ALO</title>
+  <link rel="icon" href="assets/quraner-alo-logo.jpg">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Galada&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css?v=20261001-fixes2">
+  <link rel="stylesheet" href="ui-design.css?v=20261001-fixes2">
+  <link rel="stylesheet" href="certificates.css?v=20261003-management1">
+</head>
+<body>
+  <main class="dashboard-shell">
+    <section class="card dashboard-card">
+      <div class="topbar">
+        <div class="brand-mini"><img src="assets/quraner-alo-logo.jpg" width="58" height="58" alt="QURANER ALO"><div><strong>কোরআনের আলো</strong><span>Certificates</span></div></div>
+        <div class="top-actions"><a class="secondary-btn" href="dashboard.html#settings">Settings</a><button id="signOut" class="secondary-btn" type="button">Sign out</button></div>
+      </div>
+      <p id="loading" class="notice-box">Loading…</p>
+      <p id="errorBox" class="notice-box hidden" role="alert"></p>
+      <div id="app" class="hidden">
+        <section class="panel qa-id-controls">
+          <div class="panel-head"><h2>Certificates</h2></div>
+          <nav class="certificate-tabs" role="tablist" aria-label="Certificate sections">
+            <button id="generateTab" type="button" class="active" role="tab" aria-selected="true" aria-controls="generatePanel">Generate Certificates</button>
+            <button id="recordsTab" type="button" role="tab" aria-selected="false" aria-controls="recordsPanel">Certificate Records</button>
+          </nav>
+          <section id="generatePanel" role="tabpanel" aria-labelledby="generateTab">
+            <form id="certificateForm" class="form-grid" style="padding:16px">
+              <label>Role<select id="certificateRole"></select></label>
+              <label>Name or ID<select id="certificatePerson" required></select></label>
+              <label>Certificate type<select id="certificateType"></select></label>
+              <label>Language<select id="certificateLanguage"><option value="bn">বাংলা</option><option value="en">English</option></select></label>
+              <label>Issue date<input id="certificateDate" type="date" required></label>
+              <label>Certificate number<input id="certificateNumber" maxlength="80" autocomplete="off"></label>
+              <label>Manual Reference <span class="muted-text">(optional)</span><input id="certificateReference" maxlength="120" autocomplete="off"></label>
+              <label class="span-2">Certificate text<textarea id="certificateText" rows="6" required maxlength="5000"></textarea></label>
+              <label>Authorized signatory<input id="certificateSigner" maxlength="150"></label>
+              <div class="page-actions span-2 certificate-actions">
+                <button class="primary-btn" type="submit">Preview</button>
+                <button id="issueCertificate" class="primary-btn hidden" type="button">Issue &amp; Save Record</button>
+                <button id="printCertificate" class="secondary-btn" type="button" disabled>Print / Save PDF</button>
+                <span>Review the details before issuing or printing.</span>
+              </div>
+              <p id="certificateMessage" class="notice-box hidden span-2" role="status"></p>
+            </form>
+          </section>
+          <section id="recordsPanel" class="certificate-records hidden" role="tabpanel" aria-labelledby="recordsTab" hidden>
+            <div class="certificate-record-filters">
+              <label>Search<input id="recordsSearch" type="search" placeholder="Certificate number, reference, name or ID"></label>
+              <label>Recipient type<select id="recordsType"><option value="">All</option></select></label>
+              <label>Year<select id="recordsYear"><option value="">All years</option></select></label>
+            </div>
+            <p id="recordsSummary" class="muted-text" aria-live="polite"></p>
+            <p id="recordsMessage" class="notice-box hidden" role="status"></p>
+            <div class="certificate-record-table-wrap">
+              <table class="certificate-record-table">
+                <thead><tr><th>Certificate number</th><th>Manual Reference</th><th>Recipient</th><th>Type</th><th>Issue date</th><th>Actions</th></tr></thead>
+                <tbody id="recordsBody"></tbody>
+              </table>
+            </div>
+            <div class="certificate-pagination"><button id="recordsPrev" class="secondary-btn" type="button">Previous</button><span id="recordsPage"></span><button id="recordsNext" class="secondary-btn" type="button">Next</button></div>
+          </section>
+        </section>
+        <article id="certificatePreview" class="certificate-paper hidden" data-no-translate></article>
+      </div>
+    </section>
+  </main>
+  <script src="supabase-config.js"></script>
+  <script src="management-nav.js"></script>
+  <script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script>
+  <script type="module" src="certificates.js?v=20261003-management1"></script>
+</body>
+</html>
