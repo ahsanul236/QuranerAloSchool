@@ -3,7 +3,7 @@ import {getAccess} from './authz.js';
 import {t,locale,languageControl,setLanguageUser} from './ui-i18n.js?v=20261001-fixes2';
 import {initLists,mobileTables,groupViews} from './ui-lists.js?v=20261001-fixes2';
 import {initForms} from './ui-forms.js?v=20261001-fixes2';
-import {initPortals,profileReadMode} from './ui-portals.js?v=20261004-portals5';
+import {initPortals,profileReadMode} from './ui-portals.js?v=20261004-portals6';
 import {financeSummary,voucherPreview,ledgerPagination} from './ui-finance.js?v=20261001-fixes2';
 import {readAll} from './ui-data.js?v=20261001-fixes2';
 const $=id=>document.getElementById(id),el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text)n.textContent=text;return n};

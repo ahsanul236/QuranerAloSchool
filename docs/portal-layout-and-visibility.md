@@ -32,3 +32,9 @@ Empty payroll behavior is retained. The existing WhatsApp node moves beside the 
 Scroll thresholds match `management-nav.js`: hide when moving down more than 9px beyond 120px; show near the top or when moving up more than 7px. An open More menu prevents hiding. Escape, backdrop, close button, focus return and dialog keyboard trapping are supported; reduced-motion settings disable bar animation.
 
 The fixture browser tests additionally cover the exact mobile order, initial Information, centered logo, WhatsApp relocation, visible sign-out label inside More, payroll visibility, selecting overflow panes, desktop restoration, scroll hide/show, and normal sign-out versus read-only preview exit. No real account was signed out by these tests. Rollback branch: `backup/portal-before-mobile-more-20261004` at `46a69b03c96eab61181a2d72fddfaa79220180b7`.
+
+## Compact header and clear WhatsApp icon
+
+The mobile header was reduced from 126px to the management shell's 88px. Centered branding now uses the same 46px logo, 14px school name, 3px gap and 8px vertical padding. The profile WhatsApp control now uses the exact filled SVG path from the management student profile, without the previous hand-drawn stroke. Existing WhatsApp URL, control ID, placement, language switch, More menu and scroll behavior are preserved. Desktop CSS is unchanged.
+
+The 12-scenario portal smoke test also verifies the 88px mobile header and filled/non-stroked WhatsApp SVG at 320px and 390px. Rollback branch: `backup/portal-before-header-icon-20261004` at `05c1129a520b32a7f22ffd121adae930754d4439`.
