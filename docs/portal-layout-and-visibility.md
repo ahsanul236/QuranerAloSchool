@@ -18,3 +18,17 @@ No schema, RLS, auth, query, payment, payroll, receipt, document or attendance l
 - JavaScript syntax checks and diff whitespace checks.
 
 These tests use mocked backend/documents responses; they do not claim live upload/payment/attendance writes were tested. Deployment and live asset checks use Vercel, which hosts this project, rather than GitHub Pages.
+
+## Mobile More menu and management-style shell
+
+The follow-up update opens Information by default in all three portals. Desktop tab ordering stays as before. Mobile ordering is:
+
+- Student: Information, Classes, Summary, Fees, More (Documents and the existing Sign out control).
+- Teacher: Information, My Students, My Groups, Summary, More (Payroll, Documents and the existing Sign out control).
+- Helper: Information, Summary, Payroll, More (Documents and the existing Sign out control).
+
+Empty payroll behavior is retained. The existing WhatsApp node moves beside the profile name on mobile; the original sign-out node moves into the sheet. They return to the header above 620px. No event handler or backend action is replaced. The logo is centered above the school name on mobile; the language switch remains at the top right. SVG line icons use the management palette, active green icon blocks, rounded shell, and More-sheet presentation.
+
+Scroll thresholds match `management-nav.js`: hide when moving down more than 9px beyond 120px; show near the top or when moving up more than 7px. An open More menu prevents hiding. Escape, backdrop, close button, focus return and dialog keyboard trapping are supported; reduced-motion settings disable bar animation.
+
+The fixture browser tests additionally cover the exact mobile order, initial Information, centered logo, WhatsApp relocation, visible sign-out label inside More, payroll visibility, selecting overflow panes, desktop restoration, scroll hide/show, and normal sign-out versus read-only preview exit. No real account was signed out by these tests. Rollback branch: `backup/portal-before-mobile-more-20261004` at `46a69b03c96eab61181a2d72fddfaa79220180b7`.
