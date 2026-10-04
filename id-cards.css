@@ -34,3 +34,11 @@
  html body.management-layout .management-sidebar,html body .management-mobile-toggle,html body .management-bottom-nav,html body .management-more-sheet,html body .management-nav-backdrop{display:none!important}
  html body.management-layout .dashboard-shell,html body.management-layout .dashboard-card,html body.management-layout .dashboard-card>#app,html body.qa-id-embedded .dashboard-shell,html body.qa-id-embedded .dashboard-card{padding:0!important;margin:0!important;max-width:none!important;width:100%!important;min-height:0!important;background:white!important}
 }
+
+/* Bengali glyph clearance: removable block; fixed card/photo dimensions stay unchanged. */
+.qa-id-card[data-card-language="bn"] header{padding-top:.5mm;padding-bottom:.5mm}
+.qa-id-card[data-card-language="bn"] header h2{line-height:1.6}
+.qa-id-card[data-card-language="bn"] header p{line-height:1.65}
+.qa-id-card[data-card-language="bn"] .qa-id-role{line-height:1.65}
+.qa-id-card[data-card-language="bn"] h3{line-height:1.6}
+.qa-id-card[data-card-language="bn"] dl{line-height:1.6}

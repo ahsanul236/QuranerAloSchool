@@ -20,7 +20,7 @@ function render(){
  const query=$('cardSearch').value.trim().toLowerCase(),rows=people.filter(p=>[p.full_name,p.full_name_bn,p[type.code]].some(v=>String(v||'').toLowerCase().includes(query)));
  photoObserver.disconnect();$('idCards').replaceChildren();
  for(const p of rows){
-  const id=p[type.id],card=el('article',null,'qa-id-card'+(selected.has(id)?' is-selected':'')),header=el('header'),logo=el('img');
+  const id=p[type.id],card=el('article',null,'qa-id-card'+(selected.has(id)?' is-selected':'')),header=el('header'),logo=el('img');card.dataset.cardLanguage=cardLanguage;
   logo.src=school.logo_path||'assets/quraner-alo-logo.jpg';logo.alt='';
   const title=el('div'),schoolName=el('h2',cardLanguage==='bn'?school.name_bn:school.name_en,'qa-record-name');
   title.append(schoolName,el('p',school.address||'','qa-record-name'),el('p',school.phone||'','qa-record-name'));header.append(logo,title);card.append(header);
