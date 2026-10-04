@@ -168,6 +168,7 @@ async function init() {
       <td>${item.status === 'paid' ? `<a class="portal-action-link" href="receipt.html?type=payroll&id=${encodeURIComponent(item.payroll_id)}&portal=1${previewHelperId ? '&preview_helper=' + encodeURIComponent(previewHelperId) : ''}" target="_blank" rel="noopener noreferrer">রিসিট দেখুন</a>` : '<span class="muted">পেমেন্ট হয়নি</span>'}</td>
     </tr>
   `).join('') || '<tr><td colspan="6">No salary record.</td></tr>';
+  $('helperPayrollPanel').classList.toggle('hidden',rows.length===0);
 
   $('exitPreview')?.addEventListener('click', () => { location.href = 'dashboard.html#settings'; });
   $('signOut').addEventListener('click', async () => {

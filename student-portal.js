@@ -372,6 +372,14 @@ async function init() {
     ? notes.map((note) => `<div>${esc(note)}</div>`).join('')
     : 'No new notes.';
 
+  // Visibility uses successful existing results; query errors still follow the original error path.
+  for(const [id,hasData] of [
+    ['studentEnrollmentPanel',enrollments.length>0],
+    ['studentSchedulePanel',upcoming.length>0],
+    ['studentFeesPanel',charges.length>0],
+    ['studentPaymentsPanel',payments.length>0],
+    ['studentNotesPanel',[...enrollments,...sessionRows].some(item=>String(item.notes||'').trim().length>0)]
+  ])$(id).classList.toggle('hidden',!hasData);
   setSchoolWhatsApp().catch(error=>console.warn('school WhatsApp link unavailable',error));
   Promise.allSettled([studentPhotoPromise,documentsPromise]);
 

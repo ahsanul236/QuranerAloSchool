@@ -9,7 +9,7 @@
 <link rel="icon" href="assets/quraner-alo-logo.jpg">
 <link rel="stylesheet" href="styles.css?v=20260919-1">
 <link rel="stylesheet" href="portal.css?v=20261001-profilealign3">
-<link rel="stylesheet" href="ui-design.css?v=20261001-profilealign3"></head>
+<link rel="stylesheet" href="ui-design.css?v=20261001-profilealign3"><link rel="stylesheet" href="portal-layout.css?v=20261004-portals4"></head>
 <body class="portal-page">
 <main class="portal-shell">
 <section class="card portal-card">
@@ -95,12 +95,12 @@
       <div class="portal-body"><div id="guardians" class="portal-grid"></div></div>
     </section>
 
-    <section class="portal-panel">
+    <section id="studentEnrollmentPanel" class="hidden portal-panel">
       <h2>Current Enrollment</h2>
       <div class="portal-body"><div id="enrollments" class="portal-grid"></div></div>
     </section>
 
-    <section class="portal-panel portal-wide">
+    <section id="studentSchedulePanel" class="hidden portal-panel portal-wide">
       <h2>Next Classes</h2>
       <div class="portal-body">
         <div class="portal-table-wrap">
@@ -112,7 +112,7 @@
       </div>
     </section>
 
-    <section class="portal-panel portal-wide">
+    <section id="studentPaymentsPanel" class="hidden portal-panel portal-wide">
       <h2>Recent Payments & Receipt</h2>
       <div class="portal-body">
         <p class="portal-section-note">আপনার পেমেন্টের রেকর্ড দেখুন এবং প্রয়োজন হলে অফিসিয়াল রিসিট খুলে প্রিন্ট, ডাউনলোড বা WhatsApp-এ পাঠাতে পারবেন।</p>
@@ -125,12 +125,12 @@
       </div>
     </section>
 
-    <section class="portal-panel">
+    <section id="studentFeesPanel" class="hidden portal-panel">
       <h2>Fee Summary</h2>
       <div class="portal-body"><ul id="fees" class="portal-list"></ul></div>
     </section>
 
-    <section class="portal-panel">
+    <section id="studentNotesPanel" class="hidden portal-panel">
       <h2>Teacher / School Notes</h2>
       <div class="portal-body"><p id="notes" class="portal-note">No new notes.</p></div>
     </section>
@@ -146,6 +146,6 @@
 </section>
 </main>
 <script src="supabase-config.js"></script>
-<script type="module" src="student-portal.js?v=20261001-fixes2"></script>
-<script type="module" src="ui-bootstrap.js?v=20261001-fixes2"></script></body>
+<script type="module" src="student-portal.js?v=20261004-portals4"></script>
+<script type="module" src="ui-bootstrap.js?v=20261004-portals4"></script></body>
 </html>
